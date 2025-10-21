@@ -9,19 +9,33 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var scannedImages: [UIImage] = []
-    @State private var showScanner: Bool = true
+    @State private var showScanner: Bool = false
+    @State private var scanMode: ScanMode = .single  // ← 追加：撮影モード
     
     var body: some View {
         TabView {
-            VStack {
-                if showScanner {
-                    ScanView(scannedImages: $scannedImages)
-                        .onAppear {
-                            if !showScanner {
-                                showScanner = true
-                            }
-                        }
-                } else if scannedImages.isEmpty {
+            VStack(spacing: 20) {
+                Picker("Scan Mode", selection: $scanMode) {
+                    Text("Single").tag(ScanMode.single)
+                    Text("Multiple").tag(ScanMode.multiple)
+                }
+                .pickerStyle(.segmented)
+                .padding()
+
+                Button(action: {
+                    showScanner = true
+                }) {
+                    Label("Start Scanning", systemImage: "camera")
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+
+                if scannedImages.isEmpty {
                     Text("No scanned documents yet.")
                         .foregroundColor(.black)
                         .padding()
@@ -31,13 +45,16 @@ struct ContentView: View {
                             Image(uiImage: img)
                                 .resizable()
                                 .scaledToFit()
-                                .padding() // 余白をしっかり
-                                .background(Color.white) // 画像周りも白ベース
+                                .padding()
+                                .background(Color.white)
                         }
                     }
                 }
             }
             .background(Color.white)
+            .sheet(isPresented: $showScanner) {
+                ScanView(scannedImages: $scannedImages, mode: scanMode)
+            }
             .tabItem {
                 Label("Scan", systemImage: "camera")
             }
@@ -53,11 +70,14 @@ struct ContentView: View {
                 }
         }
         .accentColor(.black)
-        
     }
+}
+
+enum ScanMode {
+    case single
+    case multiple
 }
 
 #Preview {
     ContentView()
 }
-
