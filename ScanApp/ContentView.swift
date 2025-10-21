@@ -18,7 +18,7 @@ struct ContentView: View {
                     ScanView(scannedImages: $scannedImages)
                         .onAppear {
                             // 起動時にカメラ自動表示
-                            showScanner = false
+                            showScanner = true
                         }
                 } else if scannedImages.isEmpty {
                     Text("No scanned documents yet.")
@@ -55,3 +55,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
