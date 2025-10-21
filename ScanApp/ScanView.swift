@@ -1,17 +1,9 @@
-//
-//  ScanView.swift
-//  ScanApp
-//
-//  Created by Tochishita Haruki on 2025/10/22.
-//
-
 import SwiftUI
 import VisionKit
 
-// ✅ Hashable 準拠で Picker が使える
-enum ScanMode: String, CaseIterable, Hashable {
-    case single = "Single"
-    case multiple = "Multiple"
+enum ScanMode {
+    case single
+    case multiple
 }
 
 struct ScanView: View {
@@ -24,11 +16,10 @@ struct ScanView: View {
             Color.white.ignoresSafeArea()
 
             VStack(spacing: 20) {
-                // ✅ モード切り替え（ラジオボタン）
+                // モード切り替え
                 Picker("Scan Mode", selection: $scanMode) {
-                    ForEach(ScanMode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
+                    Text("Single").tag(ScanMode.single)
+                    Text("Multiple").tag(ScanMode.multiple)
                 }
                 .pickerStyle(.segmented)
                 .padding()
@@ -38,7 +29,7 @@ struct ScanView: View {
 
                 Spacer()
 
-                // ✅ 手動起動ボタン（必要なら）
+                // カメラ起動ボタン
                 Button(action: {
                     showScanner = true
                 }) {
@@ -55,21 +46,20 @@ struct ScanView: View {
                 Spacer()
             }
         }
-        // ✅ フルスクリーンでスキャナ起動
+        // フルスクリーンでスキャナ起動
         .fullScreenCover(isPresented: $showScanner) {
             DocumentScannerView(scannedImages: $scannedImages, mode: scanMode)
-                .ignoresSafeArea()
+                .edgesIgnoringSafeArea(.all)
         }
         .onAppear {
-            // ✅ 初回表示時に自動起動（0.8秒遅延で安定）
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // 自動でスキャナを開く
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 showScanner = true
             }
         }
     }
 }
 
-// MARK: - Document Scanner
 struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
     let mode: ScanMode
@@ -86,10 +76,8 @@ struct DocumentScannerView: UIViewControllerRepresentable {
         Coordinator(parent: self)
     }
 
-    // MARK: - Coordinator
     class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
         let parent: DocumentScannerView
-
         init(parent: DocumentScannerView) {
             self.parent = parent
         }
@@ -104,12 +92,8 @@ struct DocumentScannerView: UIViewControllerRepresentable {
             }
 
             if parent.mode == .single {
-                // ✅ シングルモード：最後の1枚のみ
-                if let last = newImages.last {
-                    parent.scannedImages = [last]
-                }
+                parent.scannedImages = [newImages.last].compactMap { $0 }
             } else {
-                // ✅ 複数モード：すべて追加
                 parent.scannedImages.append(contentsOf: newImages)
             }
 

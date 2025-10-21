@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner: Bool = false
-    @State private var scanMode: ScanMode = .single  // 撮影モード
+    @State private var scanMode: ScanMode = .single  // ← 追加：撮影モード
     
     var body: some View {
         TabView {
@@ -58,20 +58,6 @@ struct ContentView: View {
             .tabItem {
                 Label("Scan", systemImage: "camera")
             }
-            .sheet(isPresented: $showScanner) {
-                ScanView(scannedImages: $scannedImages, mode: scanMode)
-            }
-            // ✅ 起動時にスキャナを自動で開く
-            .task {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    showScanner = true
-                }
-            }
-            .tabItem {
-                Label("Scan", systemImage: "camera")
-            }
-
-
 
             FileListView()
                 .tabItem {
