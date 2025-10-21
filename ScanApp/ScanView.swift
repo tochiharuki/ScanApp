@@ -49,7 +49,7 @@ struct ScanView: View {
         // フルスクリーンでスキャナ起動
         .fullScreenCover(isPresented: $showScanner) {
             DocumentScannerView(scannedImages: $scannedImages, mode: scanMode)
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
         }
         .onAppear {
             // 自動でスキャナを開く
