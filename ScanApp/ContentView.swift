@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var scannedImages: [UIImage] = []
-    @State private var showScanner: Bool = true // 自動でカメラ 起動
+    @State private var showScanner: Bool = false
     
     var body: some View {
         TabView {
@@ -17,8 +17,9 @@ struct ContentView: View {
                 if showScanner {
                     ScanView(scannedImages: $scannedImages)
                         .onAppear {
-                            // 起動時にカメラ自動表示
-                            showScanner = true
+                            if !showScanner {
+                                showScanner = true
+                            }
                         }
                 } else if scannedImages.isEmpty {
                     Text("No scanned documents yet.")
