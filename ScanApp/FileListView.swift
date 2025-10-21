@@ -12,7 +12,7 @@ struct FileListView: View {
         NavigationView {
             List {
                 Text("No scanned documents yet.")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.black)
             }
             .navigationTitle("Files")
         }

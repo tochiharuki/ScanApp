@@ -9,18 +9,12 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var scannedImages: [UIImage] = []
-    @State private var showScanner: Bool = true // 自動でカメラ起動
-    
+    @State private var showScanner: Bool = true // 起動時に自動表示
+
     var body: some View {
         TabView {
             VStack {
-                if showScanner {
-                    ScanView(scannedImages: $scannedImages)
-                        .onAppear {
-                            // 起動時にカメラ自動表示
-                            showScanner = true
-                        }
-                } else if scannedImages.isEmpty {
+                if scannedImages.isEmpty {
                     Text("No scanned documents yet.")
                         .foregroundColor(.black)
                         .padding()
@@ -30,8 +24,8 @@ struct ContentView: View {
                             Image(uiImage: img)
                                 .resizable()
                                 .scaledToFit()
-                                .padding() // 余白をしっかり
-                                .background(Color.white) // 画像周りも白ベース
+                                .padding()
+                                .background(Color.white)
                         }
                     }
                 }
@@ -39,6 +33,13 @@ struct ContentView: View {
             .background(Color.white)
             .tabItem {
                 Label("Scan", systemImage: "camera")
+            }
+            .onAppear {
+                // タブが表示されたらカメラをモーダルで開く
+                showScanner = true
+            }
+            .sheet(isPresented: $showScanner) {
+                ScanView(scannedImages: $scannedImages)
             }
 
             FileListView()
@@ -52,7 +53,6 @@ struct ContentView: View {
                 }
         }
         .accentColor(.black)
-        
     }
 }
 
