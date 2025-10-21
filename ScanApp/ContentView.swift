@@ -22,7 +22,7 @@ struct ContentView: View {
                         }
                 } else if scannedImages.isEmpty {
                     Text("No scanned documents yet.")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.black)
                         .padding()
                 } else {
                     ScrollView {
@@ -30,11 +30,13 @@ struct ContentView: View {
                             Image(uiImage: img)
                                 .resizable()
                                 .scaledToFit()
-                                .padding()
+                                .padding() // 余白をしっかり
+                                .background(Color.white) // 画像周りも白ベース
                         }
                     }
                 }
             }
+            .background(Color.white)
             .tabItem {
                 Label("Scan", systemImage: "camera")
             }
@@ -49,6 +51,8 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
         }
+        .accentColor(.black)
+        
     }
 }
 
