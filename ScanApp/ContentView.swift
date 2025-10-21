@@ -58,12 +58,20 @@ struct ContentView: View {
             .tabItem {
                 Label("Scan", systemImage: "camera")
             }
-            // ✅ アプリ起動時に自動でスキャナを開く
+            .sheet(isPresented: $showScanner) {
+                ScanView(scannedImages: $scannedImages, mode: scanMode)
+            }
+            // ✅ 起動時にスキャナを自動で開く
             .task {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     showScanner = true
                 }
             }
+            .tabItem {
+                Label("Scan", systemImage: "camera")
+            }
+
+
 
             FileListView()
                 .tabItem {
