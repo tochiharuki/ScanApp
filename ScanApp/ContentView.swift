@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var scannedImages: [UIImage] = []
-    @State private var showScanner: Bool = false
+    @State private var showScanner: Bool = true
     
     var body: some View {
         TabView {
