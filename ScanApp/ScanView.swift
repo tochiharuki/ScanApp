@@ -1,7 +1,66 @@
 import SwiftUI
 import VisionKit
 
-struct ScanView: UIViewControllerRepresentable {
+enum ScanMode {
+    case single
+    case multiple
+}
+
+struct ScanView: View {
+    @Binding var scannedImages: [UIImage]
+    @State private var showScanner = false
+    @State private var scanMode: ScanMode = .single
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            Color.white.ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                // モード切り替え
+                Picker("Scan Mode", selection: $scanMode) {
+                    Text("Single").tag(ScanMode.single)
+                    Text("Multiple").tag(ScanMode.multiple)
+                }
+                .pickerStyle(.segmented)
+                .padding()
+                .background(Color.white.opacity(0.9))
+                .cornerRadius(10)
+                .padding(.top, 60)
+
+                Spacer()
+
+                // カメラ起動ボタン
+                Button(action: {
+                    showScanner = true
+                }) {
+                    Label("Start Scanning", systemImage: "camera.fill")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.black)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                }
+
+                Spacer()
+            }
+        }
+        // フルスクリーンでスキャナ起動
+        .fullScreenCover(isPresented: $showScanner) {
+            DocumentScannerView(scannedImages: $scannedImages, mode: scanMode)
+                .edgesIgnoringSafeArea(.all)
+        }
+        .onAppear {
+            // 自動でスキャナを開く
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showScanner = true
+            }
+        }
+    }
+}
+
+struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
     let mode: ScanMode
 
@@ -18,8 +77,8 @@ struct ScanView: UIViewControllerRepresentable {
     }
 
     class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
-        let parent: ScanView
-        init(parent: ScanView) {
+        let parent: DocumentScannerView
+        init(parent: DocumentScannerView) {
             self.parent = parent
         }
 
