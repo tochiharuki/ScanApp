@@ -133,16 +133,12 @@ struct FileListView: View {
                 .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
                 .background(selectedFiles.contains(file) ? Color.blue.opacity(0.1) : Color.clear)
-                // ドラッグ元
                 .onDrag {
                     let provider = NSItemProvider()
-                    provider.registerDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier, visibility: .all) {
-                        do {
-                            let data = try file.absoluteString.data(using: .utf8)!
-                            return data
-                        } catch {
-                            return nil
-                        }
+                    provider.registerDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier, visibility: .all) { completion in
+                        let data = file.absoluteString.data(using: .utf8)
+                        completion(data, nil)
+                        return nil // Progress を返す（不要なら nil でOK）
                     }
                     return provider
                 }
