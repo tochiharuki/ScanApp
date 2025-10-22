@@ -55,8 +55,10 @@ struct ContentView: View {
             .sheet(isPresented: $showScanner) {
                 ScanView(scannedImages: $scannedImages, mode: scanMode)
             }
-            .tabItem {
-                Label("Scan", systemImage: "camera")
+            .task {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    showScanner = true
+                }
             }
 
             FileListView()
@@ -71,11 +73,6 @@ struct ContentView: View {
         }
         .accentColor(.black)
     }
-}
-
-enum ScanMode {
-    case single
-    case multiple
 }
 
 #Preview {

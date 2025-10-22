@@ -60,12 +60,6 @@ struct ScanView: View {
             DocumentScannerView(scannedImages: $scannedImages, mode: scanMode)
                 .ignoresSafeArea()
         }
-        .onAppear {
-            // ✅ 初回表示時に自動起動（0.8秒遅延で安定）
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                showScanner = true
-            }
-        }
     }
 }
 
