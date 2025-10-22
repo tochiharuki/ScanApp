@@ -78,10 +78,29 @@ struct DocumentScannerView: UIViewControllerRepresentable {
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+            let fileManager = FileManager.default
+            let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            
             for i in 0..<scan.pageCount {
                 let image = scan.imageOfPage(at: i)
-                parent.scannedImages.append(image)
+                scannedImages.append(image)
+                
+                // 保存
+                if let data = image.jpegData(compressionQuality: 0.9) {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyyMMdd_HHmmss"
+                    let timestamp = formatter.string(from: Date())
+                    let fileName = "Scan_\(timestamp)_\(i+1).jpg"
+                    let url = documentsURL.appendingPathComponent(fileName)
+                    do {
+                        try data.write(to: url)
+                        print("✅ Saved image: \(fileName)")
+                    } catch {
+                        print("❌ Failed saving image:", error)
+                    }
+                }
             }
+            
             controller.dismiss(animated: true)
         }
     }
