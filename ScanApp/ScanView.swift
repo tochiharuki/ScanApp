@@ -38,6 +38,9 @@ struct ScanView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 100)
                 }
+
+                Spacer().frame(height: 20)
+                
                 VStack(spacing: 6) {
                     Text("Save as")
                         .font(.subheadline)
