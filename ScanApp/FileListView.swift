@@ -1,4 +1,5 @@
 import SwiftUI
+import FileManagerUI
 
 struct FileListView: View {
     @State private var files: [URL] = []
@@ -7,29 +8,46 @@ struct FileListView: View {
 
     var body: some View {
         NavigationView {
-            List(files, id: \.self) { file in
-                Text(file.lastPathComponent)
-                    .foregroundColor(.black)
+            VStack {
+                FileManagerView(
+                    directoryURL: documentsURL,
+                    fileManager: fileManager
+                )
+                .navigationTitle("Saved Files")
+
+                // 例: ファイル作成ボタン
+                Button("Create Test File") {
+                    createFile()
+                }
+                .padding()
+
+                // 例: ファイル削除ボタン
+                Button("Delete Test File") {
+                    deleteFile()
+                }
+                .padding()
             }
-            .navigationTitle("Saved Files")
-            .onAppear(perform: loadFiles)
-            .refreshable {
-                loadFiles()
-            }
-            .background(Color.white)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-            loadFiles()
         }
     }
 
-    private func loadFiles() {
+    private func createFile() {
+        let newFileURL = documentsURL.appendingPathComponent("newFile.txt")
+        let content = "Hello, SwiftUI!"
         do {
-            let contents = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil)
-            files = contents.filter { $0.pathExtension.lowercased() == "jpg" }
-                .sorted(by: { $0.lastPathComponent > $1.lastPathComponent })
+            try content.write(to: newFileURL, atomically: true, encoding: .utf8)
+            print("File created at \(newFileURL)")
         } catch {
-            print("❌ Failed to load files:", error)
+            print("Error creating file: \(error)")
+        }
+    }
+
+    private func deleteFile() {
+        let newFileURL = documentsURL.appendingPathComponent("newFile.txt")
+        do {
+            try fileManager.removeItem(at: newFileURL)
+            print("File deleted")
+        } catch {
+            print("Error deleting file: \(error)")
         }
     }
 }
