@@ -58,17 +58,19 @@ struct FileListView: View {
                     Button { showCreateFolderAlert = true } label: {
                         Image(systemName: "folder.badge.plus")
                     }
-            
+                    
+                    Button { deleteSelectedFiles() } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                    
                     Button {
                         withAnimation { isGridView.toggle() }
                     } label: {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                     }
             
-                    Button { deleteSelectedFiles() } label: {
-                            Image(systemName: "trash")
-                                .foregroundColor(.red)
-                        }
+                    
             
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
