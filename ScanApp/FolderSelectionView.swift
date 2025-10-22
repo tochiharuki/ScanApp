@@ -26,7 +26,7 @@ struct FolderSelectionView: View {
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("選択") {
+                    Button("Select") {
                         onSelect(currentURL)
                         dismiss()
                     }

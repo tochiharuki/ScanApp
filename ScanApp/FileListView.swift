@@ -65,7 +65,7 @@ struct FileListView: View {
                         Image(systemName: "folder.badge.plus")
                     }
                     // ✅ ファイル移動
-                    if isEditing && !selectedFiles.isEmpty {
+                    if isEditing {
                         Button {
                             showMoveSheet = true
                         } label: {
