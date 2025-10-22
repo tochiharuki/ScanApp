@@ -98,7 +98,7 @@ struct FileListView: View {
                 HStack {
                     if isEditing {
                         Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(selectedFiles.contains(file) ? .blue : .gray)
+                            .foregroundColor(selectedFiles.contains(file) ? .black : .gray)
                     }
                     Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
                         .foregroundColor(file.hasDirectoryPath ? .black : .gray)
@@ -226,7 +226,7 @@ struct FileGridItem: View {
                 .padding(10).background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
                 if isEditing {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(isSelected ? .blue : .gray)
+                        .foregroundColor(isSelected ? .black : .gray)
                         .padding(6)
                 }
             }
