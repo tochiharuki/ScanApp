@@ -46,25 +46,26 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
+                // MARK: - 左側（Edit）
                 ToolbarItem(placement: .navigationBarLeading) {
-                    EditButton() // ← 変更② 標準のEditButtonに変更（自動的にeditModeが切り替わる）
+                    EditButton()
                 }
-            
-                // MARK: - 右側：操作ボタン群
+
+                // MARK: - 右側（操作群）
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    // 新規フォルダ
+                    // フォルダ作成
                     Button { showCreateFolderAlert = true } label: {
                         Image(systemName: "folder.badge.plus")
                     }
 
-                    // ビューモード切替
+                    // ビュー切替
                     Button {
                         withAnimation { isGridView.toggle() }
                     } label: {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                     }
 
-                    // 編集モード中のみ：ゴミ箱ボタン
+                    // 編集モード中のみ：削除
                     if editMode?.wrappedValue == .active {
                         Button { deleteSelectedFiles() } label: {
                             Image(systemName: "trash")
@@ -73,7 +74,7 @@ struct FileListView: View {
                         .transition(.opacity.combined(with: .scale))
                     }
 
-                    // ソートメニュー
+                    // ソート
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
@@ -83,6 +84,7 @@ struct FileListView: View {
                         Image(systemName: "arrow.up.arrow.down")
                     }
                 }
+            } // ← 🔹ここでtoolbarを閉じる
               // 編集終了時に選択を解除
             .onChange(of: editMode?.wrappedValue) { newValue in
                 if newValue == .inactive {
