@@ -5,7 +5,7 @@ struct FileListView: View {
     // MARK: - 状態
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
-    @State private var isEditing = false
+    @Environment(\.editMode) private var editMode
     @State private var isGridView = false
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
@@ -46,35 +46,34 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
-                // 左側：編集ボタン（常に表示）
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(isEditing ? "Done" : "Edit") {
-                        withAnimation {
-                            isEditing.toggle()
-                            if !isEditing { selectedFiles.removeAll() }
-                        }
-                    }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton() // ← 変更② 標準のEditButtonに変更（自動的にeditModeが切り替わる）
                 }
             
-                // 右側：その他の操作ボタン群
+                // MARK: - 右側：操作ボタン群
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    // 新規フォルダ
                     Button { showCreateFolderAlert = true } label: {
                         Image(systemName: "folder.badge.plus")
                     }
-            
+
+                    // ビューモード切替
                     Button {
                         withAnimation { isGridView.toggle() }
                     } label: {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                     }
-            
-                    if isEditing {
+
+                    // 編集モード中のみ：ゴミ箱ボタン
+                    if editMode?.wrappedValue == .active {
                         Button { deleteSelectedFiles() } label: {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)
                         }
+                        .transition(.opacity.combined(with: .scale))
                     }
-            
+
+                    // ソートメニュー
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
@@ -84,7 +83,13 @@ struct FileListView: View {
                         Image(systemName: "arrow.up.arrow.down")
                     }
                 }
+              // 編集終了時に選択を解除
+            .onChange(of: editMode?.wrappedValue) { newValue in
+                if newValue == .inactive {
+                    selectedFiles.removeAll()
+                }
             }
+          
             .onAppear(perform: loadFiles)
             .refreshable { loadFiles() }
             .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
