@@ -187,6 +187,14 @@ struct FileListView: View {
         selectedFiles.removeAll()
         loadFiles()
     }
+    // MARK: - スワイプ削除対応
+    private func deleteFiles(at offsets: IndexSet) {
+        let filesToDelete = offsets.map { filteredFiles[$0] }
+        for fileURL in filesToDelete {
+            try? fileManager.removeItem(at: fileURL)
+        }
+        loadFiles()
+    }
 
     private func createFolder(named name: String) {
         guard !name.isEmpty else { return }
