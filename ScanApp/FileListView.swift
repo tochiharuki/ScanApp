@@ -166,10 +166,20 @@ struct FileListView: View {
     }
 
     private func handleTap(_ file: URL) {
-        if file.hasDirectoryPath {
-            navigationTarget = file
+        if isEditing {
+            // 編集モード中は選択/解除
+            if selectedFiles.contains(file) {
+                selectedFiles.remove(file)
+            } else {
+                selectedFiles.insert(file)
+            }
         } else {
-            print("Open file: \(file.lastPathComponent)")
+            // 通常モードではフォルダを開く／ファイルを開く
+            if file.hasDirectoryPath {
+                navigationTarget = file
+            } else {
+                print("Open file: \(file.lastPathComponent)")
+            }
         }
     }
 
