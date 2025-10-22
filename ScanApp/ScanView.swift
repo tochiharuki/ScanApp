@@ -27,7 +27,7 @@ struct ScanView: View {
                         .frame(maxWidth: .infinity)
                         .background(Color.black)
                         .cornerRadius(12)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 40)
                         .padding(.top, 100)
                 }
             }
