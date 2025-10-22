@@ -17,7 +17,7 @@ struct ContentView: View {
                 }
 
 
-            DocumentBrowserView()
+            FileListView()
                 .tabItem {
                     Label("Files", systemImage: "folder")
                 }
