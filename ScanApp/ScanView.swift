@@ -6,15 +6,10 @@
 import SwiftUI
 import VisionKit
 
-enum ScanMode {
-    case single
-    case multiple
-}
 
 struct ScanView: View {
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
-    @State private var scanMode: ScanMode = .single
 
     var body: some View {
         ZStack {
@@ -48,23 +43,9 @@ struct ScanView: View {
         }
         // ✅ カメラビューをフルスクリーンで開く
         .fullScreenCover(isPresented: $showScanner) {
-            DocumentScannerView(scannedImages: $scannedImages, mode: scanMode)
+            DocumentScannerView(scannedImages: $scannedImages)
                 .ignoresSafeArea()
-                .overlay(
-                    // カメラ上にモード切り替えボタンを表示
-                    VStack {
-                        Picker("Mode", selection: $scanMode) {
-                            Text("Single").tag(ScanMode.single)
-                            Text("Multiple").tag(ScanMode.multiple)
-                        }
-                        .pickerStyle(.segmented)
-                        .padding()
-                        .background(Color.black.opacity(0.4))
-                        .cornerRadius(10)
-                        .padding(.top, 40)
-                        Spacer()
-                    }
-                )
+                
         }
     }
 }
@@ -93,24 +74,15 @@ struct DocumentScannerView: UIViewControllerRepresentable {
             self.parent = parent
         }
 
-        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
-            var newImages: [UIImage] = []
-            for i in 0..<scan.pageCount {
-                let image = scan.imageOfPage(at: i)
-                newImages.append(image)
-                if parent.mode == .single { break }
-            }
-
-            parent.scannedImages.append(contentsOf: newImages)
-            controller.dismiss(animated: true)
-        }
 
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-            controller.dismiss(animated: true)
         }
 
-        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
-            print("❌ Scan failed:", error)
+        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+            for i in 0..<scan.pageCount {
+                let image = scan.imageOfPage(at: i)
+                parent.scannedImages.append(image)
+            }
             controller.dismiss(animated: true)
         }
     }
