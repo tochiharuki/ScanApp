@@ -69,7 +69,7 @@ struct FileListView: View {
                     
                     // ソートメニュー
                     Menu {
-                        Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
+                        Button("Name ↑") { sortOption = .nameAscending; gridFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
                         Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
                         Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
@@ -93,13 +93,16 @@ struct FileListView: View {
                 ForEach(filteredFiles, id: \.self) { file in
                     FileGridItem(file: file, isSelected: selectedFiles.contains(file), isEditing: isEditing)
                         .onTapGesture { handleTap(file) }
-                        .onDrag { NSItemProvider(object: file as NSURL) }
+                        .onDrag {
+                            NSItemProvider(contentsOf: file) ?? NSItemProvider()
+                        }
                         .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
                 }
             }
             .padding()
         }
     }
+
 
     // MARK: - リストビュー
     var listView: some View {
@@ -118,11 +121,14 @@ struct FileListView: View {
                 .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
                 .background(selectedFiles.contains(file) ? Color.blue.opacity(0.1) : Color.clear)
-                .onDrag { NSItemProvider(object: file as NSURL) }
+                .onDrag {
+                    NSItemProvider(contentsOf: file) ?? NSItemProvider()
+                }
                 .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
             }
         }
         .listStyle(PlainListStyle())
+
     }
 
     // MARK: - フィルター
@@ -201,21 +207,22 @@ struct FileListView: View {
 
         func performDrop(info: DropInfo) -> Bool {
             guard destination.hasDirectoryPath else { return false }
+
             let providers = info.itemProviders(for: [.fileURL])
             for provider in providers {
-                provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { data, error in
+                provider.loadFileRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { tempURL, error in
+                    guard let tempURL = tempURL else { return }
+                    let targetURL = destination.appendingPathComponent(tempURL.lastPathComponent)
+                    try? self.fileManager.moveItem(at: tempURL, to: targetURL)
                     DispatchQueue.main.async {
-                        if let urlData = data as? Data, let url = NSURL(dataRepresentation: urlData, relativeTo: nil) as URL? {
-                            let targetURL = destination.appendingPathComponent(url.lastPathComponent)
-                            try? fileManager.moveItem(at: url, to: targetURL)
-                            parent.loadFiles()
-                        }
+                        self.parent.loadFiles()
                     }
                 }
             }
             return true
         }
     }
+
 }
 
 // MARK: - ファイルグリッドアイテム
