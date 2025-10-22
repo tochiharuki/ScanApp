@@ -17,6 +17,7 @@
 		88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEB2EA7BCD2006948EE /* ScanView.swift */; };
 		88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AED2EA7BCEF006948EE /* FileListView.swift */; };
 		88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEF2EA7BD10006948EE /* SettingsView.swift */; };
+		88860AF52EA8A5FD006948EE /* DocumentBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AF42EA8A5FD006948EE /* DocumentBrowserViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		88860AED2EA7BCEF006948EE /* FileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListView.swift; sourceTree = "<group>"; };
 		88860AEF2EA7BD10006948EE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		88860AF12EA7CF40006948EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		88860AF42EA8A5FD006948EE /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +113,7 @@
 				88860AEB2EA7BCD2006948EE /* ScanView.swift */,
 				88860AED2EA7BCEF006948EE /* FileListView.swift */,
 				88860AEF2EA7BD10006948EE /* SettingsView.swift */,
+				88860AF42EA8A5FD006948EE /* DocumentBrowserViewController.swift */,
 			);
 			path = ScanApp;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */,
 				88860AC32EA7AB35006948EE /* ContentView.swift in Sources */,
 				88860AC12EA7AB35006948EE /* ScanAppApp.swift in Sources */,
+				88860AF52EA8A5FD006948EE /* DocumentBrowserViewController.swift in Sources */,
 				88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

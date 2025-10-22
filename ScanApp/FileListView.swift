@@ -227,7 +227,7 @@ struct FileGridItem: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 40, height: 40)
-                            .foregroundColor(file.hasDirectoryPath ? .blue : .gray)
+                            .foregroundColor(file.hasDirectoryPath ? .black : .gray)
                     }
                     
                     Text(file.lastPathComponent)
@@ -238,10 +238,10 @@ struct FileGridItem: View {
                 }
                 .padding(10)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
-                )
+                // .overlay(
+                //     RoundedRectangle(cornerRadius: 12)
+                //         .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
+                // )
 
                 // 編集モードのラジオボタン
                 if isEditing {
