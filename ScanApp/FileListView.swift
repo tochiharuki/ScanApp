@@ -53,7 +53,7 @@ struct FileListView: View {
                     
                     // グリッド切替
                     Button { withAnimation { isGridView.toggle() } } label: { Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2") }
-                    
+
                     Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
                     // Edit / Done
                     Button(isEditing ? "Done" : "Edit") {
@@ -70,7 +70,7 @@ struct FileListView: View {
                     
                     // ソートメニュー
                     Menu {
-                        Button("Name ↑") { sortOption = .nameAscending; gridFiles() }
+                        Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
                         Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
                         Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
