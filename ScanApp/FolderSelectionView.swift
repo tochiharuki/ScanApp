@@ -1,9 +1,6 @@
-//
-//  FolderSelectionView.swift
-//  ScanApp
-//
-//  Created by Tochishita Haruki on 2025/10/22.
-//
+import SwiftUI  
+import UniformTypeIdentifiers
+
 
 struct FolderSelectionView: View {
     let currentURL: URL
@@ -12,15 +9,13 @@ struct FolderSelectionView: View {
 
     @State private var folders: [URL] = []
     private let fileManager = FileManager.default
+    @State private var selectedFolder: URL?
 
     var body: some View {
         NavigationStack {
             List {
                 ForEach(folders, id: \.self) { folder in
-                    Button {
-                        onSelect(folder)
-                        dismiss()
-                    } label: {
+                    NavigationLink(destination: FolderSelectionView(currentURL: folder, onSelect: onSelect)) {
                         HStack {
                             Image(systemName: "folder.fill")
                             Text(folder.lastPathComponent)
@@ -28,7 +23,15 @@ struct FolderSelectionView: View {
                     }
                 }
             }
-            .navigationTitle("Select Folder")
+            .navigationTitle(currentURL.lastPathComponent)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("選択") {
+                        onSelect(currentURL)
+                        dismiss()
+                    }
+                }
+            }
             .onAppear(perform: loadFolders)
         }
     }
