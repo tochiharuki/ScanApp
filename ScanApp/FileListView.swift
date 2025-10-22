@@ -105,12 +105,15 @@ struct FileListView: View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)]) {
                 ForEach(filteredFiles, id: \.self) { file in
-                    FileGridItem(file: file, isSelected: selectedFiles.contains(file), isEditing: isEditing)
-                        .onTapGesture { handleTap(file) }
-                        .onDrag {
-                            NSItemProvider(contentsOf: file) ?? NSItemProvider()
-                        }
-                        .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
+                    FileGridItem(
+                        file: file,
+                        isSelected: selectedFiles.contains(file),
+                        isEditing: editMode?.wrappedValue == .active
+                    )
+                    .onTapGesture { handleTap(file) }
+                    .onDrag { NSItemProvider(contentsOf: file) ?? NSItemProvider() }
+                    .onDrop(of: [.fileURL],
+                            delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
                 }
             }
             .padding()
@@ -118,12 +121,14 @@ struct FileListView: View {
     }
 
 
+
+
     // MARK: - リストビュー
     var listView: some View {
         List {
             ForEach(filteredFiles, id: \.self) { file in
                 HStack {
-                    if isEditing {
+                    if editMode?.wrappedValue == .active {
                         Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
                             .foregroundColor(selectedFiles.contains(file) ? .black : .gray)
                     }
@@ -135,15 +140,15 @@ struct FileListView: View {
                 .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
                 .background(selectedFiles.contains(file) ? Color.blue.opacity(0.1) : Color.clear)
-                .onDrag {
-                    NSItemProvider(contentsOf: file) ?? NSItemProvider()
-                }
-                .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
+                .onDrag { NSItemProvider(contentsOf: file) ?? NSItemProvider() }
+                .onDrop(of: [.fileURL],
+                        delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
             }
         }
         .listStyle(PlainListStyle())
-
     }
+
+
 
     // MARK: - フィルター
     var filteredFiles: [URL] {
@@ -152,10 +157,8 @@ struct FileListView: View {
             result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
         }
         switch sortOption {
-        case .nameAscending:
-            result.sort { $0.lastPathComponent < $1.lastPathComponent }
-        case .nameDescending:
-            result.sort { $0.lastPathComponent > $1.lastPathComponent }
+        case .nameAscending: result.sort { $0.lastPathComponent < $1.lastPathComponent }
+        case .nameDescending: result.sort { $0.lastPathComponent > $1.lastPathComponent }
         case .dateAscending:
             result.sort {
                 let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
@@ -171,6 +174,7 @@ struct FileListView: View {
         }
         return result
     }
+
 
     // MARK: - ファイル操作
     private func loadFiles() {
@@ -196,15 +200,13 @@ struct FileListView: View {
     }
 
     private func handleTap(_ file: URL) {
-        if isEditing {
-            // 編集モード中は選択/解除
+        if editMode?.wrappedValue == .active {
             if selectedFiles.contains(file) {
                 selectedFiles.remove(file)
             } else {
                 selectedFiles.insert(file)
             }
         } else {
-            // 通常モードではフォルダを開く／ファイルを開く
             if file.hasDirectoryPath {
                 navigationTarget = file
             } else {
@@ -212,6 +214,8 @@ struct FileListView: View {
             }
         }
     }
+
+
 
     // MARK: - ドラッグ&ドロップ用 Delegate
     struct DropViewDelegate: DropDelegate {
