@@ -123,26 +123,22 @@ struct FileListView: View {
         }
         switch sortOption {
         case .nameAscending:
-    result.sort { (a: URL, b: URL) -> Bool in
-        a.lastPathComponent < b.lastPathComponent
-    }
-    case .nameDescending:
-        result.sort { (a: URL, b: URL) -> Bool in
-            a.lastPathComponent > b.lastPathComponent
+            result.sort { $0.lastPathComponent < $1.lastPathComponent }
+        case .nameDescending:
+            result.sort { $0.lastPathComponent > $1.lastPathComponent }
+        case .dateAscending:
+            result.sort {
+                let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+                let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+                return dateA < dateB
+            }
+        case .dateDescending:
+            result.sort {
+                let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+                let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+                return dateA > dateB
+            }
         }
-    case .dateAscending:
-        result.sort { (a: URL, b: URL) -> Bool in
-            let dateA = (try? a.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-            let dateB = (try? b.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-            return dateA < dateB
-        }
-    case .dateDescending:
-        result.sort { (a: URL, b: URL) -> Bool in
-            let dateA = (try? a.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-            let dateB = (try? b.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-            return dateA > dateB
-        }
-
         return result
     }
 
