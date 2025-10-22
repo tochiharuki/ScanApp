@@ -65,7 +65,7 @@ struct FileListView: View {
                         Image(systemName: "folder.badge.plus")
                     }
                     // ✅ ファイル移動
-                    if isEditing {
+                    if isEditing && !selectedFiles.isEmpty {
                         Button {
                             showMoveSheet = true
                         } label: {
@@ -111,6 +111,7 @@ struct FileListView: View {
             .sheet(isPresented: $showMoveSheet) {
                 FolderSelectionView(currentURL: currentURL) { destination in
                     moveSelectedFiles(to: destination)
+            }
             }
         }
     }
