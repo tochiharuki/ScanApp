@@ -38,6 +38,11 @@ struct ScanView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 100)
                 }
+                // 🔽 保存形式のタイトル
+                Text("保存形式")
+                    .font(.headline)
+                    .foregroundColor(.black)
+                
                 // 🔽 保存形式選択プルダウン
                 Picker("Save as", selection: $saveFormat) {
                     ForEach(SaveFormat.allCases) { format in
