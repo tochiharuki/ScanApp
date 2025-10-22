@@ -5,15 +5,15 @@ struct FileListView: View {
     // MARK: - 状態
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
-    @Environment(\.editMode) private var editMode
+    @State private var isEditing = false   // ← 独自管理に戻す
     @State private var isGridView = false
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
     @State private var navigationTarget: URL? = nil
     @State private var searchText: String = ""
     @State private var sortOption: SortOption = .nameAscending
-
     @State private var currentURL: URL
+
     private let fileManager = FileManager.default
 
     enum SortOption {
@@ -46,12 +46,7 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
-                // MARK: - 左側（Edit）
-                ToolbarItem(placement: .navigationBarLeading) {
-                    EditButton()
-                }
-
-                // MARK: - 右側（操作群）
+                // MARK: - 操作群
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     // フォルダ作成
                     Button { showCreateFolderAlert = true } label: {
@@ -65,9 +60,11 @@ struct FileListView: View {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                     }
 
-                    // 編集モード中のみ：削除
-                    if editMode?.wrappedValue == .active {
-                        Button { deleteSelectedFiles() } label: {
+                    // 編集中のみ削除ボタン
+                    if isEditing {
+                        Button {
+                            deleteSelectedFiles()
+                        } label: {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)
                         }
@@ -83,15 +80,18 @@ struct FileListView: View {
                     } label: {
                         Image(systemName: "arrow.up.arrow.down")
                     }
-                }
-            } // ← 🔹ここでtoolbarを閉じる
-              // 編集終了時に選択を解除
-            .onChange(of: editMode?.wrappedValue) { newValue in
-                if newValue == .inactive {
-                    selectedFiles.removeAll()
+
+                    // Edit / Done
+                    Button(isEditing ? "Done" : "Edit") {
+                        withAnimation {
+                            isEditing.toggle()
+                            if !isEditing {
+                                selectedFiles.removeAll()
+                            }
+                        }
+                    }
                 }
             }
-          
             .onAppear(perform: loadFiles)
             .refreshable { loadFiles() }
             .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
@@ -110,7 +110,7 @@ struct FileListView: View {
                     FileGridItem(
                         file: file,
                         isSelected: selectedFiles.contains(file),
-                        isEditing: editMode?.wrappedValue == .active
+                        isEditing: isEditing // ← これに変更
                     )
                     .onTapGesture { handleTap(file) }
                     .onDrag { NSItemProvider(contentsOf: file) ?? NSItemProvider() }
@@ -122,15 +122,12 @@ struct FileListView: View {
         }
     }
 
-
-
-
     // MARK: - リストビュー
     var listView: some View {
         List {
             ForEach(filteredFiles, id: \.self) { file in
                 HStack {
-                    if editMode?.wrappedValue == .active {
+                    if isEditing {
                         Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
                             .foregroundColor(selectedFiles.contains(file) ? .black : .gray)
                     }
