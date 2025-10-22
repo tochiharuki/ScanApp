@@ -38,6 +38,10 @@ struct FileListView: View {
                     List(selection: $selectedFiles) {
                         ForEach(files, id: \.self) { file in
                             HStack {
+                                if isEditing {
+                                    Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(selectedFiles.contains(file) ? .blue : .gray)
+                                }
                                 Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
                                     .foregroundColor(file.hasDirectoryPath ? .blue : .gray)
                                     .frame(width: 24)
@@ -60,22 +64,21 @@ struct FileListView: View {
             }
             .navigationTitle("Saved Files")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(isEditing ? "Done" : "Edit") {
-                        withAnimation {
-                            isEditing.toggle()
-                            if !isEditing { selectedFiles.removeAll() }
-                        }
-                    }
-                }
-                
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    // 右側にまとめる
                     Button {
                         withAnimation {
                             isGridView.toggle()
                         }
                     } label: {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                    }
+                    
+                    Button(isEditing ? "Done" : "Edit") {
+                        withAnimation {
+                            isEditing.toggle()
+                            if !isEditing { selectedFiles.removeAll() }
+                        }
                     }
                     
                     if isEditing && !selectedFiles.isEmpty {
@@ -135,16 +138,34 @@ struct FileGridItem: View {
     let file: URL
     let isSelected: Bool
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 VStack {
-                    Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(file.hasDirectoryPath ? .blue : .gray)
+                    if file.pathExtension.lowercased() == "jpg" || file.pathExtension.lowercased() == "png" {
+                        // 🖼️ サムネイル表示
+                        if let uiImage = UIImage(contentsOfFile: file.path) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 60, height: 60)
+                                .cornerRadius(8)
+                        } else {
+                            Image(systemName: "photo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.gray)
+                        }
+                    } else {
+                        // 通常アイコン
+                        Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(file.hasDirectoryPath ? .blue : .gray)
+                    }
                     
                     Text(file.lastPathComponent)
                         .font(.caption)
@@ -158,7 +179,8 @@ struct FileGridItem: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
                 )
-                
+
+                // 編集モードのラジオボタン
                 if isEditing {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .foregroundColor(isSelected ? .blue : .gray)
