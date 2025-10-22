@@ -94,25 +94,31 @@ struct DocumentScannerView: UIViewControllerRepresentable {
 
             if parent.saveFormat == .image {
                 // 画像として保存
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyyMMdd_HHmmss"
+                let timestamp = formatter.string(from: Date())
+
                 for i in 0..<scan.pageCount {
                     let image = scan.imageOfPage(at: i)
                     parent.scannedImages.append(image)
                     if let data = image.jpegData(compressionQuality: 0.9) {
-                        // ✅ ファイル名を PDF と同じ形式に統一
-                        let timestamp = Int(Date().timeIntervalSince1970)
                         let fileName = "Scan_\(timestamp)_\(i+1).jpg"
                         let url = documentsURL.appendingPathComponent(fileName)
                         do {
                             try data.write(to: url)
-                            print("Saved image: \(fileName)")
+                            print("✅ Saved image: \(fileName)")
                         } catch {
-                            print("Failed saving image:", error)
+                            print("❌ Failed saving image:", error)
                         }
                     }
                 }
             } else {
                 // PDFとして保存
-                let pdfURL = documentsURL.appendingPathComponent("Scan_\(Int(Date().timeIntervalSince1970)).pdf")
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyyMMdd_HHmmss"
+                let timestamp = formatter.string(from: Date())
+                let pdfURL = documentsURL.appendingPathComponent("Scan_\(timestamp).pdf")
+
                 let pdfRenderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: scan.imageOfPage(at: 0).size))
                 try? pdfRenderer.writePDF(to: pdfURL, withActions: { context in
                     for i in 0..<scan.pageCount {
@@ -122,7 +128,9 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                         parent.scannedImages.append(image)
                     }
                 })
+                print("✅ Saved PDF: Scan_\(timestamp).pdf")
             }
+
 
         
             controller.dismiss(animated: true)
