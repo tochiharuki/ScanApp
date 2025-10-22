@@ -26,15 +26,16 @@ struct ScanView: View {
                     Button(action: {
                         showScanner = true
                     }) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 28))
+                        Label("Start Scanning", systemImage: "camera.fill")
+                            .font(.headline)
                             .foregroundColor(.white)
-                            .frame(width: 60, height: 60)
-                            .background(Color.blue)
-                            .clipShape(Circle())
-                            .shadow(radius: 5)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.black)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                            .padding(.top, 100)
                     }
-
 
                 }
             }
