@@ -14,52 +14,11 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            VStack(spacing: 20) {
-                Picker("Scan Mode", selection: $scanMode) {
-                    Text("Single").tag(ScanMode.single)
-                    Text("Multiple").tag(ScanMode.multiple)
-                }
-                .pickerStyle(.segmented)
-                .padding()
-
-                Button(action: {
-                    showScanner = true
-                }) {
-                    Label("Start Scanning", systemImage: "camera")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.black)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
+            ScanView()
+                .tabItem {
+                    Label("Scan", systemImage: "camera")
                 }
 
-                if scannedImages.isEmpty {
-                    Text("No scanned documents yet.")
-                        .foregroundColor(.black)
-                        .padding()
-                } else {
-                    ScrollView {
-                        ForEach(scannedImages, id: \.self) { img in
-                            Image(uiImage: img)
-                                .resizable()
-                                .scaledToFit()
-                                .padding()
-                                .background(Color.white)
-                        }
-                    }
-                }
-            }
-            .background(Color.white)
-            .sheet(isPresented: $showScanner) {
-                ScanView(scannedImages: $scannedImages, mode: scanMode)
-            }
-            .task {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    showScanner = true
-                }
-            }
 
             FileListView()
                 .tabItem {
