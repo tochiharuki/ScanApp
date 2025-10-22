@@ -4,34 +4,59 @@ struct FileListView: View {
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
     @State private var isEditing = false
+    @State private var isGridView = false   // ← アイコン表示切替
+    
     private let fileManager = FileManager.default
     private let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     
-    // グリッドレイアウト設定
-    private let columns = [
-        GridItem(.adaptive(minimum: 120), spacing: 16)
-    ]
-    
     var body: some View {
         NavigationView {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(files, id: \.self) { file in
-                        FileItemView(
-                            file: file,
-                            isSelected: selectedFiles.contains(file),
-                            isEditing: isEditing
-                        )
-                        .onTapGesture {
-                            if isEditing {
-                                toggleSelection(for: file)
-                            } else {
-                                openFile(file)
+            Group {
+                if isGridView {
+                    // アイコン表示
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)]) {
+                            ForEach(files, id: \.self) { file in
+                                FileGridItem(
+                                    file: file,
+                                    isSelected: selectedFiles.contains(file),
+                                    isEditing: isEditing
+                                )
+                                .onTapGesture {
+                                    if isEditing {
+                                        toggleSelection(for: file)
+                                    } else {
+                                        openFile(file)
+                                    }
+                                }
                             }
                         }
+                        .padding()
                     }
+                } else {
+                    // リスト表示
+                    List(selection: $selectedFiles) {
+                        ForEach(files, id: \.self) { file in
+                            HStack {
+                                Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
+                                    .foregroundColor(file.hasDirectoryPath ? .blue : .gray)
+                                    .frame(width: 24)
+                                Text(file.lastPathComponent)
+                                    .lineLimit(1)
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                if isEditing {
+                                    toggleSelection(for: file)
+                                } else {
+                                    openFile(file)
+                                }
+                            }
+                            .background(selectedFiles.contains(file) ? Color.blue.opacity(0.1) : Color.clear)
+                        }
+                    }
+                    .listStyle(PlainListStyle())
                 }
-                .padding()
             }
             .navigationTitle("Saved Files")
             .toolbar {
@@ -44,7 +69,15 @@ struct FileListView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        withAnimation {
+                            isGridView.toggle()
+                        }
+                    } label: {
+                        Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                    }
+                    
                     if isEditing && !selectedFiles.isEmpty {
                         Button {
                             deleteSelectedFiles()
@@ -94,36 +127,35 @@ struct FileListView: View {
     
     private func openFile(_ file: URL) {
         print("Open file: \(file.lastPathComponent)")
-        // 必要に応じて QuickLook などに連携可能
+        // QuickLook やシェア機能などに接続可能
     }
 }
 
-struct FileItemView: View {
+struct FileGridItem: View {
     let file: URL
     let isSelected: Bool
     let isEditing: Bool
     
     var body: some View {
-        VStack {
+        VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
-                VStack(spacing: 8) {
+                VStack {
                     Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 50, height: 50)
+                        .frame(width: 40, height: 40)
                         .foregroundColor(file.hasDirectoryPath ? .blue : .gray)
                     
                     Text(file.lastPathComponent)
                         .font(.caption)
-                        .lineLimit(2)
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: 100)
+                        .lineLimit(2)
+                        .frame(width: 80)
                 }
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemGray6)))
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 12)
                         .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
                 )
                 
