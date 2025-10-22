@@ -80,11 +80,12 @@ struct DocumentScannerView: UIViewControllerRepresentable {
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
             let fileManager = FileManager.default
             let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            
+        
             for i in 0..<scan.pageCount {
                 let image = scan.imageOfPage(at: i)
-                scannedImages.append(image)
-                
+                // ✅ 親ビューの scannedImages に追加
+                parent.scannedImages.append(image)
+        
                 // 保存
                 if let data = image.jpegData(compressionQuality: 0.9) {
                     let formatter = DateFormatter()
@@ -100,8 +101,8 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                     }
                 }
             }
-            
+        
             controller.dismiss(animated: true)
-        }
+}
     }
 }
