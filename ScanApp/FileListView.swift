@@ -133,8 +133,18 @@ struct FileListView: View {
                 .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
                 .background(selectedFiles.contains(file) ? Color.blue.opacity(0.1) : Color.clear)
+                // ドラッグ元
                 .onDrag {
-                    NSItemProvider(contentsOf: file) ?? NSItemProvider()
+                    let provider = NSItemProvider()
+                    provider.registerDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier, visibility: .all) {
+                        do {
+                            let data = try file.absoluteString.data(using: .utf8)!
+                            return data
+                        } catch {
+                            return nil
+                        }
+                    }
+                    return provider
                 }
                 .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
             }
@@ -221,23 +231,36 @@ struct FileListView: View {
         }
     }
 
-    // MARK: - ドラッグ&ドロップ用 Delegate
+    // ドロップ先
     struct DropViewDelegate: DropDelegate {
         let destination: URL
         let fileManager: FileManager
         let parent: FileListView
-
+    
         func performDrop(info: DropInfo) -> Bool {
             guard destination.hasDirectoryPath else { return false }
-
+    
             let providers = info.itemProviders(for: [.fileURL])
             for provider in providers {
-                provider.loadFileRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { tempURL, error in
-                    guard let tempURL = tempURL else { return }
-                    let targetURL = destination.appendingPathComponent(tempURL.lastPathComponent)
-                    try? self.fileManager.moveItem(at: tempURL, to: targetURL)
+                _ = provider.loadDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { data, error in
+                    guard let data = data,
+                          let path = String(data: data, encoding: .utf8),
+                          let sourceURL = URL(string: path)
+                    else { return }
+    
+                    // フォルダ間で移動
+                    let targetURL = destination.appendingPathComponent(sourceURL.lastPathComponent)
+                    do {
+                        if fileManager.fileExists(atPath: targetURL.path) {
+                            try fileManager.removeItem(at: targetURL)
+                        }
+                        try fileManager.moveItem(at: sourceURL, to: targetURL)
+                    } catch {
+                        print("Move failed:", error)
+                    }
+    
                     DispatchQueue.main.async {
-                        self.parent.loadFiles()
+                        parent.loadFiles()
                     }
                 }
             }
