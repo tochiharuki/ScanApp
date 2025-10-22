@@ -55,9 +55,14 @@ struct FileListView: View {
                             if !isEditing { selectedFiles.removeAll() }
                         }
                     }
-                    if isEditing && !selectedFiles.isEmpty {
-                        Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
+                    
+                    // ✅ ゴミ箱ボタンは常に表示、選択なしなら無効化
+                    Button { deleteSelectedFiles() } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(selectedFiles.isEmpty ? .gray : .red)
                     }
+                    .disabled(selectedFiles.isEmpty)
+
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
