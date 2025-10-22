@@ -54,6 +54,7 @@ struct FileListView: View {
                     // グリッド切替
                     Button { withAnimation { isGridView.toggle() } } label: { Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2") }
                     
+                    Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
                     // Edit / Done
                     Button(isEditing ? "Done" : "Edit") {
                         withAnimation {
@@ -62,10 +63,10 @@ struct FileListView: View {
                         }
                     }
                     
-                    // ゴミ箱ボタン（条件付き）
-                    if isEditing && !selectedFiles.isEmpty {
-                        Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
-                    }
+                    // // ゴミ箱ボタン（条件付き）
+                    // if isEditing && !selectedFiles.isEmpty {
+                    //     Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
+                    // }
                     
                     // ソートメニュー
                     Menu {
