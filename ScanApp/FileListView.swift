@@ -49,6 +49,7 @@ struct FileListView: View {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button { showCreateFolderAlert = true } label: { Image(systemName: "folder.badge.plus") }
                     Button { withAnimation { isGridView.toggle() } } label: { Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2") }
+                    
                     Button(isEditing ? "Done" : "Edit") {
                         withAnimation {
                             isEditing.toggle()
@@ -56,13 +57,13 @@ struct FileListView: View {
                         }
                     }
                     
-                    // ✅ ゴミ箱ボタンは常に表示、選択なしなら無効化
+                    // ゴミ箱は常に表示、選択がなければ無効化
                     Button { deleteSelectedFiles() } label: {
                         Image(systemName: "trash")
                             .foregroundColor(selectedFiles.isEmpty ? .gray : .red)
                     }
                     .disabled(selectedFiles.isEmpty)
-
+                    
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
