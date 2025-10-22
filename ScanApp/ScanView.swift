@@ -16,6 +16,7 @@ enum ScanMode: String, CaseIterable, Hashable {
 
 struct ScanView: View {
     @Binding var scannedImages: [UIImage]
+    var mode: ScanMode
     @State private var showScanner = false
     @State private var scanMode: ScanMode = .single
 

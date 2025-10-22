@@ -17,7 +17,6 @@
 		88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEB2EA7BCD2006948EE /* ScanView.swift */; };
 		88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AED2EA7BCEF006948EE /* FileListView.swift */; };
 		88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEF2EA7BD10006948EE /* SettingsView.swift */; };
-		88860AF32EA7EB4F006948EE /* ScanContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AF22EA7EB4F006948EE /* ScanContainerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,7 +52,6 @@
 		88860AED2EA7BCEF006948EE /* FileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListView.swift; sourceTree = "<group>"; };
 		88860AEF2EA7BD10006948EE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		88860AF12EA7CF40006948EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		88860AF22EA7EB4F006948EE /* ScanContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanContainerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +102,6 @@
 		88860ABF2EA7AB35006948EE /* ScanApp */ = {
 			isa = PBXGroup;
 			children = (
-				88860AF22EA7EB4F006948EE /* ScanContainerView.swift */,
 				88860AF12EA7CF40006948EE /* Info.plist */,
 				88860AC02EA7AB35006948EE /* ScanAppApp.swift */,
 				88860AC22EA7AB35006948EE /* ContentView.swift */,
@@ -276,7 +273,6 @@
 				88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */,
 				88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */,
 				88860AC32EA7AB35006948EE /* ContentView.swift in Sources */,
-				88860AF32EA7EB4F006948EE /* ScanContainerView.swift in Sources */,
 				88860AC12EA7AB35006948EE /* ScanAppApp.swift in Sources */,
 				88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */,
 			);
