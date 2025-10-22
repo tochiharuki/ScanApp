@@ -35,12 +35,6 @@ struct ScanView: View {
                 }
             }
         }
-        // ✅ カメラを自動起動
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                showScanner = true
-            }
-        }
         // ✅ カメラビューをフルスクリーンで開く
         .fullScreenCover(isPresented: $showScanner) {
             DocumentScannerView(scannedImages: $scannedImages)
@@ -71,6 +65,11 @@ struct DocumentScannerView: UIViewControllerRepresentable {
 
         init(parent: DocumentScannerView) {
             self.parent = parent
+        }
+
+        // ✅ キャンセル時にカメラを閉じる
+        func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+            controller.dismiss(animated: true)
         }
 
 
