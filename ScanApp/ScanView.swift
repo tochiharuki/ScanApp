@@ -53,7 +53,6 @@ struct ScanView: View {
 // MARK: - Document Scanner
 struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
-    let mode: ScanMode
 
     func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
         let scanner = VNDocumentCameraViewController()
