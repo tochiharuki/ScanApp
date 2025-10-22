@@ -10,6 +10,14 @@ import VisionKit
 struct ScanView: View {
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
+    @State private var saveFormat: SaveFormat = .image
+
+    enum SaveFormat: String, CaseIterable, Identifiable {
+        case image = "Image"
+        case pdf = "PDF"
+        
+        var id: String { rawValue }
+    }
 
     var body: some View {
         ZStack {
@@ -30,6 +38,15 @@ struct ScanView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 100)
                 }
+                // 🔽 保存形式選択プルダウン
+                Picker("Save as", selection: $saveFormat) {
+                    ForEach(SaveFormat.allCases) { format in
+                        Text(format.rawValue).tag(format)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal, 40)
+                .padding(.top, 10)
             }
         }
         // ✅ カメラビューをフルスクリーンで開く
@@ -75,25 +92,30 @@ struct DocumentScannerView: UIViewControllerRepresentable {
             let fileManager = FileManager.default
             let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         
-            for i in 0..<scan.pageCount {
-                let image = scan.imageOfPage(at: i)
-                // ✅ 親ビューの scannedImages に追加
-                parent.scannedImages.append(image)
-        
-                // 保存
-                if let data = image.jpegData(compressionQuality: 0.9) {
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "yyyyMMdd_HHmmss"
-                    let timestamp = formatter.string(from: Date())
-                    let fileName = "Scan_\(timestamp)_\(i+1).jpg"
-                    let url = documentsURL.appendingPathComponent(fileName)
-                    do {
-                        try data.write(to: url)
-                        print("✅ Saved image: \(fileName)")
-                    } catch {
-                        print("❌ Failed saving image:", error)
+            if parent.saveFormat == .image {
+                // 画像として保存
+                for i in 0..<scan.pageCount {
+                    let image = scan.imageOfPage(at: i)
+                    parent.scannedImages.append(image)
+                    if let data = image.jpegData(compressionQuality: 0.9) {
+                        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .medium)
+                        let fileName = "Scan_\(timestamp)_\(i+1).jpg"
+                        let url = documentsURL.appendingPathComponent(fileName)
+                        try? data.write(to: url)
                     }
                 }
+            } else {
+                // PDFとして保存
+                let pdfURL = documentsURL.appendingPathComponent("Scan_\(Date().timeIntervalSince1970).pdf")
+                let pdfRenderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: scan.imageOfPage(at: 0).size))
+                try? pdfRenderer.writePDF(to: pdfURL, withActions: { context in
+                    for i in 0..<scan.pageCount {
+                        let image = scan.imageOfPage(at: i)
+                        context.beginPage()
+                        image.draw(in: CGRect(origin: .zero, size: image.size))
+                        parent.scannedImages.append(image)
+                    }
+                })
             }
         
             controller.dismiss(animated: true)
