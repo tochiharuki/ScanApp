@@ -50,12 +50,11 @@ struct ScanView: View {
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                    .padding(4)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                    .padding(.horizontal, 40)
                 }
-                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .padding(.horizontal, 40)
                 .padding(.top, 10)
             }
