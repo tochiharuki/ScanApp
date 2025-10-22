@@ -67,13 +67,11 @@ struct DocumentScannerView: UIViewControllerRepresentable {
             self.parent = parent
         }
 
+
+
         // ✅ キャンセル時にカメラを閉じる
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
             controller.dismiss(animated: true)
-        }
-
-
-        func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
