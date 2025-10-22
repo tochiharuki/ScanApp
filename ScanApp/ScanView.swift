@@ -38,16 +38,22 @@ struct ScanView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 100)
                 }
-                // 🔽 保存形式のタイトル
-                Text("保存形式")
-                    .font(.headline)
-                    .foregroundColor(.black)
-                
-                // 🔽 保存形式選択プルダウン
-                Picker("Save as", selection: $saveFormat) {
-                    ForEach(SaveFormat.allCases) { format in
-                        Text(format.rawValue).tag(format)
+                // 🔽 保存形式セレクター
+                VStack(spacing: 6) {
+                    Text("Save as")
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                    
+                    Picker("", selection: $saveFormat) {
+                        ForEach(SaveFormat.allCases) { format in
+                            Text(format.rawValue).tag(format)
+                        }
                     }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(4)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    .padding(.horizontal, 40)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal, 40)
