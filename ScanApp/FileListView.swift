@@ -46,6 +46,7 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
+                // フォルダ追加とグリッド切替
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button { showCreateFolderAlert = true } label: { Image(systemName: "folder.badge.plus") }
                     Button { withAnimation { isGridView.toggle() } } label: { Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2") }
@@ -56,14 +57,17 @@ struct FileListView: View {
                             if !isEditing { selectedFiles.removeAll() }
                         }
                     }
-                    
-                    // ゴミ箱は常に表示、選択がなければ無効化
-                    Button { deleteSelectedFiles() } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(selectedFiles.isEmpty ? .gray : .red)
+                }
+
+                // ゴミ箱ボタンは別の ToolbarItem
+                if isEditing && !selectedFiles.isEmpty {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
                     }
-                    .disabled(selectedFiles.isEmpty)
-                    
+                }
+
+                // ソートメニュー
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
