@@ -16,22 +16,19 @@ struct ScanView: View {
             Color.white.ignoresSafeArea()
 
             VStack {
-                if scannedImages.isEmpty {
-                    // 📸 キャンセル後に出るボタン
-                    Button(action: {
-                        showScanner = true
-                    }) {
-                        Label("Start Scanning", systemImage: "camera.fill")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.black)
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                            .padding(.top, 100)
-                    }
-
+                // 📸 キャンセル後に出るボタン
+                Button(action: {
+                    showScanner = true
+                }) {
+                    Label("Start Scanning", systemImage: "camera.fill")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.black)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                        .padding(.top, 100)
                 }
             }
         }
