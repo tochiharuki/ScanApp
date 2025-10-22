@@ -22,18 +22,21 @@ struct ScanView: View {
 
             VStack {
                 if scannedImages.isEmpty {
-                    Text("Scanning...")
-                        .foregroundColor(.gray)
-                        .padding(.top, 100)
-                } else {
-                    ScrollView {
-                        ForEach(scannedImages, id: \.self) { img in
-                            Image(uiImage: img)
-                                .resizable()
-                                .scaledToFit()
-                                .padding()
-                        }
+                    // 📸 キャンセル後に出るボタン
+                    Button(action: {
+                        showScanner = true
+                    }) {
+                        Label("Start Scanning", systemImage: "camera.fill")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.black)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                            .padding(.top, 100)
                     }
+
                 }
             }
         }
