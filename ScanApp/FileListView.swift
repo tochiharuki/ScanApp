@@ -12,6 +12,9 @@ struct FileListView: View {
     @State private var navigationTarget: URL? = nil
     @State private var searchText: String = ""
     @State private var sortOption: SortOption = .nameAscending
+    // ✅ フォルダ移動用
+    @State private var showMoveSheet = false
+    @State private var selectedDestination: URL? = nil
 
     @State private var currentURL: URL
     private let fileManager = FileManager.default
@@ -61,7 +64,16 @@ struct FileListView: View {
                     } label: {
                         Image(systemName: "folder.badge.plus")
                     }
-            
+                    // ✅ ファイル移動
+                    if isEditing && !selectedFiles.isEmpty {
+                        Button {
+                            showMoveSheet = true
+                        } label: {
+                            Image(systemName: "arrow.right.folder")
+                        }
+                    }
+
+
                     // 削除ボタン
                     Button {
                         deleteSelectedFiles()
@@ -95,6 +107,11 @@ struct FileListView: View {
                 Button("Create") { createFolder(named: newFolderName); newFolderName = "" }
                 Button("Cancel", role: .cancel) { newFolderName = "" }
             } message: { Text("Enter a name for the new folder.") }
+            // ✅ フォルダ移動用シート
+            .sheet(isPresented: $showMoveSheet) {
+                FolderSelectionView(currentURL: currentURL) { destination in
+                    moveSelectedFiles(to: destination)
+            }
         }
     }
 
@@ -185,6 +202,24 @@ struct FileListView: View {
             files = contents
         } catch { print("Failed to load files: \(error)") }
     }
+    
+    // MARK: - ファイル移動処理
+    private func moveSelectedFiles(to destination: URL) {
+        for fileURL in selectedFiles {
+            let targetURL = destination.appendingPathComponent(fileURL.lastPathComponent)
+            do {
+                if fileManager.fileExists(atPath: targetURL.path) {
+                    try fileManager.removeItem(at: targetURL)
+                }
+                try fileManager.moveItem(at: fileURL, to: targetURL)
+            } catch {
+                print("Move failed:", error)
+            }
+        }
+        selectedFiles.removeAll()
+        loadFiles()
+    }
+
 
     private func deleteSelectedFiles() {
         for fileURL in selectedFiles {

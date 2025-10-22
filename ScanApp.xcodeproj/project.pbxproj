@@ -17,6 +17,7 @@
 		88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEB2EA7BCD2006948EE /* ScanView.swift */; };
 		88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AED2EA7BCEF006948EE /* FileListView.swift */; };
 		88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEF2EA7BD10006948EE /* SettingsView.swift */; };
+		88860AF92EA91FB3006948EE /* FolderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AF82EA91FB3006948EE /* FolderSelectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		88860AED2EA7BCEF006948EE /* FileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListView.swift; sourceTree = "<group>"; };
 		88860AEF2EA7BD10006948EE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		88860AF12EA7CF40006948EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		88860AF82EA91FB3006948EE /* FolderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				88860AF12EA7CF40006948EE /* Info.plist */,
+				88860AF82EA91FB3006948EE /* FolderSelectionView.swift */,
 				88860AC02EA7AB35006948EE /* ScanAppApp.swift */,
 				88860AC22EA7AB35006948EE /* ContentView.swift */,
 				88860AC42EA7AB37006948EE /* Assets.xcassets */,
@@ -275,6 +278,7 @@
 				88860AC32EA7AB35006948EE /* ContentView.swift in Sources */,
 				88860AC12EA7AB35006948EE /* ScanAppApp.swift in Sources */,
 				88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */,
+				88860AF92EA91FB3006948EE /* FolderSelectionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
