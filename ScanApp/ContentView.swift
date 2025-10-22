@@ -8,9 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var scannedImages: [UIImage] = []
-    @State private var showScanner: Bool = false
-    @State private var scanMode: ScanMode = .single  // ← 追加：撮影モード
     
     var body: some View {
         TabView {
