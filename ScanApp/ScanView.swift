@@ -16,7 +16,7 @@ struct ScanView: View {
             Color.white.ignoresSafeArea()
 
             VStack {
-                // 📸 キャンセル後に 出るボタン
+                // 📸 キャンセル後に出るボタン
                 Button(action: {
                     showScanner = true
                 }) {
