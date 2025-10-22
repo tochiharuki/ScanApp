@@ -46,32 +46,38 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
-                
-                Button(isEditing ? "Done" : "Edit") {
-                    withAnimation {
-                        isEditing.toggle()
-                        if !isEditing { selectedFiles.removeAll() }
+    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    // 編集ボタン
+                    Button(isEditing ? "Done" : "Edit") {
+                        withAnimation {
+                            isEditing.toggle()
+                            if !isEditing { selectedFiles.removeAll() }
+                        }
                     }
-                }
-                // 右側：その他の操作ボタン群
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button { showCreateFolderAlert = true } label: {
+            
+                    // フォルダ作成
+                    Button {
+                        showCreateFolderAlert = true
+                    } label: {
                         Image(systemName: "folder.badge.plus")
                     }
-                    
-                    Button { deleteSelectedFiles() } label: {
+            
+                    // 削除ボタン
+                    Button {
+                        deleteSelectedFiles()
+                    } label: {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
                     }
-                    
+            
+                    // グリッド／リスト切替
                     Button {
                         withAnimation { isGridView.toggle() }
                     } label: {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                     }
             
-                    
-            
+                    // 並び替えメニュー
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                         Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
