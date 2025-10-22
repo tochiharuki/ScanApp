@@ -150,97 +150,109 @@ struct FileListView: View {
 
 
     // MARK: - フィルター
-    var filteredFiles: [URL] {
-        var result = files
-        if !searchText.isEmpty {
-            result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
+var filteredFiles: [URL] {
+    var result = files
+    if !searchText.isEmpty {
+        result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
+    }
+    switch sortOption {
+    case .nameAscending:
+        result.sort { $0.lastPathComponent < $1.lastPathComponent }
+    case .nameDescending:
+        result.sort { $0.lastPathComponent > $1.lastPathComponent }
+    case .dateAscending:
+        result.sort {
+            let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+            let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+            return dateA < dateB
         }
-        switch sortOption {
-        case .nameAscending: result.sort { $0.lastPathComponent < $1.lastPathComponent }
-        case .nameDescending: result.sort { $0.lastPathComponent > $1.lastPathComponent }
-        case .dateAscending:
-            result.sort {
-                let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                return dateA < dateB
-            }
-        case .dateDescending:
-            result.sort {
-                let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                return dateA > dateB
-            }
+    case .dateDescending:
+        result.sort {
+            let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+            let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+            return dateA > dateB
         }
-        return result
     }
+    return result
+}
 
 
-    // MARK: - ファイル操作
-    private func loadFiles() {
-        do {
-            let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.creationDateKey])
-            files = contents
-        } catch { print("Failed to load files: \(error)") }
+// MARK: - ファイル操作
+private func loadFiles() {
+    do {
+        let contents = try fileManager.contentsOfDirectory(
+            at: currentURL,
+            includingPropertiesForKeys: [.creationDateKey]
+        )
+        // 隠しファイル除外
+        files = contents.filter { !$0.lastPathComponent.hasPrefix(".") }
+    } catch {
+        print("Failed to load files: \(error)")
     }
+}
 
-    private func deleteSelectedFiles() {
-        for fileURL in selectedFiles {
-            try? fileManager.removeItem(at: fileURL)
-        }
-        selectedFiles.removeAll()
-        loadFiles()
+private func deleteSelectedFiles() {
+    for fileURL in selectedFiles {
+        try? fileManager.removeItem(at: fileURL)
     }
+    selectedFiles.removeAll()
+    loadFiles()
+}
 
-    private func createFolder(named name: String) {
-        guard !name.isEmpty else { return }
-        let newFolderURL = currentURL.appendingPathComponent(name)
-        try? fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
-        loadFiles()
-    }
+private func createFolder(named name: String) {
+    guard !name.isEmpty else { return }
+    let newFolderURL = currentURL.appendingPathComponent(name)
+    try? fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
+    loadFiles()
+}
 
-    private func handleTap(_ file: URL) {
-        if editMode?.wrappedValue == .active {
-            if selectedFiles.contains(file) {
-                selectedFiles.remove(file)
-            } else {
-                selectedFiles.insert(file)
-            }
+private func handleTap(_ file: URL) {
+    if editMode?.wrappedValue == .active {
+        // 編集モード中 → 選択状態を切り替える
+        if selectedFiles.contains(file) {
+            selectedFiles.remove(file)
         } else {
-            if file.hasDirectoryPath {
-                navigationTarget = file
-            } else {
-                print("Open file: \(file.lastPathComponent)")
-            }
+            selectedFiles.insert(file)
+        }
+    } else {
+        // 通常モード → フォルダなら遷移、ファイルなら開く
+        if file.hasDirectoryPath {
+            navigationTarget = file
+        } else {
+            print("Open file: \(file.lastPathComponent)")
         }
     }
+}
+}
 
+// MARK: - ドラッグ&ドロップ用 Delegate（← View の外に出した）
+struct DropViewDelegate: DropDelegate {
+    let destination: URL
+    let fileManager: FileManager
+    let parent: FileListView
 
+    func performDrop(info: DropInfo) -> Bool {
+        guard destination.hasDirectoryPath else { return false }
 
-    // MARK: - ドラッグ&ドロップ用 Delegate
-    struct DropViewDelegate: DropDelegate {
-        let destination: URL
-        let fileManager: FileManager
-        let parent: FileListView
+        let providers = info.itemProviders(for: [.fileURL])
+        for provider in providers {
+            provider.loadFileRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { tempURL, _ in
+                guard let tempURL = tempURL else { return }
+                let targetURL = destination.appendingPathComponent(tempURL.lastPathComponent)
 
-        func performDrop(info: DropInfo) -> Bool {
-            guard destination.hasDirectoryPath else { return false }
+                // ファイルを移動
+                try? fileManager.moveItem(at: tempURL, to: targetURL)
 
-            let providers = info.itemProviders(for: [.fileURL])
-            for provider in providers {
-                provider.loadFileRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { tempURL, error in
-                    guard let tempURL = tempURL else { return }
-                    let targetURL = destination.appendingPathComponent(tempURL.lastPathComponent)
-                    try? self.fileManager.moveItem(at: tempURL, to: targetURL)
-                    DispatchQueue.main.async {
-                        self.parent.loadFiles()
-                    }
+                // 更新
+                DispatchQueue.main.async {
+                    parent.loadFiles()
                 }
             }
-            return true
         }
+        return true
     }
-
 }
+
 
 // MARK: - ファイルグリッドアイテム
 struct FileGridItem: View {
@@ -253,11 +265,23 @@ struct FileGridItem: View {
             ZStack(alignment: .topTrailing) {
                 VStack {
                     Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
-                        .resizable().scaledToFit().frame(width: 40, height: 40)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
                         .foregroundColor(file.hasDirectoryPath ? .black : .gray)
-                    Text(file.lastPathComponent).font(.caption).multilineTextAlignment(.center).lineLimit(2).frame(width: 80)
+
+                    Text(file.lastPathComponent)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .frame(width: 80)
                 }
-                .padding(10).background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                .padding(10)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray6))
+                )
+
                 if isEditing {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .foregroundColor(isSelected ? .black : .gray)
