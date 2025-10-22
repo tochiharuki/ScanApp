@@ -67,7 +67,7 @@ struct FileListView: View {
                         deleteSelectedFiles()
                     } label: {
                         Image(systemName: "trash")
-                            .foregroundColor(.red)
+                            .foregroundColor(.black)
                     }
             
                     // グリッド／リスト切替
@@ -138,6 +138,8 @@ struct FileListView: View {
                 }
                 .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
             }
+            // 🔽 ここを追加
+            .onDelete(perform: deleteFiles)
         }
         .listStyle(PlainListStyle())
 
