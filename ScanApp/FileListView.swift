@@ -68,11 +68,9 @@ struct FileListView: View {
                         Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                     }
             
-                    if isEditing {
-                        Button { deleteSelectedFiles() } label: {
-                            Image(systemName: "trash")
-                                .foregroundColor(.red)
-                        }
+                    Button { deleteSelectedFiles() } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
                     }
             
                     Menu {
