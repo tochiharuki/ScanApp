@@ -11,12 +11,19 @@ import UIKit
 // UIKitのDocument BrowserをSwiftUIで使えるようにする
 struct DocumentBrowserView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIDocumentBrowserViewController {
-        let browser = UIDocumentBrowserViewController(forOpening: [.item])
-        browser.allowsDocumentCreation = true
-        browser.allowsPickingMultipleItems = true
-        browser.delegate = context.coordinator
-        return browser
-    }
+      let browser = UIDocumentBrowserViewController(forOpening: [.item])
+      browser.allowsDocumentCreation = true
+      browser.allowsPickingMultipleItems = true
+      browser.delegate = context.coordinator
+      
+      // ✅ ツールバー非表示
+      browser.toolbarItems = []
+      browser.navigationItem.hidesBackButton = true
+      browser.view.backgroundColor = .systemBackground
+      
+      return browser
+  }
+
 
     func updateUIViewController(_ uiViewController: UIDocumentBrowserViewController, context: Context) {}
 
