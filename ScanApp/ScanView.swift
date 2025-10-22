@@ -38,7 +38,6 @@ struct ScanView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 100)
                 }
-                // 🔽 保存形式セレクター
                 VStack(spacing: 6) {
                     Text("Save as")
                         .font(.subheadline)
@@ -50,13 +49,13 @@ struct ScanView: View {
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                    .frame(maxWidth: .infinity) // ← これを追加
                 }
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .padding(.horizontal, 40)
-                .padding(.top, 10)
             }
         }
         // ✅ カメラビューをフルスクリーンで開く
