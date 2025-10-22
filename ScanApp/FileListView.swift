@@ -46,16 +46,13 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
-                // 左側：編集ボタン（常に表示）
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(isEditing ? "Done" : "Edit") {
-                        withAnimation {
-                            isEditing.toggle()
-                            if !isEditing { selectedFiles.removeAll() }
-                        }
+                
+                Button(isEditing ? "Done" : "Edit") {
+                    withAnimation {
+                        isEditing.toggle()
+                        if !isEditing { selectedFiles.removeAll() }
                     }
                 }
-            
                 // 右側：その他の操作ボタン群
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button { showCreateFolderAlert = true } label: {
@@ -69,9 +66,9 @@ struct FileListView: View {
                     }
             
                     Button { deleteSelectedFiles() } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                    }
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
             
                     Menu {
                         Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
