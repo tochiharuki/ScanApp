@@ -48,32 +48,33 @@ struct FileListView: View {
             .toolbar {
                 // フォルダ追加とグリッド切替
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                // フォルダ追加
-                Button { showCreateFolderAlert = true } label: { Image(systemName: "folder.badge.plus") }
-                
-                // グリッド切替
-                Button { withAnimation { isGridView.toggle() } } label: { Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2") }
-                
-                // Edit / Done
-                Button(isEditing ? "Done" : "Edit") {
-                    withAnimation {
-                        isEditing.toggle()
-                        if !isEditing { selectedFiles.removeAll() }
+                    // フォルダ追加
+                    Button { showCreateFolderAlert = true } label: { Image(systemName: "folder.badge.plus") }
+                    
+                    // グリッド切替
+                    Button { withAnimation { isGridView.toggle() } } label: { Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2") }
+                    
+                    // Edit / Done
+                    Button(isEditing ? "Done" : "Edit") {
+                        withAnimation {
+                            isEditing.toggle()
+                            if !isEditing { selectedFiles.removeAll() }
+                        }
                     }
+                    
+                    // ゴミ箱ボタン（条件付き）
+                    if isEditing && !selectedFiles.isEmpty {
+                        Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
+                    }
+                    
+                    // ソートメニュー
+                    Menu {
+                        Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
+                        Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
+                        Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
+                        Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
+                    } label: { Image(systemName: "arrow.up.arrow.down") }
                 }
-                
-                // ゴミ箱ボタン（条件付き）
-                if isEditing && !selectedFiles.isEmpty {
-                    Button { deleteSelectedFiles() } label: { Image(systemName: "trash").foregroundColor(.red) }
-                }
-                
-                // ソートメニュー
-                Menu {
-                    Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
-                    Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
-                    Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
-                    Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
-                } label: { Image(systemName: "arrow.up.arrow.down") }
             }
             .onAppear(perform: loadFiles)
             .refreshable { loadFiles() }
