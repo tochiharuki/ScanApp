@@ -29,7 +29,7 @@ struct FileListView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Group {
                 if isGridView {
                     // アイコン表示
@@ -89,7 +89,7 @@ struct FileListView: View {
                     FileListView(currentURL: folderURL)
                 }
             }
-            .navigationTitle("Saved Files")
+            .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     // 右側にまとめる
