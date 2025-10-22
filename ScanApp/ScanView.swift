@@ -51,9 +51,8 @@ struct ScanView: View {
         }
         // ✅ カメラビューをフルスクリーンで開く
         .fullScreenCover(isPresented: $showScanner) {
-            DocumentScannerView(scannedImages: $scannedImages)
+            DocumentScannerView(scannedImages: $scannedImages, saveFormat: saveFormat)
                 .ignoresSafeArea()
-                
         }
     }
 }
@@ -61,6 +60,7 @@ struct ScanView: View {
 // MARK: - Document Scanner
 struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
+    var saveFormat: ScanView.SaveFormat 
 
     func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
         let scanner = VNDocumentCameraViewController()
@@ -91,7 +91,7 @@ struct DocumentScannerView: UIViewControllerRepresentable {
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
             let fileManager = FileManager.default
             let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
+
             if parent.saveFormat == .image {
                 // 画像として保存
                 for i in 0..<scan.pageCount {
@@ -119,6 +119,6 @@ struct DocumentScannerView: UIViewControllerRepresentable {
             }
         
             controller.dismiss(animated: true)
-}
-    }
-}
+        } // ← ここで documentCameraViewController の閉じ括弧
+    } // ← ここで Coordinator の閉じ括弧
+} // ← ここで DocumentScannerView の閉じ括弧
