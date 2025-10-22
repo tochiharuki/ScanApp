@@ -1,13 +1,32 @@
 import SwiftUI
 
+struct FileItem: Identifiable, Hashable {
+    let id = UUID()
+    var name: String
+    var isFolder: Bool
+    var image: UIImage? = nil
+    var children: [FileItem]? = nil
+}
+
+
 struct FileListView: View {
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
     @State private var isEditing = false
     @State private var isGridView = false   // ← アイコン表示切替
-    
+    @State private var showCreateFolderAlert = false
+    @State private var newFolderName = ""
+    @State private var navigationTarget: URL? = nil
+
+
+    // ✅ 「今見ているフォルダのURL」を保持（← Stateで可変）
+    @State private var currentURL: URL
     private let fileManager = FileManager.default
-    private let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+
+    // ✅ 初期化時にどのフォルダを表示するか指定
+    init(currentURL: URL? = nil) {
+        _currentURL = State(initialValue: currentURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
+    }
     
     var body: some View {
         NavigationView {
@@ -62,10 +81,24 @@ struct FileListView: View {
                     .listStyle(PlainListStyle())
                 }
             }
+            .navigationDestination(isPresented: Binding(
+                get: { navigationTarget != nil },
+                set: { if !$0 { navigationTarget = nil } }
+            )) {
+                if let folderURL = navigationTarget {
+                    FileListView(currentURL: folderURL)
+                }
+            }
             .navigationTitle("Saved Files")
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     // 右側にまとめる
+                    // 🟦 フォルダ作成ボタン追加
+                    Button {
+                        showCreateFolderAlert = true
+                    } label: {
+                        Image(systemName: "folder.badge.plus")
+                    }
                     Button {
                         withAnimation {
                             isGridView.toggle()
@@ -95,13 +128,26 @@ struct FileListView: View {
             .refreshable {
                 loadFiles()
             }
+            .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
+                TextField("Folder name", text: $newFolderName)
+                Button("Create") {
+                    createFolder(named: newFolderName)
+                    newFolderName = ""
+                }
+                Button("Cancel", role: .cancel) {
+                    newFolderName = ""
+                }
+            } message: {
+                Text("Enter a name for the new folder.")
+            }
+
         }
     }
     
     // MARK: - ファイル操作
     private func loadFiles() {
         do {
-            let contents = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil)
+            let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
             files = contents.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
         } catch {
             print("Failed to load files: \(error)")
@@ -129,9 +175,26 @@ struct FileListView: View {
     }
     
     private func openFile(_ file: URL) {
-        print("Open file: \(file.lastPathComponent)")
-        // QuickLook やシェア機能などに接続可能
+        if file.hasDirectoryPath {
+            navigationTarget = file  // ✅ ここで遷移先をセット
+        } else {
+            print("Open file: \(file.lastPathComponent)")
+            // ここで QuickLook やシェア機能を呼び出すことも可能
+        }
     }
+
+    private func createFolder(named name: String) {
+        guard !name.isEmpty else { return }
+        let newFolderURL = currentURL.appendingPathComponent(name)
+
+        do {
+            try fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
+            loadFiles()
+        } catch {
+            print("Failed to create folder: \(error)")
+        }
+    }
+
 }
 
 struct FileGridItem: View {
@@ -191,3 +254,4 @@ struct FileGridItem: View {
         .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 }
+
