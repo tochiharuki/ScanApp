@@ -15,29 +15,29 @@ struct FolderSelectionView: View {
         VStack(spacing: 0) {
             // MARK: - パス階層バー
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     ForEach(pathComponents(), id: \.self) { component in
                         Button {
                             navigateTo(component)
                         } label: {
                             Text(component.lastPathComponent)
-                                .font(.caption)
+                                .font(.subheadline) // ← 文字を少し大きく
                                 .foregroundColor(component == currentURL ? .black : .gray)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8) // ← 高さを増やす
                                 .background(component == currentURL ? Color.gray.opacity(0.3) : Color.gray.opacity(0.1))
                                 .cornerRadius(6)
                         }
-
+            
                         if component != currentURL {
                             Image(systemName: "chevron.right")
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundColor(.gray)
                         }
                     }
                 }
                 .padding(.horizontal)
-                .padding(.vertical, 6)
+                .padding(.vertical, 10) // ← 全体の上下余白を増やす
             }
             .background(Color(.systemGray5))
             .clipShape(RoundedRectangle(cornerRadius: 8))
