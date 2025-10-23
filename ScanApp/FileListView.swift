@@ -59,9 +59,12 @@ struct FileListView: View {
                         }
             
                         Button {
-                            deleteSelectedFiles()
+                            showMoveSheet = true
+                            moveSelectedFiles()
                         } label: {
                             Image(systemName: "arrow.right.folder")
+                                .foregroundColor(.black)
+
                         }
             
                         Button {
@@ -98,7 +101,6 @@ struct FileListView: View {
                     }
                 }
             }
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
                 FolderSelectionView(currentURL: currentURL) { destination in
                     moveSelectedFiles(to: destination)
