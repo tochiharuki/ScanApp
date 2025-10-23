@@ -9,10 +9,13 @@ struct FolderSelectionView: View {
     @State private var folders: [URL] = []
     private let fileManager = FileManager.default
 
+    @State private var showCreateFolderAlert = false
+    @State private var newFolderName = ""
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ✅ パスバー（階層表示）
+                // ✅ パス階層バー
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
                         ForEach(pathComponents(), id: \.self) { component in
@@ -34,12 +37,14 @@ struct FolderSelectionView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 6)
                 }
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .padding(.horizontal)
                 .padding(.top)
+
+                Divider()
 
                 // ✅ フォルダリスト
                 List(folders, id: \.self) { folder in
@@ -56,7 +61,25 @@ struct FolderSelectionView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    // ✅ 戻るボタン
+                    Button {
+                        goBack()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(isAtRoot)
+                }
+
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    // ✅ フォルダ作成ボタン
+                    Button {
+                        showCreateFolderAlert = true
+                    } label: {
+                        Image(systemName: "folder.badge.plus")
+                    }
+
+                    // ✅ 選択ボタン
                     Button("Select") {
                         onSelect(currentURL)
                         dismiss()
@@ -64,10 +87,19 @@ struct FolderSelectionView: View {
                 }
             }
             .onAppear(perform: loadFolders)
+            // ✅ 新規フォルダ作成アラート
+            .alert("New Folder", isPresented: $showCreateFolderAlert) {
+                TextField("Folder name", text: $newFolderName)
+                Button("Create") {
+                    createFolder(named: newFolderName)
+                    newFolderName = ""
+                }
+                Button("Cancel", role: .cancel) {}
+            }
         }
     }
 
-    // MARK: - 現在のフォルダ階層（例: /Documents/Sub1/Sub2）
+    // MARK: - 階層ナビゲーション
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
         var url = currentURL
@@ -80,12 +112,25 @@ struct FolderSelectionView: View {
         return paths
     }
 
-    // MARK: - 階層をクリックで戻る
     private func navigateTo(_ url: URL) {
         currentURL = url
         loadFolders()
     }
 
+    private func goBack() {
+        let parent = currentURL.deletingLastPathComponent()
+        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard parent.path.hasPrefix(documents.path) else { return }
+        currentURL = parent
+        loadFolders()
+    }
+
+    private var isAtRoot: Bool {
+        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return currentURL == documents
+    }
+
+    // MARK: - フォルダ読み込み
     private func loadFolders() {
         do {
             let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
@@ -93,6 +138,18 @@ struct FolderSelectionView: View {
         } catch {
             print("Failed to load folders:", error)
             folders = []
+        }
+    }
+
+    // MARK: - フォルダ作成
+    private func createFolder(named name: String) {
+        guard !name.isEmpty else { return }
+        let newFolderURL = currentURL.appendingPathComponent(name)
+        do {
+            try fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
+            loadFolders()
+        } catch {
+            print("Create folder failed:", error)
         }
     }
 }
