@@ -57,10 +57,15 @@ struct FileListView: View {
                                 selectedFiles.removeAll()
                             }
                         }
-                        
-                        Button("Move") {
-                            withAnimation { showMoveSheet = true }
-                        }
+            
+                        Button {
+                            showMoveSheet = true
+           
+                        } label: {
+                            Image(systemName: "arrow.forward")
+                                .foregroundColor(.black)
+
+    
             
                         Button {
                             deleteSelectedFiles()
