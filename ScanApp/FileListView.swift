@@ -59,9 +59,9 @@ struct FileListView: View {
                         }
             
                         Button {
-                            showMoveSheet = true
+                            deleteSelectedFiles()
                         } label: {
-                            Image(systemName: "folder.badge.plus")
+                            Image(systemName: "arrow.right.folder")
                         }
             
                         Button {
