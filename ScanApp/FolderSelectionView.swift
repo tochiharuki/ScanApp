@@ -8,98 +8,103 @@ struct FolderSelectionView: View {
 
     @State private var folders: [URL] = []
     private let fileManager = FileManager.default
-
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // ✅ パス階層バー
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 4) {
-                        ForEach(pathComponents(), id: \.self) { component in
-                            Button {
-                                navigateTo(component)
-                            } label: {
-                                Text(component.lastPathComponent)
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(component == currentURL ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
-                                    .cornerRadius(6)
-                            }
-                            if component != currentURL {
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2)
-                                    .foregroundColor(.gray)
-                            }
+        VStack(spacing: 0) {
+            // MARK: - パス階層バー
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    ForEach(pathComponents(), id: \.self) { component in
+                        Button {
+                            navigateTo(component)
+                        } label: {
+                            Text(component.lastPathComponent)
+                                .font(.caption)
+                                .foregroundColor(component == currentURL ? .black : .gray)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(component == currentURL ? Color.gray.opacity(0.3) : Color.gray.opacity(0.1))
+                                .cornerRadius(6)
+                        }
+
+                        if component != currentURL {
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundColor(.gray)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 6)
                 }
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
                 .padding(.horizontal)
-                .padding(.top)
+                .padding(.vertical, 6)
+            }
+            .background(Color(.systemGray5))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .padding(.horizontal)
+            .padding(.top)
 
-                Divider()
+            Divider()
 
-                // ✅ フォルダリスト
-                List(folders, id: \.self) { folder in
-                    Button {
-                        currentURL = folder
-                        loadFolders()
-                    } label: {
-                        HStack {
-                            Image(systemName: "folder.fill")
-                            Text(folder.lastPathComponent)
-                        }
+            // MARK: - フォルダリスト
+            List(folders, id: \.self) { folder in
+                Button {
+                    currentURL = folder
+                    loadFolders()
+                } label: {
+                    HStack {
+                        Image(systemName: "folder.fill")
+                            .foregroundColor(.gray)
+                        Text(folder.lastPathComponent)
+                            .foregroundColor(.primary)
                     }
+                }
+                .listRowBackground(Color(.systemGray6))
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemGray6))
+        }
+        .navigationTitle(currentURL.lastPathComponent)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color(.systemGray6))
+        .toolbar {
+            // MARK: - 戻るボタン
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    goBack()
+                } label: {
+                    Image(systemName: "chevron.left")
+                }
+                .disabled(isAtRoot)
+            }
+
+            // MARK: - フォルダ作成 & 選択
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button {
+                    showCreateFolderAlert = true
+                } label: {
+                    Image(systemName: "folder.badge.plus")
+                }
+
+                Button("Select") {
+                    onSelect(currentURL)
+                    dismiss()
                 }
             }
-            .navigationTitle(currentURL.lastPathComponent)
-            .toolbar {
-                ToolbarItemGroup(placement: .navigationBarLeading) {
-                    // ✅ 戻るボタン
-                    Button {
-                        goBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                    }
-                    .disabled(isAtRoot)
-                }
-
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    // ✅ フォルダ作成ボタン
-                    Button {
-                        showCreateFolderAlert = true
-                    } label: {
-                        Image(systemName: "folder.badge.plus")
-                    }
-
-                    // ✅ 選択ボタン
-                    Button("Select") {
-                        onSelect(currentURL)
-                        dismiss()
-                    }
-                }
+        }
+        .onAppear(perform: loadFolders)
+        // MARK: - フォルダ作成アラート
+        .alert("New Folder", isPresented: $showCreateFolderAlert) {
+            TextField("Folder name", text: $newFolderName)
+            Button("Create") {
+                createFolder(named: newFolderName)
+                newFolderName = ""
             }
-            .onAppear(perform: loadFolders)
-            // ✅ 新規フォルダ作成アラート
-            .alert("New Folder", isPresented: $showCreateFolderAlert) {
-                TextField("Folder name", text: $newFolderName)
-                Button("Create") {
-                    createFolder(named: newFolderName)
-                    newFolderName = ""
-                }
-                Button("Cancel", role: .cancel) {}
-            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 
-    // MARK: - 階層ナビゲーション
+    // MARK: - 階層パス処理
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
         var url = currentURL
@@ -113,16 +118,20 @@ struct FolderSelectionView: View {
     }
 
     private func navigateTo(_ url: URL) {
-        currentURL = url
-        loadFolders()
+        withAnimation {
+            currentURL = url
+            loadFolders()
+        }
     }
 
     private func goBack() {
         let parent = currentURL.deletingLastPathComponent()
         let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         guard parent.path.hasPrefix(documents.path) else { return }
-        currentURL = parent
-        loadFolders()
+        withAnimation {
+            currentURL = parent
+            loadFolders()
+        }
     }
 
     private var isAtRoot: Bool {
