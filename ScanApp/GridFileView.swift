@@ -4,6 +4,8 @@
 //
 //  Created by Tochishita Haruki on 2025/10/24.
 //
+import SwiftUI
+import Foundation
 
 struct GridFileView: View {
     let files: [URL]

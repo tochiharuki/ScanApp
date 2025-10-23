@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct FileListView: View {
     @State private var currentURL: URL
