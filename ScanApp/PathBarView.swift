@@ -9,47 +9,49 @@ import SwiftUI
 
 struct PathBarView: View {
     let currentURL: URL
-    let onNavigate: (URL) -> Void
-    
-    private let fileManager = FileManager.default
-    
+    let onSelectPath: (URL) -> Void
+
+    /// iOSサンドボックスの "Documents" 以下だけをパスとして表示
+    private var visibleComponents: [URL] {
+        var components: [URL] = []
+
+        // アプリのドキュメントディレクトリパスを取得
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+        // 現在のURLがドキュメント配下か確認
+        guard currentURL.path.hasPrefix(documentsURL.path) else { return [] }
+
+        // Documents 自体も含める
+        var url = currentURL
+        while url.path != documentsURL.deletingLastPathComponent().path {
+            components.insert(url, at: 0)
+            if url.path == documentsURL.path { break }
+            url.deleteLastPathComponent()
+        }
+
+        return components
+    }
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 4) {
-                ForEach(pathComponents(), id: \.self) { url in
-                    Button(action: { onNavigate(url) }) {
+                ForEach(visibleComponents, id: \.self) { url in
+                    Button(action: { onSelectPath(url) }) {
                         Text(url.lastPathComponent)
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.subheadline)
                             .lineLimit(1)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 4)
-                            .background(url == currentURL ? Color.accentColor.opacity(0.25) : Color.clear)
-                            .cornerRadius(5)
+                            .foregroundColor(.blue)
                     }
-                    if url != pathComponents().last {
+                    if url != visibleComponents.last {
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 10))
+                            .font(.caption2)
                             .foregroundColor(.gray)
                     }
                 }
             }
-            .padding(.horizontal)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
         }
-        .background(Color(UIColor.secondarySystemBackground))
-    }
-    
-    /// Documents から currentURL までの階層を返す
-    private func pathComponents() -> [URL] {
-        var stack: [URL] = []
-        var url = currentURL
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        while url.path.hasPrefix(documents.path) {
-            stack.insert(url, at: 0)
-            if url == documents { break }
-            url.deleteLastPathComponent()
-        }
-        return stack
+        .background(Color(.systemGray6))
     }
 }
