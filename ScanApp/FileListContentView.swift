@@ -17,43 +17,44 @@ struct FileListContentView: View {
     @State private var newFolderName = ""
     @State private var showMoveSheet = false
     @State private var showNoSelectionAlert = false
-    @State private var selectedDestination: URL? = nil
 
     private let fileManager = FileManager.default
 
     var body: some View {
         VStack(spacing: 0) {
-            
-            // ✅ PathBarView を追加
+            // PathBar
             PathBarView(currentURL: currentURL) { newPath in
                 currentURL = newPath
             }
             Divider()
-            
-            Group {
-                if isGridView { gridView }
-                else { listView }
-            }
-            .searchable(text: $searchText)
-            .toolbar { toolbarContent }
-            .onAppear { loadFiles() }
-            .alert("No file selected", isPresented: $showNoSelectionAlert) {
-                Button("OK", role: .cancel) {}
-            }
-            .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
-                TextField("Folder name", text: $newFolderName)
-                Button("Create") { createFolder(named: newFolderName) }
-                Button("Cancel", role: .cancel) {}
-            } message: { Text("Enter a name for the new folder.") }
-            .sheet(isPresented: $showMoveSheet) {
-                // ✅ Binding を渡す
-                FolderSelectionView(selectedFolderURL: $selectedDestination, currentURL: currentURL)
-            }
-            .onChange(of: selectedDestination) { newValue in
-                if let destination = newValue {
-                    moveSelectedFiles(to: destination)
-                    selectedDestination = nil
+
+            // ファイル表示
+            if isGridView {
+                GridFileView(files: filteredFiles, selectedFiles: $selectedFiles, isEditing: $isEditing) { file in
+                    handleTap(file)
                 }
+            } else {
+                ListFileView(files: filteredFiles, selectedFiles: $selectedFiles, isEditing: $isEditing) { file in
+                    handleTap(file)
+                } deleteAction: { offsets in
+                    deleteFiles(at: offsets)
+                }
+            }
+        }
+        .searchable(text: $searchText)
+        .toolbar { toolbarContent }
+        .onAppear { loadFiles() }
+        .alert("No file selected", isPresented: $showNoSelectionAlert) {
+            Button("OK", role: .cancel) {}
+        }
+        .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
+            TextField("Folder name", text: $newFolderName)
+            Button("Create") { createFolder(named: newFolderName) }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("Enter a name for the new folder.") }
+        .sheet(isPresented: $showMoveSheet) {
+            FolderSelectionView(selectedFolderURL: $selectedFiles.first) { destination in
+                moveSelectedFiles(to: destination)
             }
         }
     }
@@ -80,49 +81,18 @@ struct FileListContentView: View {
         }
     }
 
-    // MARK: - Views
-    private var gridView: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
-                ForEach(filteredFiles, id: \.self) { file in
-                    FileGridItem(file: file, isSelected: selectedFiles.contains(file), isEditing: isEditing)
-                        .onTapGesture { handleTap(file) }
-                }
-            }
-            .padding()
-        }
-    }
-
-    private var listView: some View {
-        List {
-            ForEach(filteredFiles, id: \.self) { file in
-                HStack {
-                    if isEditing {
-                        Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
-                    }
-                    Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
-                    Text(file.lastPathComponent)
-                }
-                .onTapGesture { handleTap(file) }
-            }
-            .onDelete(perform: deleteFiles)
-        }
-        .listStyle(.plain)
-    }
-
     // MARK: - Logic
     private var filteredFiles: [URL] {
-        var result = files
-        if !searchText.isEmpty {
-            result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
-        }
-        return result
+        if searchText.isEmpty { return files }
+        return files.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
     }
 
     private func loadFiles() {
         do {
             files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
-        } catch { print(error) }
+        } catch {
+            print("Failed to load files:", error)
+        }
     }
 
     private func handleTap(_ file: URL) {

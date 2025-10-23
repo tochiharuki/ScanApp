@@ -22,6 +22,8 @@
 		88860AFD2EAAA790006948EE /* FileGridItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFC2EAAA790006948EE /* FileGridItem.swift */; };
 		88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFE2EAAA7C5006948EE /* FileListItem.swift */; };
 		88860B012EAAAA02006948EE /* FileListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B002EAAAA02006948EE /* FileListContentView.swift */; };
+		88860B032EAAAFA8006948EE /* GridFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B022EAAAFA8006948EE /* GridFileView.swift */; };
+		88860B052EAAAFD0006948EE /* ListFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B042EAAAFD0006948EE /* ListFileView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,8 @@
 		88860AFC2EAAA790006948EE /* FileGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileGridItem.swift; sourceTree = "<group>"; };
 		88860AFE2EAAA7C5006948EE /* FileListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListItem.swift; sourceTree = "<group>"; };
 		88860B002EAAAA02006948EE /* FileListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListContentView.swift; sourceTree = "<group>"; };
+		88860B022EAAAFA8006948EE /* GridFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridFileView.swift; sourceTree = "<group>"; };
+		88860B042EAAAFD0006948EE /* ListFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +130,8 @@
 				88860AED2EA7BCEF006948EE /* FileListView.swift */,
 				88860AEF2EA7BD10006948EE /* SettingsView.swift */,
 				88860B002EAAAA02006948EE /* FileListContentView.swift */,
+				88860B022EAAAFA8006948EE /* GridFileView.swift */,
+				88860B042EAAAFD0006948EE /* ListFileView.swift */,
 			);
 			path = ScanApp;
 			sourceTree = "<group>";
@@ -285,10 +291,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88860B052EAAAFD0006948EE /* ListFileView.swift in Sources */,
 				88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */,
 				88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */,
 				88860B012EAAAA02006948EE /* FileListContentView.swift in Sources */,
 				88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */,
+				88860B032EAAAFA8006948EE /* GridFileView.swift in Sources */,
 				88860AFD2EAAA790006948EE /* FileGridItem.swift in Sources */,
 				88860AFB2EAA9F94006948EE /* PathBarView.swift in Sources */,
 				88860AC32EA7AB35006948EE /* ContentView.swift in Sources */,
