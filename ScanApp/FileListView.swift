@@ -2,7 +2,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct FileListView: View {
-    // MARK: - 状態
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
     @State private var isEditing = false
@@ -10,250 +9,179 @@ struct FileListView: View {
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
     @State private var navigationTarget: URL? = nil
-    @State private var searchText: String = ""
-    @State private var sortOption: SortOption = .nameAscending
-    // ✅ フォルダ移動用
     @State private var showMoveSheet = false
-    @State private var selectedDestination: URL? = nil
-
-    @State private var currentURL: URL
     @State private var showNoSelectionAlert = false
+    @State private var currentURL: URL
+    @State private var searchText = ""
+    @State private var sortOption: SortOption = .nameAscending
+
     private let fileManager = FileManager.default
 
     enum SortOption {
         case nameAscending, nameDescending, dateAscending, dateDescending
     }
 
-    // MARK: - 初期化
     init(currentURL: URL? = nil) {
-        _currentURL = State(initialValue: currentURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
+        _currentURL = State(initialValue:
+            currentURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        )
     }
 
-    // MARK: - 本体
     var body: some View {
-        NavigationStack {
-            Group {
-                if isGridView {
-                    gridView
-                } else {
-                    listView
-                }
+        VStack(spacing: 0) {
+            // ✅ パスバーを上に追加
+            PathBarView(currentURL: currentURL) { newPath in
+                navigationTarget = newPath
             }
-            .searchable(text: $searchText, prompt: "Search files")
-            .navigationDestination(isPresented: Binding(
-                get: { navigationTarget != nil },
-                set: { if !$0 { navigationTarget = nil } }
-            )) {
-                if let folderURL = navigationTarget {
-                    FileListView(currentURL: folderURL)
-                }
-            }
-            .navigationTitle(currentURL.lastPathComponent)
-            .toolbar {
-    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    if isEditing {
-                        Button("Done") {
-                            withAnimation {
-                                isEditing = false
-                                selectedFiles.removeAll()
-                            }
-                        }
-            
-                        Button {
-                            if selectedFiles.isEmpty {
-                                showNoSelectionAlert = true  // ← アラート表示
-                            } else {
-                                showMoveSheet = true
-                            }
-                        } label: {
-                            Image(systemName: "arrow.forward")
-                        }
-            
-                        Button {
-                            deleteSelectedFiles()
-                        } label: {
-                            Image(systemName: "trash")
-                        }
-            
+
+            Divider()
+
+            NavigationStack {
+                Group {
+                    if isGridView {
+                        gridView
                     } else {
-                        Button("Edit") {
-                            withAnimation { isEditing = true }
-                        }
-            
-                        Button {
-                            showCreateFolderAlert = true
-                        } label: {
-                            Image(systemName: "folder.badge.plus")
-                        }
-            
-                        Button {
-                            withAnimation { isGridView.toggle() }
-                        } label: {
-                            Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
-                        }
-            
-                        Menu {
-                            Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
-                            Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
-                            Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
-                            Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down")
-                        }
+                        listView
+                    }
+                }
+                .searchable(text: $searchText)
+                .navigationDestination(isPresented: Binding(
+                    get: { navigationTarget != nil },
+                    set: { if !$0 { navigationTarget = nil } }
+                )) {
+                    if let folderURL = navigationTarget {
+                        FileListView(currentURL: folderURL)
+                    }
+                }
+                .navigationTitle(currentURL.lastPathComponent)
+                .toolbar { toolbarContent }
+                .onAppear { loadFiles() }
+                .alert("No file selected", isPresented: $showNoSelectionAlert) {
+                    Button("OK", role: .cancel) {}
+                }
+                .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
+                    TextField("Folder name", text: $newFolderName)
+                    Button("Create") { createFolder(named: newFolderName) }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Enter a name for the new folder.")
+                }
+                .sheet(isPresented: $showMoveSheet) {
+                    FolderSelectionView(currentURL: currentURL) { destination in
+                        moveSelectedFiles(to: destination)
                     }
                 }
             }
-            .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
-                FolderSelectionView(currentURL: currentURL) { destination in
-                    moveSelectedFiles(to: destination)
-                }
-            }
-            .alert("No file selected", isPresented: $showNoSelectionAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Please select at least one file before moving.")
-            }
-            // ✅ フォルダ作成アラートを追加
-            .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
-                TextField("Folder name", text: $newFolderName)
-                Button("Create") {
-                    createFolder(named: newFolderName)
-                    newFolderName = ""
-                }
-                Button("Cancel", role: .cancel) {
-                    newFolderName = ""
-                }
-            } message: {
-                Text("Enter a name for the new folder.")
-}
-
-            .onAppear {
-                loadFiles()
-            }
-            
         }
     }
 
-    // MARK: - グリッドビュー
-    var gridView: some View {
+    // MARK: - Toolbar
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            if isEditing {
+                Button("Done") {
+                    isEditing = false
+                    selectedFiles.removeAll()
+                }
+
+                Button {
+                    if selectedFiles.isEmpty {
+                        showNoSelectionAlert = true
+                    } else {
+                        showMoveSheet = true
+                    }
+                } label: { Image(systemName: "arrow.forward") }
+
+                Button {
+                    deleteSelectedFiles()
+                } label: { Image(systemName: "trash") }
+
+            } else {
+                Button("Edit") { isEditing = true }
+                Button { showCreateFolderAlert = true } label: {
+                    Image(systemName: "folder.badge.plus")
+                }
+                Button { isGridView.toggle() } label: {
+                    Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                }
+            }
+        }
+    }
+
+    // MARK: - Views
+    private var gridView: some View {
         ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)]) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
                 ForEach(filteredFiles, id: \.self) { file in
                     FileGridItem(file: file, isSelected: selectedFiles.contains(file), isEditing: isEditing)
                         .onTapGesture { handleTap(file) }
-                        .onDrag {
-                            NSItemProvider(contentsOf: file) ?? NSItemProvider()
-                        }
-                        .onDrop(of: [.fileURL],
-                            delegate: DropViewDelegate(destination: file, fileManager: fileManager, refresh: { self.loadFiles() }))
                 }
             }
             .padding()
         }
     }
 
-
-    // MARK: - リストビュー
-    var listView: some View {
+    private var listView: some View {
         List {
             ForEach(filteredFiles, id: \.self) { file in
                 HStack {
                     if isEditing {
                         Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(selectedFiles.contains(file) ? .black : .gray)
                     }
                     Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
-                        .foregroundColor(file.hasDirectoryPath ? .black : .gray)
-                        .frame(width: 24)
-                    Text(file.lastPathComponent).lineLimit(1)
+                    Text(file.lastPathComponent)
                 }
-                .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
-                .onDrag {
-                    let provider = NSItemProvider()
-                    provider.registerDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier, visibility: .all) { completion in
-                        let data = file.absoluteString.data(using: .utf8)
-                        completion(data, nil)
-                        return nil // Progress を返す（不要なら nil でOK）
-                    }
-                    return provider
-                }
-                .onDrop(of: [.fileURL],
-                    delegate: DropViewDelegate(destination: file, fileManager: fileManager, refresh: { self.loadFiles() }))
             }
-            // 🔽 ここを追加
             .onDelete(perform: deleteFiles)
         }
-        .listStyle(PlainListStyle())
-
+        .listStyle(.plain)
     }
 
-    // MARK: - フィルター
-    var filteredFiles: [URL] {
+    // MARK: - Logic
+    private var filteredFiles: [URL] {
         var result = files
         if !searchText.isEmpty {
             result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
         }
-        switch sortOption {
-        case .nameAscending:
-            result.sort { $0.lastPathComponent < $1.lastPathComponent }
-        case .nameDescending:
-            result.sort { $0.lastPathComponent > $1.lastPathComponent }
-        case .dateAscending:
-            result.sort {
-                let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                return dateA < dateB
-            }
-        case .dateDescending:
-            result.sort {
-                let dateA = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                let dateB = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-                return dateA > dateB
-            }
-        }
         return result
     }
 
-    // MARK: - ファイル操作
     private func loadFiles() {
         do {
-            let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.creationDateKey])
-            files = contents
-        } catch { print("Failed to load files: \(error)") }
-    }
-    
-    // MARK: - ファイル移動処理
-    private func moveSelectedFiles(to destination: URL) {
-        for fileURL in selectedFiles {
-            let targetURL = destination.appendingPathComponent(fileURL.lastPathComponent)
-            do {
-                if fileManager.fileExists(atPath: targetURL.path) {
-                    try fileManager.removeItem(at: targetURL)
-                }
-                try fileManager.moveItem(at: fileURL, to: targetURL)
-            } catch {
-                print("Move failed:", error)
-            }
-        }
-        selectedFiles.removeAll()
-        loadFiles()
+            files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
+        } catch { print(error) }
     }
 
+    private func handleTap(_ file: URL) {
+        if isEditing {
+            if selectedFiles.contains(file) { selectedFiles.remove(file) }
+            else { selectedFiles.insert(file) }
+        } else if file.hasDirectoryPath {
+            navigationTarget = file
+        }
+    }
+
+    private func deleteFiles(at offsets: IndexSet) {
+        for index in offsets {
+            try? fileManager.removeItem(at: filteredFiles[index])
+        }
+        loadFiles()
+    }
 
     private func deleteSelectedFiles() {
-        for fileURL in selectedFiles {
-            try? fileManager.removeItem(at: fileURL)
-        }
+        for file in selectedFiles { try? fileManager.removeItem(at: file) }
         selectedFiles.removeAll()
         loadFiles()
     }
-    // MARK: - スワイプ削除対応
-    private func deleteFiles(at offsets: IndexSet) {
-        let filesToDelete = offsets.map { filteredFiles[$0] }
-        for fileURL in filesToDelete {
-            try? fileManager.removeItem(at: fileURL)
+
+    private func moveSelectedFiles(to destination: URL) {
+        for file in selectedFiles {
+            let target = destination.appendingPathComponent(file.lastPathComponent)
+            try? fileManager.moveItem(at: file, to: target)
         }
+        selectedFiles.removeAll()
         loadFiles()
     }
 
@@ -262,87 +190,5 @@ struct FileListView: View {
         let newFolderURL = currentURL.appendingPathComponent(name)
         try? fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
         loadFiles()
-    }
-
-    private func handleTap(_ file: URL) {
-        if isEditing {
-            // 編集モード中は選択/解除
-            if selectedFiles.contains(file) {
-                selectedFiles.remove(file)
-            } else {
-                selectedFiles.insert(file)
-            }
-        } else {
-            // 通常モードではフォルダを開く／ファイルを開く
-            if file.hasDirectoryPath {
-                navigationTarget = file
-            } else {
-                print("Open file: \(file.lastPathComponent)")
-            }
-        }
-    }
-
-    // ドロップ先
-    struct DropViewDelegate: DropDelegate {
-        let destination: URL
-        let fileManager: FileManager
-        // parent の代わりにリフレッシュ用クロージャを受け取る
-        let refresh: () -> Void
-    
-        func performDrop(info: DropInfo) -> Bool {
-            guard destination.hasDirectoryPath else { return false }
-    
-            let providers = info.itemProviders(for: [.fileURL])
-            for provider in providers {
-                // loadFileRepresentation を使って一時URLを取得する（より確実）
-                provider.loadFileRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { tempURL, error in
-                    guard let tempURL = tempURL else { return }
-                    let targetURL = destination.appendingPathComponent(tempURL.lastPathComponent)
-                    do {
-                        // 既存ファイルがあれば置き換える
-                        if fileManager.fileExists(atPath: targetURL.path) {
-                            try fileManager.removeItem(at: targetURL)
-                        }
-                        try fileManager.moveItem(at: tempURL, to: targetURL)
-                    } catch {
-                        print("Move failed:", error)
-                    }
-    
-                    // メインスレッドでリフレッシュを呼ぶ
-                    DispatchQueue.main.async {
-                        refresh()
-                    }
-                }
-            }
-            return true
-        }
-}
-
-}
-
-// MARK: - ファイルグリッドアイテム
-struct FileGridItem: View {
-    let file: URL
-    let isSelected: Bool
-    let isEditing: Bool
-
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack(alignment: .topTrailing) {
-                VStack {
-                    Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
-                        .resizable().scaledToFit().frame(width: 40, height: 40)
-                        .foregroundColor(file.hasDirectoryPath ? .black : .gray)
-                    Text(file.lastPathComponent).font(.caption).multilineTextAlignment(.center).lineLimit(2).frame(width: 80)
-                }
-                .padding(10).background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                if isEditing {
-                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(isSelected ? .black : .gray)
-                        .padding(6)
-                }
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 }
