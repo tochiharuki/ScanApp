@@ -99,8 +99,6 @@ struct FileListView: View {
                 }
             }
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(Color.white, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
                 FolderSelectionView(currentURL: currentURL) { destination in
                     moveSelectedFiles(to: destination)
