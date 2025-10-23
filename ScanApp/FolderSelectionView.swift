@@ -21,35 +21,49 @@ struct FolderSelectionView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // ✅ 常に固定されるパスバー
                 PathBarView(currentURL: currentURL) { url in
                     currentURL = url
                 }
+                .padding(.vertical, 4)
+                .background(Color(uiColor: .systemGray6))
+                .zIndex(1)
+
                 Divider()
-                
-                List(folders, id: \.self) { folder in
-                    Button {
-                        currentURL = folder
-                    } label: {
-                        HStack {
-                            Image(systemName: "folder.fill").foregroundColor(.accentColor)
-                            Text(folder.lastPathComponent).foregroundColor(.primary)
-                            Spacer()
+
+                // ✅ フォルダ一覧はスクロール可能
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(folders, id: \.self) { folder in
+                            Button {
+                                currentURL = folder
+                            } label: {
+                                HStack {
+                                    Image(systemName: "folder.fill")
+                                        .foregroundColor(.accentColor)
+                                    Text(folder.lastPathComponent)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 6)
+                                .padding(.horizontal)
+                            }
                         }
                     }
                 }
-                .listStyle(.plain)
-                
+
                 Divider()
-                
+
+                // ✅ フッター固定
                 HStack {
                     Button("New Folder") { showCreateFolderAlert = true }
                         .buttonStyle(.bordered)
-                    
+
                     Spacer()
-                    
+
                     Button("Select") {
                         selectedFolderURL = currentURL
-                        onSelect?(currentURL)          // 選択時にクロージャ呼び出し
+                        onSelect?(currentURL)
                         dismiss()
                     }
                     .buttonStyle(.borderedProminent)
@@ -77,6 +91,7 @@ struct FolderSelectionView: View {
         }
     }
 
+    // MARK: - ヘルパー
     private var isAtRoot: Bool { currentURL.path == documentsURL.path }
 
     private func goBack() { if !isAtRoot { currentURL.deleteLastPathComponent() } }
@@ -85,7 +100,10 @@ struct FolderSelectionView: View {
         do {
             let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.isDirectoryKey])
             folders = contents.filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false }
-        } catch { folders = []; print("Error loading folders:", error) }
+        } catch {
+            folders = []
+            print("Error loading folders:", error)
+        }
     }
 
     private func createFolder(named name: String) {
