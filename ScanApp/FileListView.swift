@@ -60,12 +60,9 @@ struct FileListView: View {
             
                         Button {
                             showMoveSheet = true
-           
                         } label: {
                             Image(systemName: "arrow.forward")
-                                .foregroundColor(.black)
-
-    
+                        }
             
                         Button {
                             deleteSelectedFiles()
@@ -124,12 +121,7 @@ struct FileListView: View {
                             NSItemProvider(contentsOf: file) ?? NSItemProvider()
                         }
                         .onDrop(of: [.fileURL],
-                            delegate: DropViewDelegate(
-                                destination: file,
-                                fileManager: fileManager,
-                                refresh: { DispatchQueue.main.async { loadFiles() } }
-                            )
-                        )
+                            delegate: DropViewDelegate(destination: file, fileManager: fileManager, refresh: { self.loadFiles() }))
                 }
             }
             .padding()
@@ -331,4 +323,3 @@ struct FileGridItem: View {
         .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 }
-
