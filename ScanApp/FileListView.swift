@@ -106,12 +106,14 @@ struct FileListView: View {
                 Button("Create") { createFolder(named: newFolderName); newFolderName = "" }
                 Button("Cancel", role: .cancel) { newFolderName = "" }
             } message: { Text("Enter a name for the new folder.") }
-            // ✅ フォルダ移動用シート
-            .sheet(isPresented: $showMoveSheet) {
+           
+            }
+            .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
                 FolderSelectionView(currentURL: currentURL) { destination in
                     moveSelectedFiles(to: destination)
+                }
             }
-            }
+            
         }
     }
 
