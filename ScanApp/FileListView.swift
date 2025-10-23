@@ -49,49 +49,54 @@ struct FileListView: View {
             }
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
-    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    if isEditing {
-                        Button("Done") {
-                            withAnimation {
-                                isEditing = false
-                                selectedFiles.removeAll()
-                            }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    // 編集モード切り替え
+                    Button(isEditing ? "Done" : "Edit") {
+                        withAnimation {
+                            isEditing.toggle()
+                            if !isEditing { selectedFiles.removeAll() }
                         }
+                    }
             
-                        
-            
-                        Button {
-                            deleteSelectedFiles()
-                        } label: {
-                            Image(systemName: "trash")
-                        }
-                        
-                        Button {
-                            showMoveSheet = true
- 
-                        } label: {
-                            Image(systemName: "arrow.right.folder")
-                                .foregroundColor(.black)
-
-                        }
-            
-                    } else {
-                        Button("Edit") {
-                            withAnimation { isEditing = true }
-                        }
-            
+                    // フォルダ作成
+                    if !isEditing {
                         Button {
                             showCreateFolderAlert = true
                         } label: {
                             Image(systemName: "folder.badge.plus")
                         }
+                    }
             
+                    // 移動ボタン（常にレイアウト上に存在）
+                    Button {
+                        if isEditing {
+                            showMoveSheet = true
+                        }
+                    } label: {
+                        Image(systemName: "arrow.right.folder")
+                            .foregroundColor(isEditing ? .black : .gray.opacity(0.4))
+                    }
+                    .disabled(!isEditing) // 編集時以外は無効化
+            
+                    // 削除ボタン
+                    if isEditing {
+                        Button {
+                            deleteSelectedFiles()
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.black)
+                        }
+                    }
+            
+                    // グリッド切り替え
+                    if !isEditing {
                         Button {
                             withAnimation { isGridView.toggle() }
                         } label: {
                             Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                         }
             
+                        // ソートメニュー
                         Menu {
                             Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
                             Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
@@ -101,11 +106,6 @@ struct FileListView: View {
                             Image(systemName: "arrow.up.arrow.down")
                         }
                     }
-                }
-            }
-            .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
-                FolderSelectionView(currentURL: currentURL) { destination in
-                    moveSelectedFiles(to: destination)
                 }
             }
             .onAppear {
