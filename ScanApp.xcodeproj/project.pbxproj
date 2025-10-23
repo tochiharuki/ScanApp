@@ -21,6 +21,7 @@
 		88860AFB2EAA9F94006948EE /* PathBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFA2EAA9F94006948EE /* PathBarView.swift */; };
 		88860AFD2EAAA790006948EE /* FileGridItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFC2EAAA790006948EE /* FileGridItem.swift */; };
 		88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFE2EAAA7C5006948EE /* FileListItem.swift */; };
+		88860B012EAAAA02006948EE /* FileListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B002EAAAA02006948EE /* FileListContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		88860AFA2EAA9F94006948EE /* PathBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathBarView.swift; sourceTree = "<group>"; };
 		88860AFC2EAAA790006948EE /* FileGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileGridItem.swift; sourceTree = "<group>"; };
 		88860AFE2EAAA7C5006948EE /* FileListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListItem.swift; sourceTree = "<group>"; };
+		88860B002EAAAA02006948EE /* FileListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +125,7 @@
 				88860AEB2EA7BCD2006948EE /* ScanView.swift */,
 				88860AED2EA7BCEF006948EE /* FileListView.swift */,
 				88860AEF2EA7BD10006948EE /* SettingsView.swift */,
+				88860B002EAAAA02006948EE /* FileListContentView.swift */,
 			);
 			path = ScanApp;
 			sourceTree = "<group>";
@@ -284,6 +287,7 @@
 			files = (
 				88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */,
 				88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */,
+				88860B012EAAAA02006948EE /* FileListContentView.swift in Sources */,
 				88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */,
 				88860AFD2EAAA790006948EE /* FileGridItem.swift in Sources */,
 				88860AFB2EAA9F94006948EE /* PathBarView.swift in Sources */,
