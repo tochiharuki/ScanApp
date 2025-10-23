@@ -2,6 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct FileListView: View {
+    // MARK: - 状態
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
     @State private var isEditing = false
@@ -21,28 +22,25 @@ struct FileListView: View {
         case nameAscending, nameDescending, dateAscending, dateDescending
     }
 
+    // MARK: - 初期化
     init(currentURL: URL? = nil) {
         _currentURL = State(initialValue:
             currentURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         )
     }
 
+    // MARK: - 本体
     var body: some View {
         VStack(spacing: 0) {
-            // ✅ パスバーを上に追加
+            // ✅ PathBarView を上に表示
             PathBarView(currentURL: currentURL) { newPath in
                 navigationTarget = newPath
             }
-
             Divider()
 
             NavigationStack {
                 Group {
-                    if isGridView {
-                        gridView
-                    } else {
-                        listView
-                    }
+                    if isGridView { gridView } else { listView }
                 }
                 .searchable(text: $searchText)
                 .navigationDestination(isPresented: Binding(
@@ -84,19 +82,11 @@ struct FileListView: View {
                     isEditing = false
                     selectedFiles.removeAll()
                 }
-
                 Button {
-                    if selectedFiles.isEmpty {
-                        showNoSelectionAlert = true
-                    } else {
-                        showMoveSheet = true
-                    }
+                    if selectedFiles.isEmpty { showNoSelectionAlert = true }
+                    else { showMoveSheet = true }
                 } label: { Image(systemName: "arrow.forward") }
-
-                Button {
-                    deleteSelectedFiles()
-                } label: { Image(systemName: "trash") }
-
+                Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
             } else {
                 Button("Edit") { isEditing = true }
                 Button { showCreateFolderAlert = true } label: {
@@ -109,12 +99,14 @@ struct FileListView: View {
         }
     }
 
-    // MARK: - Views
+    // MARK: - Grid / List Views
     private var gridView: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
                 ForEach(filteredFiles, id: \.self) { file in
-                    FileGridItem(file: file, isSelected: selectedFiles.contains(file), isEditing: isEditing)
+                    FileGridItem(file: file,
+                                 isSelected: selectedFiles.contains(file),
+                                 isEditing: isEditing)
                         .onTapGesture { handleTap(file) }
                 }
             }
@@ -131,7 +123,9 @@ struct FileListView: View {
                     }
                     Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
                     Text(file.lastPathComponent)
+                    Spacer()
                 }
+                .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
             }
             .onDelete(perform: deleteFiles)
@@ -139,7 +133,7 @@ struct FileListView: View {
         .listStyle(.plain)
     }
 
-    // MARK: - Logic
+    // MARK: - ファイルフィルタリング
     private var filteredFiles: [URL] {
         var result = files
         if !searchText.isEmpty {
@@ -148,25 +142,22 @@ struct FileListView: View {
         return result
     }
 
+    // MARK: - ファイル操作
     private func loadFiles() {
-        do {
-            files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
-        } catch { print(error) }
+        do { files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil) }
+        catch { print(error) }
     }
 
     private func handleTap(_ file: URL) {
         if isEditing {
-            if selectedFiles.contains(file) { selectedFiles.remove(file) }
-            else { selectedFiles.insert(file) }
+            selectedFiles.contains(file) ? selectedFiles.remove(file) : selectedFiles.insert(file)
         } else if file.hasDirectoryPath {
             navigationTarget = file
         }
     }
 
     private func deleteFiles(at offsets: IndexSet) {
-        for index in offsets {
-            try? fileManager.removeItem(at: filteredFiles[index])
-        }
+        for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
         loadFiles()
     }
 

@@ -19,6 +19,8 @@
 		88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AEF2EA7BD10006948EE /* SettingsView.swift */; };
 		88860AF92EA91FB3006948EE /* FolderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AF82EA91FB3006948EE /* FolderSelectionView.swift */; };
 		88860AFB2EAA9F94006948EE /* PathBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFA2EAA9F94006948EE /* PathBarView.swift */; };
+		88860AFD2EAAA790006948EE /* FileGridItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFC2EAAA790006948EE /* FileGridItem.swift */; };
+		88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860AFE2EAAA7C5006948EE /* FileListItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,8 @@
 		88860AF12EA7CF40006948EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		88860AF82EA91FB3006948EE /* FolderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSelectionView.swift; sourceTree = "<group>"; };
 		88860AFA2EAA9F94006948EE /* PathBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathBarView.swift; sourceTree = "<group>"; };
+		88860AFC2EAAA790006948EE /* FileGridItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileGridItem.swift; sourceTree = "<group>"; };
+		88860AFE2EAAA7C5006948EE /* FileListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +111,8 @@
 			isa = PBXGroup;
 			children = (
 				88860AF12EA7CF40006948EE /* Info.plist */,
+				88860AFE2EAAA7C5006948EE /* FileListItem.swift */,
+				88860AFC2EAAA790006948EE /* FileGridItem.swift */,
 				88860AFA2EAA9F94006948EE /* PathBarView.swift */,
 				88860AF82EA91FB3006948EE /* FolderSelectionView.swift */,
 				88860AC02EA7AB35006948EE /* ScanAppApp.swift */,
@@ -277,7 +283,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */,
+				88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */,
 				88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */,
+				88860AFD2EAAA790006948EE /* FileGridItem.swift in Sources */,
 				88860AFB2EAA9F94006948EE /* PathBarView.swift in Sources */,
 				88860AC32EA7AB35006948EE /* ContentView.swift in Sources */,
 				88860AC12EA7AB35006948EE /* ScanAppApp.swift in Sources */,
