@@ -58,19 +58,21 @@ struct FileListView: View {
                             }
                         }
             
-                        Button {
-                            showMoveSheet = true
-                        } label: {
-                            Image(systemName: "arrow.right.folder")
-                                .foregroundColor(.black)
-                                .frame(width: 24, height: 24)
-
-                        }
+                        
             
                         Button {
                             deleteSelectedFiles()
                         } label: {
                             Image(systemName: "trash")
+                        }
+                        
+                        Button {
+                            showMoveSheet = true
+ 
+                        } label: {
+                            Image(systemName: "arrow.right.folder")
+                                .foregroundColor(.black)
+
                         }
             
                     } else {
