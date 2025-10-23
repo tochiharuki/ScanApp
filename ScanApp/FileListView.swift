@@ -103,6 +103,20 @@ struct FileListView: View {
                     moveSelectedFiles(to: destination)
                 }
             }
+            // ✅ フォルダ作成アラートを追加
+            .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
+                TextField("Folder name", text: $newFolderName)
+                Button("Create") {
+                    createFolder(named: newFolderName)
+                    newFolderName = ""
+                }
+                Button("Cancel", role: .cancel) {
+                    newFolderName = ""
+                }
+            } message: {
+                Text("Enter a name for the new folder.")
+}
+
             .onAppear {
                 loadFiles()
             }
