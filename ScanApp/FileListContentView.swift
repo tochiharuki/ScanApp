@@ -1,3 +1,8 @@
+//
+//  FileListContentView.swift
+//  ScanApp
+//
+
 import SwiftUI
 import Foundation
 import UniformTypeIdentifiers
@@ -14,7 +19,7 @@ struct FileListContentView: View {
     @State private var showMoveSheet = false
     @State private var showNoSelectionAlert = false
     
-    // 移動先フォルダ用
+    // 選択中の移動先フォルダ
     @State private var selectedFolderURL: URL? = nil
     
     private let fileManager = FileManager.default
@@ -51,9 +56,7 @@ struct FileListContentView: View {
                 Button("Cancel", role: .cancel) {}
             } message: { Text("Enter a name for the new folder.") }
             .sheet(isPresented: $showMoveSheet) {
-                FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
-                    moveSelectedFiles(to: destination)
-                }
+                FolderSelectionView(selectedFolderURL: $selectedFolderURL)
             }
         }
     }
@@ -63,12 +66,24 @@ struct FileListContentView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
             if isEditing {
-                Button("Done") { isEditing = false; selectedFiles.removeAll() }
+                Button("Done") {
+                    isEditing = false
+                    selectedFiles.removeAll()
+                }
                 Button {
-                    if selectedFiles.isEmpty { showNoSelectionAlert = true }
-                    else { showMoveSheet = true }
-                } label: { Image(systemName: "arrow.forward") }
-                Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
+                    if selectedFiles.isEmpty {
+                        showNoSelectionAlert = true
+                    } else {
+                        showMoveSheet = true
+                    }
+                } label: {
+                    Image(systemName: "arrow.forward")
+                }
+                Button {
+                    deleteSelectedFiles()
+                } label: {
+                    Image(systemName: "trash")
+                }
             } else {
                 Button("Edit") { isEditing = true }
                 Button { showCreateFolderAlert = true } label: {
@@ -83,29 +98,40 @@ struct FileListContentView: View {
     
     // MARK: - Logic
     private var filteredFiles: [URL] {
-        files.filter { searchText.isEmpty || $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
+        if searchText.isEmpty { return files }
+        return files.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
     }
     
     private func loadFiles() {
-        do { files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil) }
-        catch { print(error) }
+        do {
+            files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
+        } catch { print(error) }
     }
     
     private func handleTap(_ file: URL) {
         if isEditing {
-            selectedFiles.contains(file) ? selectedFiles.remove(file) : selectedFiles.insert(file)
+            // ⚠️ 三項演算子ではなく if-else に修正
+            if selectedFiles.contains(file) {
+                selectedFiles.remove(file)
+            } else {
+                selectedFiles.insert(file)
+            }
         } else if file.hasDirectoryPath {
             currentURL = file
         }
     }
     
     private func deleteFiles(at offsets: IndexSet) {
-        for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
+        for index in offsets {
+            try? fileManager.removeItem(at: filteredFiles[index])
+        }
         loadFiles()
     }
     
     private func deleteSelectedFiles() {
-        for file in selectedFiles { try? fileManager.removeItem(at: file) }
+        for file in selectedFiles {
+            try? fileManager.removeItem(at: file)
+        }
         selectedFiles.removeAll()
         loadFiles()
     }
