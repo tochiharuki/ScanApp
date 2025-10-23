@@ -1,12 +1,6 @@
-//
-//  FileListContentView.swift
-//  ScanApp
-//
-
 import SwiftUI
 import Foundation
 import UniformTypeIdentifiers
-
 
 struct FileListContentView: View {
     @Binding var currentURL: URL
@@ -20,7 +14,7 @@ struct FileListContentView: View {
     @State private var showMoveSheet = false
     @State private var showNoSelectionAlert = false
     
-    // ✅ 選択中の移動先フォルダ
+    // 移動先フォルダ用
     @State private var selectedFolderURL: URL? = nil
     
     private let fileManager = FileManager.default
@@ -28,15 +22,22 @@ struct FileListContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             Group {
-                if isGridView { GridFileView(files: filteredFiles,
-                                             selectedFiles: $selectedFiles,
-                                             isEditing: $isEditing,
-                                             onTap: handleTap) }
-                else { ListFileView(files: filteredFiles,
-                                    selectedFiles: $selectedFiles,
-                                    isEditing: $isEditing,
-                                    onTap: handleTap,
-                                    deleteAction: deleteFiles) }
+                if isGridView {
+                    GridFileView(
+                        files: filteredFiles,
+                        selectedFiles: $selectedFiles,
+                        isEditing: $isEditing,
+                        onTap: handleTap
+                    )
+                } else {
+                    ListFileView(
+                        files: filteredFiles,
+                        selectedFiles: $selectedFiles,
+                        isEditing: $isEditing,
+                        onTap: handleTap,
+                        deleteAction: deleteFiles
+                    )
+                }
             }
             .searchable(text: $searchText)
             .toolbar { toolbarContent }
@@ -51,9 +52,7 @@ struct FileListContentView: View {
             } message: { Text("Enter a name for the new folder.") }
             .sheet(isPresented: $showMoveSheet) {
                 FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
-                    if let destination = destination {
-                        moveSelectedFiles(to: destination)
-                    }
+                    moveSelectedFiles(to: destination)
                 }
             }
         }
@@ -69,9 +68,7 @@ struct FileListContentView: View {
                     if selectedFiles.isEmpty { showNoSelectionAlert = true }
                     else { showMoveSheet = true }
                 } label: { Image(systemName: "arrow.forward") }
-                Button {
-                    deleteSelectedFiles()
-                } label: { Image(systemName: "trash") }
+                Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
             } else {
                 Button("Edit") { isEditing = true }
                 Button { showCreateFolderAlert = true } label: {
@@ -86,23 +83,17 @@ struct FileListContentView: View {
     
     // MARK: - Logic
     private var filteredFiles: [URL] {
-        var result = files
-        if !searchText.isEmpty {
-            result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
-        }
-        return result
+        files.filter { searchText.isEmpty || $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
     }
     
     private func loadFiles() {
-        do {
-            files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
-        } catch { print(error) }
+        do { files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil) }
+        catch { print(error) }
     }
     
     private func handleTap(_ file: URL) {
         if isEditing {
-            if selectedFiles.contains(file) { selectedFiles.remove(file) }
-            else { selectedFiles.insert(file) }
+            selectedFiles.contains(file) ? selectedFiles.remove(file) : selectedFiles.insert(file)
         } else if file.hasDirectoryPath {
             currentURL = file
         }
