@@ -17,6 +17,7 @@ struct FolderSelectionView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                
                 // ✅ パスバー
                 PathBarView(currentURL: currentURL) { url in
                     navigateTo(url)
@@ -43,10 +44,8 @@ struct FolderSelectionView: View {
                 
                 // ✅ フッター
                 HStack {
-                    Button("New Folder") {
-                        showCreateFolderAlert = true
-                    }
-                    .buttonStyle(.bordered)
+                    Button("New Folder") { showCreateFolderAlert = true }
+                        .buttonStyle(.bordered)
                     
                     Spacer()
                     
@@ -88,7 +87,7 @@ struct FolderSelectionView: View {
         }
     }
     
-    // MARK: - フォルダ制御
+    // MARK: - フォルダ操作
     private func navigateTo(_ url: URL) {
         currentURL = url
     }

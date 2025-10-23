@@ -2,8 +2,6 @@
 //  FileListContentView.swift
 //  ScanApp
 //
-//  Created by Tochishita Haruki on 2025/10/24.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -19,11 +17,19 @@ struct FileListContentView: View {
     @State private var newFolderName = ""
     @State private var showMoveSheet = false
     @State private var showNoSelectionAlert = false
+    @State private var selectedDestination: URL? = nil
 
     private let fileManager = FileManager.default
 
     var body: some View {
         VStack(spacing: 0) {
+            
+            // ✅ PathBarView を追加
+            PathBarView(currentURL: currentURL) { newPath in
+                currentURL = newPath
+            }
+            Divider()
+            
             Group {
                 if isGridView { gridView }
                 else { listView }
@@ -40,8 +46,13 @@ struct FileListContentView: View {
                 Button("Cancel", role: .cancel) {}
             } message: { Text("Enter a name for the new folder.") }
             .sheet(isPresented: $showMoveSheet) {
-                FolderSelectionView(currentURL: currentURL) { destination in
+                // ✅ Binding を渡す
+                FolderSelectionView(selectedFolderURL: $selectedDestination, currentURL: currentURL)
+            }
+            .onChange(of: selectedDestination) { newValue in
+                if let destination = newValue {
                     moveSelectedFiles(to: destination)
+                    selectedDestination = nil
                 }
             }
         }
