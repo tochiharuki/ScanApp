@@ -169,7 +169,6 @@ struct FileListView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { handleTap(file) }
-                .background(selectedFiles.contains(file) ? Color.blue.opacity(0.1) : Color.clear)
                 .onDrag {
                     let provider = NSItemProvider()
                     provider.registerDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier, visibility: .all) { completion in
