@@ -51,20 +51,14 @@ struct FileListView: View {
             .toolbar {
     ToolbarItemGroup(placement: .navigationBarTrailing) {
                     if isEditing {
-                        Button("Done") {
-                            withAnimation {
-                                isEditing = false
-                                selectedFiles.removeAll()
-                            }
-                        }
-            
-                        HStack {
-                            Button {
-                                showMoveSheet = true
-                            } label: {
-                                Image(systemName: "arrow.right.folder")
-                                    .foregroundColor(.blue)
-                            }
+                    
+                        Button {
+                            showMoveSheet = true
+     
+                        } label: {
+                            Image(systemName: "arrow.right.folder")
+                                .foregroundColor(.black)
+
                         }
             
                         Button {
@@ -72,6 +66,15 @@ struct FileListView: View {
                         } label: {
                             Image(systemName: "trash")
                         }
+                        
+                        Button("Done") {
+                            withAnimation {
+                                isEditing = false
+                                selectedFiles.removeAll()
+                            }
+                        }
+            
+                        
             
                     } else {
                         Button("Edit") {
