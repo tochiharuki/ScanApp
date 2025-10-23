@@ -103,6 +103,9 @@ struct FileListView: View {
                     moveSelectedFiles(to: destination)
                 }
             }
+            .onAppear {
+                loadFiles()
+            }
             
         }
     }
