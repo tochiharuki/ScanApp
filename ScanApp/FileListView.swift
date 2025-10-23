@@ -65,11 +65,14 @@ struct FileListView: View {
                         Image(systemName: "folder.badge.plus")
                     }
                     // ✅ ファイル移動
-                    Button {
+                    if isEditing && !selectedFiles.isEmpty {
+                        Button {
                             showMoveSheet = true
                         } label: {
                             Image(systemName: "arrow.right.folder")
+                                .foregroundColor(.black)
                         }
+                    }
 
 
                     // 削除ボタン
