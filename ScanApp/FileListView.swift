@@ -63,6 +63,7 @@ struct FileListView: View {
                         } label: {
                             Image(systemName: "arrow.right.folder")
                                 .foregroundColor(.black)
+                                .frame(width: 24, height: 24)
 
                         }
             
