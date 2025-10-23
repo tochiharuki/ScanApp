@@ -15,7 +15,7 @@ struct FolderSelectionView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ✅ パスバー
+                // ✅ パスバー（常に高さを確保）
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
                         ForEach(pathComponents(), id: \.self) { component in
@@ -39,7 +39,7 @@ struct FolderSelectionView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.vertical, 8)
+                    .frame(minHeight: 40) // ✅ 高さを確保
                 }
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -102,7 +102,7 @@ struct FolderSelectionView: View {
             .onAppear(perform: loadFolders)
             .onChange(of: currentURL) { _ in
                 loadFolders()
-            } // ✅ currentURL変更時に再読込
+            }
             .alert("New Folder", isPresented: $showCreateFolderAlert) {
                 TextField("Folder name", text: $newFolderName)
                 Button("Create") {
@@ -118,12 +118,15 @@ struct FolderSelectionView: View {
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
         guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return [] }
+
         var url = currentURL
+        // ルートが外れた場合でも安全に終了
         while url.path.hasPrefix(documents.path) {
             paths.insert(url, at: 0)
             if url == documents { break }
             url.deleteLastPathComponent()
         }
+
         return paths
     }
 
