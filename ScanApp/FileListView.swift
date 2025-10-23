@@ -61,7 +61,7 @@ struct FileListView: View {
                         Button {
                             showMoveSheet = true
                         } label: {
-                            Image(systemName: "arrow.right.folder")
+                            Image(systemName: "folder.badge.plus")
                         }
             
                         Button {
