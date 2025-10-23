@@ -60,7 +60,6 @@ struct FileListView: View {
             
                         Button {
                             showMoveSheet = true
-                            moveSelectedFiles()
                         } label: {
                             Image(systemName: "arrow.right.folder")
                                 .foregroundColor(.black)
