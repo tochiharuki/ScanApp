@@ -50,63 +50,53 @@ struct FileListView: View {
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    // 編集ボタン
-                    Button(isEditing ? "Done" : "Edit") {
-                        withAnimation {
-                            isEditing.toggle()
-                            if !isEditing { selectedFiles.removeAll() }
+                    if isEditing {
+                        Button("Done") {
+                            withAnimation {
+                                isEditing = false
+                                selectedFiles.removeAll()
+                            }
+                        }
+            
+                        Button {
+                            showMoveSheet = true
+                        } label: {
+                            Image(systemName: "arrow.right.folder")
+                        }
+            
+                        Button {
+                            deleteSelectedFiles()
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+            
+                    } else {
+                        Button("Edit") {
+                            withAnimation { isEditing = true }
+                        }
+            
+                        Button {
+                            showCreateFolderAlert = true
+                        } label: {
+                            Image(systemName: "folder.badge.plus")
+                        }
+            
+                        Button {
+                            withAnimation { isGridView.toggle() }
+                        } label: {
+                            Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                        }
+            
+                        Menu {
+                            Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
+                            Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
+                            Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
+                            Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
                         }
                     }
-            
-                    // フォルダ作成
-                    Button {
-                        showCreateFolderAlert = true
-                    } label: {
-                        Image(systemName: "folder.badge.plus")
-                    }
-                    // ✅ ファイル移動
-                    Button {
-                        showMoveSheet = true
-                    } label: {
-                        Image(systemName: "arrow.right.folder")
-                            .foregroundColor(.black)
-                    }
-
-
-                    // 削除ボタン
-                    Button {
-                        deleteSelectedFiles()
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(.black)
-                    }
-            
-                    // グリッド／リスト切替
-                    Button {
-                        withAnimation { isGridView.toggle() }
-                    } label: {
-                        Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
-                    }
-            
-                    // 並び替えメニュー
-                    Menu {
-                        Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
-                        Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
-                        Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
-                        Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
-                    } label: {
-                        Image(systemName: "arrow.up.arrow.down")
-                    }
                 }
-            }
-            .onAppear(perform: loadFiles)
-            .refreshable { loadFiles() }
-            .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
-                TextField("Folder name", text: $newFolderName)
-                Button("Create") { createFolder(named: newFolderName); newFolderName = "" }
-                Button("Cancel", role: .cancel) { newFolderName = "" }
-            } message: { Text("Enter a name for the new folder.") }
-           
             }
             .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
                 FolderSelectionView(currentURL: currentURL) { destination in
@@ -127,7 +117,8 @@ struct FileListView: View {
                         .onDrag {
                             NSItemProvider(contentsOf: file) ?? NSItemProvider()
                         }
-                        .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
+                        .onDrop(of: [.fileURL],
+                            delegate: DropViewDelegate(destination: file, fileManager: fileManager, refresh: { self.loadFiles() }))
                 }
             }
             .padding()
@@ -161,7 +152,8 @@ struct FileListView: View {
                     }
                     return provider
                 }
-                .onDrop(of: [.fileURL], delegate: DropViewDelegate(destination: file, fileManager: fileManager, parent: self))
+                .onDrop(of: [.fileURL],
+                    delegate: DropViewDelegate(destination: file, fileManager: fileManager, refresh: { self.loadFiles() }))
             }
             // 🔽 ここを追加
             .onDelete(perform: deleteFiles)
@@ -268,38 +260,37 @@ struct FileListView: View {
     struct DropViewDelegate: DropDelegate {
         let destination: URL
         let fileManager: FileManager
-        let parent: FileListView
+        // parent の代わりにリフレッシュ用クロージャを受け取る
+        let refresh: () -> Void
     
         func performDrop(info: DropInfo) -> Bool {
             guard destination.hasDirectoryPath else { return false }
     
             let providers = info.itemProviders(for: [.fileURL])
             for provider in providers {
-                _ = provider.loadDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { data, error in
-                    guard let data = data,
-                          let path = String(data: data, encoding: .utf8),
-                          let sourceURL = URL(string: path)
-                    else { return }
-    
-                    // フォルダ間で移動
-                    let targetURL = destination.appendingPathComponent(sourceURL.lastPathComponent)
+                // loadFileRepresentation を使って一時URLを取得する（より確実）
+                provider.loadFileRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { tempURL, error in
+                    guard let tempURL = tempURL else { return }
+                    let targetURL = destination.appendingPathComponent(tempURL.lastPathComponent)
                     do {
+                        // 既存ファイルがあれば置き換える
                         if fileManager.fileExists(atPath: targetURL.path) {
                             try fileManager.removeItem(at: targetURL)
                         }
-                        try fileManager.moveItem(at: sourceURL, to: targetURL)
+                        try fileManager.moveItem(at: tempURL, to: targetURL)
                     } catch {
                         print("Move failed:", error)
                     }
     
+                    // メインスレッドでリフレッシュを呼ぶ
                     DispatchQueue.main.async {
-                        parent.loadFiles()
+                        refresh()
                     }
                 }
             }
             return true
         }
-    }
+}
 
 }
 
