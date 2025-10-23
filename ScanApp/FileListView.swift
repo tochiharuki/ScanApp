@@ -50,62 +50,62 @@ struct FileListView: View {
             .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
     ToolbarItemGroup(placement: .navigationBarTrailing) {
-        // 編集モード切り替え
-        Button(isEditing ? "Done" : "Edit") {
-            withAnimation {
-                isEditing.toggle()
-                if !isEditing { selectedFiles.removeAll() }
+                    if isEditing {
+                        Button("Done") {
+                            withAnimation {
+                                isEditing = false
+                                selectedFiles.removeAll()
+                            }
+                        }
+            
+                        HStack {
+                            Button {
+                                showMoveSheet = true
+                            } label: {
+                                Image(systemName: "arrow.right.folder")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+            
+                        Button {
+                            deleteSelectedFiles()
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+            
+                    } else {
+                        Button("Edit") {
+                            withAnimation { isEditing = true }
+                        }
+            
+                        Button {
+                            showCreateFolderAlert = true
+                        } label: {
+                            Image(systemName: "folder.badge.plus")
+                        }
+            
+                        Button {
+                            withAnimation { isGridView.toggle() }
+                        } label: {
+                            Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                        }
+            
+                        Menu {
+                            Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
+                            Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
+                            Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
+                            Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                        }
+                    }
+                }
             }
-        }
-
-        // フォルダ作成
-        if !isEditing {
-            Button {
-                showCreateFolderAlert = true
-            } label: {
-                Image(systemName: "folder.badge.plus")
+            .sheet(isPresented: $showMoveSheet) {  // ✅ ここに出す
+                FolderSelectionView(currentURL: currentURL) { destination in
+                    moveSelectedFiles(to: destination)
+                }
             }
-        }
-        
-        if isEditing {
-            Button {
-                showMoveSheet = true
-            } label: {
-                Image(systemName: "arrow.right.folder")
-                    .foregroundColor(.black)
-            }
-        }
-
-        // 削除ボタン
-        if isEditing {
-            Button {
-                deleteSelectedFiles()
-            } label: {
-                Image(systemName: "trash")
-                    .foregroundColor(.black)
-            }
-        }
-
-        // グリッド切り替え
-        if !isEditing {
-            Button {
-                withAnimation { isGridView.toggle() }
-            } label: {
-                Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
-            }
-
-            // ソートメニュー
-            Menu {
-                Button("Name ↑") { sortOption = .nameAscending; loadFiles() }
-                Button("Name ↓") { sortOption = .nameDescending; loadFiles() }
-                Button("Date ↑") { sortOption = .dateAscending; loadFiles() }
-                Button("Date ↓") { sortOption = .dateDescending; loadFiles() }
-            } label: {
-                Image(systemName: "arrow.up.arrow.down")
-            }
-        }
-    }
-}
             .onAppear {
                 loadFiles()
             }
