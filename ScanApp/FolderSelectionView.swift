@@ -7,15 +7,15 @@ struct FolderSelectionView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var folders: [URL] = []
-    private let fileManager = FileManager.default
-
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
+
+    private let fileManager = FileManager.default
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ✅ パス階層バー（パンくずリスト）
+                // ✅ パスバー
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
                         ForEach(pathComponents(), id: \.self) { component in
@@ -51,8 +51,9 @@ struct FolderSelectionView: View {
                 // ✅ フォルダリスト
                 List(folders, id: \.self) { folder in
                     Button {
-                        currentURL = folder
-                        loadFolders()
+                        withAnimation {
+                            currentURL = folder
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "folder.fill")
@@ -66,10 +67,10 @@ struct FolderSelectionView: View {
                 .background(Color(.systemGray5))
             }
             .background(Color(.systemGray5))
-            .navigationTitle("Select Folder")
+            .navigationTitle(currentURL.lastPathComponent)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarLeading) {
-                    // ✅ 戻るボタン
+                    // 戻るボタン
                     Button {
                         goBack()
                     } label: {
@@ -77,21 +78,21 @@ struct FolderSelectionView: View {
                     }
                     .disabled(isAtRoot)
 
-                    // ✅ キャンセルボタン
+                    // キャンセル
                     Button("Cancel") {
                         dismiss()
                     }
                 }
 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    // ✅ 新規フォルダ作成
+                    // 新規フォルダ作成
                     Button {
                         showCreateFolderAlert = true
                     } label: {
                         Image(systemName: "folder.badge.plus")
                     }
 
-                    // ✅ 選択ボタン
+                    // 選択ボタン
                     Button("Select") {
                         onSelect(currentURL)
                         dismiss()
@@ -99,7 +100,9 @@ struct FolderSelectionView: View {
                 }
             }
             .onAppear(perform: loadFolders)
-            // ✅ 新規フォルダ作成アラート
+            .onChange(of: currentURL) { _ in
+                loadFolders()
+            } // ✅ currentURL変更時に再読込
             .alert("New Folder", isPresented: $showCreateFolderAlert) {
                 TextField("Folder name", text: $newFolderName)
                 Button("Create") {
@@ -111,13 +114,11 @@ struct FolderSelectionView: View {
         }
     }
 
-    // MARK: - パス階層リスト生成
+    // MARK: - パス階層
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return [] }
         var url = currentURL
-
-        // Documents までの階層を全て配列化
         while url.path.hasPrefix(documents.path) {
             paths.insert(url, at: 0)
             if url == documents { break }
@@ -126,26 +127,28 @@ struct FolderSelectionView: View {
         return paths
     }
 
-    // MARK: - ナビゲーション制御
+    // MARK: - 移動・戻る
     private func navigateTo(_ url: URL) {
-        currentURL = url
-        loadFolders()
+        withAnimation {
+            currentURL = url
+        }
     }
 
     private func goBack() {
         let parent = currentURL.deletingLastPathComponent()
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        guard parent.path.hasPrefix(documents.path) else { return }
-        currentURL = parent
-        loadFolders()
+        guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first,
+              parent.path.hasPrefix(documents.path) else { return }
+        withAnimation {
+            currentURL = parent
+        }
     }
 
     private var isAtRoot: Bool {
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return false }
         return currentURL == documents
     }
 
-    // MARK: - フォルダ読み込み
+    // MARK: - フォルダ読み込み・作成
     private func loadFolders() {
         do {
             let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)
@@ -156,7 +159,6 @@ struct FolderSelectionView: View {
         }
     }
 
-    // MARK: - フォルダ作成
     private func createFolder(named name: String) {
         guard !name.isEmpty else { return }
         let newFolderURL = currentURL.appendingPathComponent(name)
