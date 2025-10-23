@@ -17,6 +17,7 @@ struct FileListView: View {
     @State private var selectedDestination: URL? = nil
 
     @State private var currentURL: URL
+    @State private var showNoSelectionAlert = false
     private let fileManager = FileManager.default
 
     enum SortOption {
@@ -59,7 +60,11 @@ struct FileListView: View {
                         }
             
                         Button {
-                            showMoveSheet = true
+                            if selectedFiles.isEmpty {
+                                showNoSelectionAlert = true  // ← アラート表示
+                            } else {
+                                showMoveSheet = true
+                            }
                         } label: {
                             Image(systemName: "arrow.forward")
                         }
@@ -102,6 +107,11 @@ struct FileListView: View {
                 FolderSelectionView(currentURL: currentURL) { destination in
                     moveSelectedFiles(to: destination)
                 }
+            }
+            .alert("No file selected", isPresented: $showNoSelectionAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please select at least one file before moving.")
             }
             // ✅ フォルダ作成アラートを追加
             .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
