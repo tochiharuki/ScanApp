@@ -1,57 +1,49 @@
-//
-//  PathBarView.swift
-//  ScanApp
-//
-//  Created by Tochishita Haruki on 2025/10/24.
-//
-
 import SwiftUI
 
 struct PathBarView: View {
     let currentURL: URL
-    let onSelectPath: (URL) -> Void
-
-    /// iOSサンドボックスの "Documents" 以下だけをパスとして表示
-    private var visibleComponents: [URL] {
-        var components: [URL] = []
-
-        // アプリのドキュメントディレクトリパスを取得
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-
-        // 現在のURLがドキュメント配下か確認
-        guard currentURL.path.hasPrefix(documentsURL.path) else { return [] }
-
-        // Documents 自体も含める
-        var url = currentURL
-        while url.path != documentsURL.deletingLastPathComponent().path {
-            components.insert(url, at: 0)
-            if url.path == documentsURL.path { break }
-            url.deleteLastPathComponent()
-        }
-
-        return components
-    }
-
+    let onNavigate: (URL) -> Void
+    
+    private let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 4) {
-                ForEach(visibleComponents, id: \.self) { url in
-                    Button(action: { onSelectPath(url) }) {
+                ForEach(pathComponents(), id: \.self) { url in
+                    Button {
+                        onNavigate(url)
+                    } label: {
                         Text(url.lastPathComponent)
-                            .font(.subheadline)
-                            .lineLimit(1)
-                            .foregroundColor(.blue)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(url == currentURL ? .primary : .gray)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(url == currentURL ? Color.accentColor.opacity(0.2) : Color.gray.opacity(0.1))
+                            .cornerRadius(6)
                     }
-                    if url != visibleComponents.last {
+                    
+                    if url != pathComponents().last {
                         Image(systemName: "chevron.right")
-                            .font(.caption2)
+                            .font(.system(size: 10))
                             .foregroundColor(.gray)
                     }
                 }
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal)
             .padding(.vertical, 8)
         }
-        .background(Color(.systemGray6))
+        .background(Color(UIColor.secondarySystemBackground))
+        .frame(minHeight: 40) // ✅ 高さを保証
+    }
+    
+    private func pathComponents() -> [URL] {
+        var paths: [URL] = []
+        var url = currentURL
+        while url.path.hasPrefix(documentsURL.path) {
+            paths.insert(url, at: 0)
+            if url == documentsURL { break }
+            url.deleteLastPathComponent()
+        }
+        return paths
     }
 }
