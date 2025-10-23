@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct FileListItem: View {
     let file: URL

@@ -5,6 +5,9 @@
 //  Created by Tochishita Haruki on 2025/10/24.
 //
 
+import SwiftUI
+import Foundation
+
 struct ListFileView: View {
     let files: [URL]
     @Binding var selectedFiles: Set<URL>

@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct FolderSelectionView: View {
     @Environment(\.dismiss) private var dismiss

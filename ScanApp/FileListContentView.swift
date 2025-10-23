@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import Foundation
 import UniformTypeIdentifiers
 
 struct FileListContentView: View {
