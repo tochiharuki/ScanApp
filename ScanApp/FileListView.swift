@@ -124,7 +124,12 @@ struct FileListView: View {
                             NSItemProvider(contentsOf: file) ?? NSItemProvider()
                         }
                         .onDrop(of: [.fileURL],
-                            delegate: DropViewDelegate(destination: file, fileManager: fileManager, refresh: { self.loadFiles() }))
+                            delegate: DropViewDelegate(
+                                destination: file,
+                                fileManager: fileManager,
+                                refresh: { DispatchQueue.main.async { loadFiles() } }
+                            )
+                        )
                 }
             }
             .padding()
