@@ -14,7 +14,7 @@ struct FileListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ✅ パスバー表示
+                // ✅ 常にパスバーを表示
                 PathBarView(currentURL: currentURL) { url in
                     if url != currentURL {
                         withAnimation {
@@ -22,13 +22,18 @@ struct FileListView: View {
                         }
                     }
                 }
-                Divider()
+                .padding(.horizontal, 4)
+                .padding(.vertical, 6)
+                .background(Color(UIColor.secondarySystemBackground))
+                .overlay(Divider(), alignment: .bottom)
 
-                // ✅ ファイルリスト部分
+                // ✅ コンテンツ部分
                 FileListContentView(currentURL: $currentURL)
             }
-            .navigationTitle(currentURL.lastPathComponent)
+            // タイトルは空にしてツールバーに表示されないようにする
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar) // ← ツールバーを完全に非表示
         }
     }
 }
