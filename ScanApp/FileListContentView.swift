@@ -1,8 +1,3 @@
-//
-//  FileListContentView.swift
-//  ScanApp
-//
-
 import SwiftUI
 import Foundation
 import UniformTypeIdentifiers
@@ -18,8 +13,6 @@ struct FileListContentView: View {
     @State private var newFolderName = ""
     @State private var showMoveSheet = false
     @State private var showNoSelectionAlert = false
-
-    // 選択した移動先フォルダ
     @State private var selectedFolderURL: URL? = nil
 
     private let fileManager = FileManager.default
@@ -46,7 +39,8 @@ struct FileListContentView: View {
             }
             .searchable(text: $searchText)
             .toolbar { toolbarContent }
-            .onAppear { loadFiles() }
+            .onAppear { asyncLoadFiles() }
+            .onChange(of: currentURL) { _ in asyncLoadFiles() }
             .alert("No file selected", isPresented: $showNoSelectionAlert) {
                 Button("OK", role: .cancel) {}
             }
@@ -54,7 +48,7 @@ struct FileListContentView: View {
                 TextField("Folder name", text: $newFolderName)
                 Button("Create") { createFolder(named: newFolderName) }
                 Button("Cancel", role: .cancel) {}
-            } message: { Text("Enter a name for the new folder.") }
+            }
             .sheet(isPresented: $showMoveSheet) {
                 FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
                     moveSelectedFiles(to: destination)
@@ -88,16 +82,17 @@ struct FileListContentView: View {
 
     // MARK: - Logic
     private var filteredFiles: [URL] {
-        var result = files
-        if !searchText.isEmpty {
-            result = result.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
-        }
-        return result
+        if searchText.isEmpty { return files }
+        return files.filter { $0.lastPathComponent.localizedCaseInsensitiveContains(searchText) }
     }
 
-    private func loadFiles() {
-        do { files = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil) }
-        catch { print(error) }
+    private func asyncLoadFiles() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)) ?? []
+            DispatchQueue.main.async {
+                self.files = contents
+            }
+        }
     }
 
     private func handleTap(_ file: URL) {
@@ -111,20 +106,20 @@ struct FileListContentView: View {
 
     private func deleteFiles(at offsets: IndexSet) {
         for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
-        loadFiles()
+        asyncLoadFiles()
     }
 
     private func deleteSelectedFiles() {
         for file in selectedFiles { try? fileManager.removeItem(at: file) }
         selectedFiles.removeAll()
-        loadFiles()
+        asyncLoadFiles()
     }
 
     private func createFolder(named name: String) {
         guard !name.isEmpty else { return }
         let newFolderURL = currentURL.appendingPathComponent(name)
         try? fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
-        loadFiles()
+        asyncLoadFiles()
     }
 
     private func moveSelectedFiles(to destination: URL) {
@@ -133,6 +128,6 @@ struct FileListContentView: View {
             try? fileManager.moveItem(at: file, to: target)
         }
         selectedFiles.removeAll()
-        loadFiles()
+        asyncLoadFiles()
     }
 }

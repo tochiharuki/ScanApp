@@ -6,23 +6,25 @@ struct FolderSelectionView: View {
     @Binding var selectedFolderURL: URL?
     var onSelect: ((URL) -> Void)? = nil
 
-    @State private var currentURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    @State private var currentURL: URL
     @State private var folders: [URL] = []
-
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
+    @State private var navigationTarget: URL? = nil
 
     private let fileManager = FileManager.default
     private var documentsURL: URL { fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0] }
 
-    @State private var navigationTarget: URL? = nil
+    init(selectedFolderURL: Binding<URL?>, onSelect: ((URL) -> Void)? = nil, currentURL: URL? = nil) {
+        _selectedFolderURL = selectedFolderURL
+        self.onSelect = onSelect
+        _currentURL = State(initialValue: currentURL ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0])
+    }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                PathBarView(currentURL: currentURL) { url in
-                    currentURL = url
-                }
+                PathBarView(currentURL: currentURL) { url in currentURL = url }
                 Divider()
                 
                 List(folders, id: \.self) { folder in
@@ -31,7 +33,7 @@ struct FolderSelectionView: View {
                     } label: {
                         HStack {
                             Image(systemName: "folder.fill").foregroundColor(.accentColor)
-                            Text(folder.lastPathComponent).foregroundColor(.primary)
+                            Text(folder.lastPathComponent)
                             Spacer()
                         }
                     }
@@ -39,7 +41,6 @@ struct FolderSelectionView: View {
                 .listStyle(.plain)
                 
                 Divider()
-                
                 HStack {
                     Button("New Folder") { showCreateFolderAlert = true }
                         .buttonStyle(.bordered)
@@ -64,14 +65,13 @@ struct FolderSelectionView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
-            .onAppear(perform: loadFolders)
-            .onChange(of: currentURL) { _ in loadFolders() }
+            .onAppear(perform: asyncLoadFolders)
+            .onChange(of: currentURL) { _ in asyncLoadFolders() }
             .alert("New Folder", isPresented: $showCreateFolderAlert) {
                 TextField("Folder name", text: $newFolderName)
                 Button("Create") { createFolder(named: newFolderName); newFolderName = "" }
                 Button("Cancel", role: .cancel) {}
             }
-            // ✅ NavigationStack で深い階層に遷移
             .navigationDestination(isPresented: Binding(
                 get: { navigationTarget != nil },
                 set: { if !$0 { navigationTarget = nil } }
@@ -85,19 +85,23 @@ struct FolderSelectionView: View {
 
     private var isAtRoot: Bool { currentURL.path == documentsURL.path }
 
-    private func goBack() { if !isAtRoot { currentURL.deleteLastPathComponent() } }
+    private func goBack() {
+        guard !isAtRoot else { return }
+        currentURL.deleteLastPathComponent()
+    }
 
-    private func loadFolders() {
-        do {
-            let contents = try fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.isDirectoryKey])
-            folders = contents.filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false }
-        } catch { folders = []; print("Error loading folders:", error) }
+    private func asyncLoadFolders() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let urls = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.isDirectoryKey]))?
+                .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false } ?? []
+            DispatchQueue.main.async { folders = urls }
+        }
     }
 
     private func createFolder(named name: String) {
         guard !name.isEmpty else { return }
-        let newFolderURL = currentURL.appendingPathComponent(name)
-        try? fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: true)
-        loadFolders()
+        let newURL = currentURL.appendingPathComponent(name)
+        try? fileManager.createDirectory(at: newURL, withIntermediateDirectories: true)
+        asyncLoadFolders()
     }
 }
