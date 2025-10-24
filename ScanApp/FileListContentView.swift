@@ -20,11 +20,11 @@ struct FileListContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Group {
-                if isLoading {
-                    ProgressView("Loading...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
+            if isLoading {
+                ProgressView("Loading...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Group {
                     if isGridView {
                         GridFileView(
                             files: filteredFiles,
@@ -40,30 +40,26 @@ struct FileListContentView: View {
                             onTap: handleTap,
                             deleteAction: deleteFiles
                         )
-                        .listStyle(.plain)
                     }
                 }
+                .searchable(text: $searchText)
+                .toolbar { toolbarContent }
             }
-            .searchable(text: $searchText)
-            .toolbar { toolbarContent }
-            .onAppear { asyncLoadFiles() }
-            .onChange(of: currentURL) { _ in asyncLoadFiles() }
-
-            // アラート類
-            .alert("No file selected", isPresented: $showNoSelectionAlert) {
-                Button("OK", role: .cancel) {}
-            }
-            .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
-                TextField("Folder name", text: $newFolderName)
-                Button("Create") { createFolder(named: newFolderName) }
-                Button("Cancel", role: .cancel) {}
-            }
-            // 移動用フォルダ選択
-            .sheet(isPresented: $showMoveSheet) {
-                NavigationStack {
-                    FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
-                        moveSelectedFiles(to: destination)
-                    }
+        }
+        .onAppear { asyncLoadFiles() }
+        .onChange(of: currentURL) { _ in asyncLoadFiles() }
+        .alert("No file selected", isPresented: $showNoSelectionAlert) {
+            Button("OK", role: .cancel) {}
+        }
+        .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
+            TextField("Folder name", text: $newFolderName)
+            Button("Create") { createFolder(named: newFolderName) }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showMoveSheet) {
+            NavigationStack {
+                FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
+                    moveSelectedFiles(to: destination)
                 }
             }
         }
@@ -74,20 +70,12 @@ struct FileListContentView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
             if isEditing {
-                Button("Done") {
-                    isEditing = false
-                    selectedFiles.removeAll()
-                }
+                Button("Done") { isEditing = false; selectedFiles.removeAll() }
                 Button {
-                    if selectedFiles.isEmpty {
-                        showNoSelectionAlert = true
-                    } else {
-                        showMoveSheet = true
-                    }
+                    if selectedFiles.isEmpty { showNoSelectionAlert = true }
+                    else { showMoveSheet = true }
                 } label: { Image(systemName: "arrow.forward") }
-                Button {
-                    deleteSelectedFiles()
-                } label: { Image(systemName: "trash") }
+                Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
             } else {
                 Button("Edit") { isEditing = true }
                 Button { showCreateFolderAlert = true } label: {
@@ -109,12 +97,9 @@ struct FileListContentView: View {
     private func asyncLoadFiles() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
+            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)) ?? []
             DispatchQueue.main.async {
-                self.files = contents.filter { url in
-                    // ✅ 非フォルダのみを対象（フォルダはFileListView側で表示）
-                    ((try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false) == false
-                }.sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+                self.files = contents
                 self.isLoading = false
             }
         }
@@ -122,27 +107,22 @@ struct FileListContentView: View {
 
     private func handleTap(_ file: URL) {
         if isEditing {
-            if selectedFiles.contains(file) {
-                selectedFiles.remove(file)
-            } else {
-                selectedFiles.insert(file)
-            }
+            if selectedFiles.contains(file) { selectedFiles.remove(file) }
+            else { selectedFiles.insert(file) }
         } else if file.hasDirectoryPath {
-            currentURL = file // ✅ フォルダは FileListView 側で扱うため、ここは通常到達しない想定
+            withAnimation {
+                currentURL = file
+            }
         }
     }
 
     private func deleteFiles(at offsets: IndexSet) {
-        for index in offsets {
-            try? fileManager.removeItem(at: filteredFiles[index])
-        }
+        for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
         asyncLoadFiles()
     }
 
     private func deleteSelectedFiles() {
-        for file in selectedFiles {
-            try? fileManager.removeItem(at: file)
-        }
+        for file in selectedFiles { try? fileManager.removeItem(at: file) }
         selectedFiles.removeAll()
         asyncLoadFiles()
     }
