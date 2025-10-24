@@ -2,7 +2,7 @@ import SwiftUI
 
 struct FileListView: View {
     @State private var currentPath: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    @State private var files: [URL] = []
+    @State private var allItems: [URL] = [] // ← 名前変更
 
     var body: some View {
         VStack {
@@ -23,7 +23,8 @@ struct FileListView: View {
             }
 
             List {
-                ForEach(folders(), id: \.self) { folder in
+                // フォルダ一覧
+                ForEach(foldersOnly(), id: \.self) { folder in
                     Button(action: {
                         currentPath = folder
                     }) {
@@ -31,7 +32,8 @@ struct FileListView: View {
                     }
                 }
 
-                ForEach(files(), id: \.self) { file in
+                // ファイル一覧
+                ForEach(filesOnly(), id: \.self) { file in
                     Label(file.lastPathComponent, systemImage: "doc")
                 }
             }
@@ -44,20 +46,22 @@ struct FileListView: View {
     }
 
     // MARK: - Helper
+
     private func loadFiles() {
         do {
-            files = try FileManager.default.contentsOfDirectory(at: currentPath, includingPropertiesForKeys: nil)
+            allItems = try FileManager.default.contentsOfDirectory(at: currentPath, includingPropertiesForKeys: nil)
         } catch {
             print("Error loading files:", error)
+            allItems = []
         }
     }
 
-    private func folders() -> [URL] {
-        files.filter { $0.hasDirectoryPath }
+    private func foldersOnly() -> [URL] {
+        allItems.filter { $0.hasDirectoryPath }
     }
 
-    private func files() -> [URL] {
-        files.filter { !$0.hasDirectoryPath }
+    private func filesOnly() -> [URL] {
+        allItems.filter { !$0.hasDirectoryPath }
     }
 
     private func pathComponents() -> [URL] {
