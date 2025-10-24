@@ -11,6 +11,7 @@ struct FolderSelectionView: View {
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
     @State private var navigationTarget: URL? = nil
+    @State private var isLoading = false // ← フリーズ防止に追加
 
     private let fileManager = FileManager.default
     private var documentsURL: URL { fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0] }
@@ -24,21 +25,28 @@ struct FolderSelectionView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                PathBarView(currentURL: currentURL) { url in currentURL = url }
+                PathBarView(currentURL: currentURL) { url in
+                    if url != currentURL { currentURL = url }
+                }
                 Divider()
                 
-                List(folders, id: \.self) { folder in
-                    Button {
-                        navigationTarget = folder
-                    } label: {
-                        HStack {
-                            Image(systemName: "folder.fill").foregroundColor(.accentColor)
-                            Text(folder.lastPathComponent)
-                            Spacer()
+                if isLoading {
+                    ProgressView("Loading folders...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(folders, id: \.self) { folder in
+                        Button {
+                            navigationTarget = folder
+                        } label: {
+                            HStack {
+                                Image(systemName: "folder.fill").foregroundColor(.accentColor)
+                                Text(folder.lastPathComponent)
+                                Spacer()
+                            }
                         }
                     }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
                 
                 Divider()
                 HStack {
@@ -58,18 +66,25 @@ struct FolderSelectionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button { goBack() } label: { Label("Back", systemImage: "chevron.backward") }
-                        .disabled(isAtRoot)
+                    Button { goBack() } label: {
+                        Label("Back", systemImage: "chevron.backward")
+                    }
+                    .disabled(isAtRoot)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }
                 }
             }
             .onAppear(perform: asyncLoadFolders)
-            .onChange(of: currentURL) { _ in asyncLoadFolders() }
+            .onChange(of: currentURL) { _ in
+                asyncLoadFolders()
+            }
             .alert("New Folder", isPresented: $showCreateFolderAlert) {
                 TextField("Folder name", text: $newFolderName)
-                Button("Create") { createFolder(named: newFolderName); newFolderName = "" }
+                Button("Create") {
+                    createFolder(named: newFolderName)
+                    newFolderName = ""
+                }
                 Button("Cancel", role: .cancel) {}
             }
             .navigationDestination(isPresented: Binding(
@@ -91,17 +106,33 @@ struct FolderSelectionView: View {
     }
 
     private func asyncLoadFolders() {
+        guard !isLoading else { return } // ← 二重ロード防止
+        isLoading = true
+
+        let targetURL = currentURL
         DispatchQueue.global(qos: .userInitiated).async {
-            let urls = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: [.isDirectoryKey]))?
-                .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false } ?? []
-            DispatchQueue.main.async { folders = urls }
+            let urls = (try? fileManager.contentsOfDirectory(at: targetURL, includingPropertiesForKeys: [.isDirectoryKey]))?
+                .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false }
+                .sorted { $0.lastPathComponent.lowercased() < $1.lastPathComponent.lowercased() } ?? []
+
+            DispatchQueue.main.async {
+                // currentURL が変わっていたら更新しない
+                if currentURL == targetURL {
+                    folders = urls
+                }
+                isLoading = false
+            }
         }
     }
 
     private func createFolder(named name: String) {
         guard !name.isEmpty else { return }
         let newURL = currentURL.appendingPathComponent(name)
-        try? fileManager.createDirectory(at: newURL, withIntermediateDirectories: true)
-        asyncLoadFolders()
+        DispatchQueue.global(qos: .userInitiated).async {
+            try? fileManager.createDirectory(at: newURL, withIntermediateDirectories: true)
+            DispatchQueue.main.async {
+                asyncLoadFolders()
+            }
+        }
     }
 }
