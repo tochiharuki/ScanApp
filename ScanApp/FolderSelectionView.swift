@@ -6,16 +6,17 @@ struct FolderSelectionView: View {
     @Binding var selectedFolderURL: URL?
     var onSelect: ((URL) -> Void)? = nil
 
+    // 初期表示パスを外から渡せるようにする（デフォルトは Documents）
     @State private var currentURL: URL
     @State private var folders: [URL] = []
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
-    @State private var navigationTarget: URL? = nil
-    @State private var isLoading = false // ← フリーズ防止に追加
+    @State private var isLoading = false
 
     private let fileManager = FileManager.default
     private var documentsURL: URL { fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0] }
 
+    // カスタムイニシャライザ（Binding と optional currentURL）
     init(selectedFolderURL: Binding<URL?>, onSelect: ((URL) -> Void)? = nil, currentURL: URL? = nil) {
         _selectedFolderURL = selectedFolderURL
         self.onSelect = onSelect
@@ -23,104 +24,107 @@ struct FolderSelectionView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                PathBarView(currentURL: currentURL) { url in
-                    if url != currentURL { currentURL = url }
+        VStack(spacing: 0) {
+            PathBarView(currentURL: currentURL) { url in
+                // PathBar からのナビゲートは currentURL を更新するだけ
+                if url != currentURL {
+                    currentURL = url
                 }
-                Divider()
-                
-                if isLoading {
-                    ProgressView("Loading folders...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    List(folders, id: \.self) { folder in
-                        Button {
-                            navigationTarget = folder
-                        } label: {
+            }
+            Divider()
+
+            if isLoading {
+                ProgressView("Loading...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    // NavigationLink を使って子 FolderSelectionView（ビュー自体には NavigationStack を含めない）
+                    ForEach(folders, id: \.self) { folder in
+                        NavigationLink(value: folder) {
                             HStack {
-                                Image(systemName: "folder.fill").foregroundColor(.accentColor)
+                                Image(systemName: "folder.fill")
+                                    .foregroundColor(.accentColor)
                                 Text(folder.lastPathComponent)
+                                    .foregroundColor(.primary)
                                 Spacer()
                             }
                         }
                     }
-                    .listStyle(.plain)
                 }
-                
-                Divider()
-                HStack {
-                    Button("New Folder") { showCreateFolderAlert = true }
-                        .buttonStyle(.bordered)
-                    Spacer()
-                    Button("Select") {
-                        selectedFolderURL = currentURL
-                        onSelect?(currentURL)
-                        dismiss()
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding()
-            }
-            .navigationTitle(currentURL.lastPathComponent)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button { goBack() } label: {
-                        Label("Back", systemImage: "chevron.backward")
-                    }
-                    .disabled(isAtRoot)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") { dismiss() }
-                }
-            }
-            .onAppear(perform: asyncLoadFolders)
-            .onChange(of: currentURL) { _ in
-                asyncLoadFolders()
-            }
-            .alert("New Folder", isPresented: $showCreateFolderAlert) {
-                TextField("Folder name", text: $newFolderName)
-                Button("Create") {
-                    createFolder(named: newFolderName)
-                    newFolderName = ""
-                }
-                Button("Cancel", role: .cancel) {}
-            }
-            .navigationDestination(isPresented: Binding(
-                get: { navigationTarget != nil },
-                set: { if !$0 { navigationTarget = nil } }
-            )) {
-                if let folder = navigationTarget {
+                .listStyle(.plain)
+                // SwiftUI の NavigationStack と組み合わせるため、NavigationDestination をここで追加
+                .navigationDestination(for: URL.self) { folder in
+                    // 子は同じ View 型を使うが NavigationStack は含めない -> ネストしない
                     FolderSelectionView(selectedFolderURL: $selectedFolderURL, onSelect: onSelect, currentURL: folder)
                 }
             }
+
+            Divider()
+
+            HStack {
+                Button("New Folder") { showCreateFolderAlert = true }
+                    .buttonStyle(.bordered)
+                Spacer()
+                Button("Select") {
+                    selectedFolderURL = currentURL
+                    onSelect?(currentURL)
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+        }
+        .navigationTitle(currentURL.lastPathComponent)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    goBack()
+                } label: {
+                    Label("Back", systemImage: "chevron.backward")
+                }
+                .disabled(currentURL.path == documentsURL.path)
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Cancel") { dismiss() }
+            }
+        }
+        .onAppear(perform: asyncLoadFolders)
+        .onChange(of: currentURL) { _ in asyncLoadFolders() }
+        .alert("New Folder", isPresented: $showCreateFolderAlert) {
+            TextField("Folder name", text: $newFolderName)
+            Button("Create") {
+                createFolder(named: newFolderName)
+                newFolderName = ""
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 
-    private var isAtRoot: Bool { currentURL.path == documentsURL.path }
-
     private func goBack() {
-        guard !isAtRoot else { return }
+        guard currentURL.path != documentsURL.path else { return }
         currentURL.deleteLastPathComponent()
     }
 
     private func asyncLoadFolders() {
-        guard !isLoading else { return } // ← 二重ロード防止
+        // 二重呼び出し防止
+        guard !isLoading else { return }
         isLoading = true
 
-        let targetURL = currentURL
+        // キャプチャしておく（結果適用時の整合性チェック用）
+        let target = currentURL
+
         DispatchQueue.global(qos: .userInitiated).async {
-            let urls = (try? fileManager.contentsOfDirectory(at: targetURL, includingPropertiesForKeys: [.isDirectoryKey]))?
+            let urls = (try? fileManager.contentsOfDirectory(at: target, includingPropertiesForKeys: [.isDirectoryKey]))?
                 .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false }
                 .sorted { $0.lastPathComponent.lowercased() < $1.lastPathComponent.lowercased() } ?? []
 
             DispatchQueue.main.async {
-                // currentURL が変わっていたら更新しない
-                if currentURL == targetURL {
-                    folders = urls
+                // currentURL が変わっていたら古い結果を破棄
+                if self.currentURL == target {
+                    self.folders = urls
                 }
-                isLoading = false
+                self.isLoading = false
             }
         }
     }

@@ -50,8 +50,10 @@ struct FileListContentView: View {
                 Button("Cancel", role: .cancel) {}
             }
             .sheet(isPresented: $showMoveSheet) {
-                FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
-                    moveSelectedFiles(to: destination)
+                NavigationStack {
+                    FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
+                        moveSelectedFiles(to: destination)
+                    }
                 }
             }
         }
