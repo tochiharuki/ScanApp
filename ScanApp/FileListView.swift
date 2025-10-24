@@ -11,28 +11,45 @@ struct FileListView: View {
     }
 
     var body: some View {
+        import SwiftUI
+import Foundation
+
+struct FileListView: View {
+    @State private var currentURL: URL
+    @State private var isLoading = false
+
+    init(currentURL: URL? = nil) {
+        _currentURL = State(initialValue:
+            currentURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        )
+    }
+
+    var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ✅ パスバー
-                if !currentURL.path.isEmpty {
-                    PathBarView(currentURL: currentURL) { newPath in
+                // ✅ PathBarView（上部に表示）
+                PathBarView(currentURL: currentURL) { url in
+                    if url != currentURL {
                         withAnimation {
-                            currentURL = newPath
+                            currentURL = url
                         }
                     }
-                    .transition(.opacity)
-                    .animation(.easeInOut, value: currentURL)
                 }
 
                 Divider()
 
-                // ✅ ファイル一覧
-                FileListContentView(currentURL: $currentURL)
+                // ✅ ファイル一覧ビュー
+                if isLoading {
+                    ProgressView("Loading...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    FileListContentView(currentURL: $currentURL)
+                        .id(currentURL) // 違う階層で正しく再描画
+                }
             }
             .navigationTitle(currentURL.lastPathComponent)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                // 念のため再ロード
                 if currentURL.lastPathComponent.isEmpty {
                     currentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                 }
