@@ -78,6 +78,7 @@ struct ScanView: View {
                         HStack {
                             Image(systemName: "folder.fill")
                             Text(selectedFolderURL?.lastPathComponent ?? "Select Folder")
+                                .font(.footnote)
                                 .lineLimit(1)
                             Spacer()
                         }
