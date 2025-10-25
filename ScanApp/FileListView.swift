@@ -106,6 +106,7 @@ struct FileListContentView: View {
                     },
                     isPresented: $showMoveSheet   // ← これを追加！
                 )
+                .accentColor(.black) // ここで黒に変更
             }
         }
     }
