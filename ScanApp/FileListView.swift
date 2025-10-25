@@ -259,13 +259,17 @@ struct FileListContentView: View {
     }
     private func renameFile() {
         guard let file = fileToRename, !newFileName.isEmpty else { return }
-        let newURL = file.deletingLastPathComponent().appendingPathComponent(newFileName)
+        let ext = file.pathExtension
+        let newFullName = ext.isEmpty ? newFileName : "\(newFileName).\(ext)"
+        let newURL = file.deletingLastPathComponent().appendingPathComponent(newFullName)
+        
         do {
             try fileManager.moveItem(at: file, to: newURL)
             asyncLoadFiles()
         } catch {
             print("Rename failed: \(error)")
         }
+        
         fileToRename = nil
     }
 

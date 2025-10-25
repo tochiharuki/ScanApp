@@ -12,7 +12,7 @@ struct GridFileView: View {
     @Binding var selectedFiles: Set<URL>
     @Binding var isEditing: Bool
     var onTap: (URL) -> Void
-    var onRename: (URL) -> Void  // ← 追加
+    var onRename: (URL) -> Void    // ←追加
 
     var body: some View {
         ScrollView {
@@ -20,8 +20,8 @@ struct GridFileView: View {
                 ForEach(files, id: \.self) { file in
                     FileGridItem(file: file, isSelected: selectedFiles.contains(file), isEditing: isEditing)
                         .onTapGesture { onTap(file) }
-                        .contextMenu {
-                            Button("Rename") { onRename(file) }
+                        .onLongPressGesture {
+                            onRename(file)   // 長押しでリネーム
                         }
                 }
             }

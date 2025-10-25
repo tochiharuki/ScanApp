@@ -1,20 +1,10 @@
-//
-//  ListFileView.swift
-//  ScanApp
-//
-//  Created by Tochishita Haruki on 2025/10/24.
-//
-
-import SwiftUI
-import Foundation
-
 struct ListFileView: View {
     let files: [URL]
     @Binding var selectedFiles: Set<URL>
     @Binding var isEditing: Bool
     var onTap: (URL) -> Void
     var deleteAction: (IndexSet) -> Void
-    var onRename: (URL) -> Void   // ← 追加
+    var onRename: (URL) -> Void   // ←追加
 
     var body: some View {
         List {
@@ -27,8 +17,8 @@ struct ListFileView: View {
                     Text(file.lastPathComponent)
                 }
                 .onTapGesture { onTap(file) }
-                .contextMenu {
-                    Button("Rename") { onRename(file) }
+                .onLongPressGesture {
+                    onRename(file)   // 長押しでリネーム
                 }
             }
             .onDelete(perform: deleteAction)
