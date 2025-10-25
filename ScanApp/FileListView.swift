@@ -182,8 +182,13 @@ struct FileListContentView: View {
             if selectedFiles.contains(file) { selectedFiles.remove(file) }
             else { selectedFiles.insert(file) }
         } else if file.hasDirectoryPath {
+            guard !isReloading else { return }   // ← 追加
+            isReloading = true                  // ← 追加
             withAnimation {
                 currentURL = file
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                isReloading = false            // ← 追加: 再入防止解除
             }
         }
     }
