@@ -101,6 +101,7 @@ struct FileListContentView: View {
             NavigationStack {
                 FolderSelectionView(
                     selectedFolderURL: $selectedFolderURL,
+                    currentURL: currentFolder,  // ← ここで現在のディレクトリを渡す
                     onSelect: { destination in
                         moveSelectedFiles(to: destination)
                     },
