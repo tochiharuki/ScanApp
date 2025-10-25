@@ -221,4 +221,3 @@ struct FileListContentView: View {
             asyncLoadFiles()
         }
     }
-}
