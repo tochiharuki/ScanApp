@@ -79,6 +79,7 @@ struct ScanView: View {
                         }
                         .frame(maxWidth: .infinity)
                     }
+                    .padding()
                     .foregroundColor(.black)
                     .background(Color.white)
                     .cornerRadius(8)       // 角丸を追加
