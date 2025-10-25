@@ -27,7 +27,7 @@ struct ScanView: View {
             Color.white.ignoresSafeArea()
 
             VStack {
-                Spacer(minLength: 60) // 上部スペース
+                Spacer(minLength: 80) // 上部スペース
 
                 // 📸 スキャン開始ボタン（大きめ）
                 Button(action: {
