@@ -151,29 +151,15 @@ struct ScanView: View {
                     if !isStale {
                         selectedFolderURL = url
                         _ = url.startAccessingSecurityScopedResource()
-                        alertMessage = "📂 前回の保存先を読み込みました:\n\(url.lastPathComponent)"
-                        showAlert = true
-                    }
-                } catch {
-                    alertMessage = "⚠️ 保存先を読み込めませんでした"
-                    showAlert = true
-                }
+                      
             }
         }
-        .alert(alertMessage, isPresented: $showAlert) {
-            Button("OK", role: .cancel) {}
-        }
+       
         .onChange(of: selectedFolderURL) { newURL in
             if let url = newURL {
                 do {
                     let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
                     UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
-                    alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
-                    showAlert = true
-                } catch {
-                    alertMessage = "⚠️ 保存先の記録に失敗しました"
-                    showAlert = true
-                }
             }
         }
     }
