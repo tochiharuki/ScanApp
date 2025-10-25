@@ -81,7 +81,11 @@ struct ScanView: View {
 
                     // 選択中のパスを表示
                     if let url = selectedFolderURL {
-                        Text(url.path)
+                        let relativePath = url.pathComponents
+                            .drop(while: { $0 != "Documents" }) // Documents までスキップ
+                            .joined(separator: "/")
+                        
+                        Text(relativePath)
                             .font(.caption)
                             .foregroundColor(.gray)
                             .lineLimit(1)
