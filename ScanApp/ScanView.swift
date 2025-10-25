@@ -57,7 +57,6 @@ struct ScanView: View {
                     .pickerStyle(SegmentedPickerStyle())
                     .frame(maxWidth: .infinity) // ← これを追加
                 }
-                .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
@@ -96,7 +95,6 @@ struct ScanView: View {
                             .padding(.horizontal)
                     }
                 }
-                .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
