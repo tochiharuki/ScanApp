@@ -47,23 +47,23 @@ struct FileListView: View {
 
     // MARK: - Helper
     private func pathComponents() -> [URL] {
-        var paths: [URL] = []
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        var current = currentURL
-    
-        // 📌 Documents より上は表示しない
-        while current.path != documentsURL.deletingLastPathComponent().path {
+    var paths: [URL] = []
+    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    var current = currentURL
+
+    // 📌 Documents より上は表示しない
+    while current.path != documentsURL.deletingLastPathComponent().path {
+        paths.insert(current, at: 0)
+        current.deleteLastPathComponent()
+        if current.path == documentsURL.path { // ← ここで止める
             paths.insert(current, at: 0)
-            current.deleteLastPathComponent()
-            if current.path == documentsURL.path { // ← ここで止める
-                paths.insert(current, at: 0)
-                break
-            }
+            break
         }
-    
-        return paths
     }
+
+    return paths
 }
+
 
 struct FileListContentView: View {
     @Binding var currentURL: URL
@@ -78,11 +78,11 @@ struct FileListContentView: View {
     @State private var showNoSelectionAlert = false
     @State private var selectedFolderURL: URL? = nil
     @State private var isLoading = false
-    @State private var isReloading = false
 
     private let fileManager = FileManager.default
 
-    var body: some View {
+    var body
+    @State private var isReloading = false: some View {
         VStack(spacing: 0) {
             if isLoading {
                 ProgressView("Loading...")
@@ -110,15 +110,21 @@ struct FileListContentView: View {
                 .toolbar { toolbarContent }
             }
         }
-        .onAppear { asyncLoadFiles() } // ← 追加！
-        .onChange(of: currentURL) { _ in
-            asyncLoadFiles()
+        .onAppear { asyncLoadFiles() }
+        .onChange(of: currentURL) .onChange(of: currentURL) { _ in
+            guard !isReloading else { return }     // 再入防止
+            isReloading = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                asyncLoadFiles()
+                isReloading = false
+            }
         }
+        // 🩵 修正箇所ここまで
 
         .alert("No file selected", isPresented: $showNoSelectionAlert) {
             Button("OK", role: .cancel) {}
         }
-        .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
+Alert) {
             TextField("Folder name", text: $newFolderName)
             Button("Create") { createFolder(named: newFolderName) }
             Button("Cancel", role: .cancel) {}
@@ -163,12 +169,9 @@ struct FileListContentView: View {
 
     private func asyncLoadFiles() {
         isLoading = true
-        let url = currentURL
         DispatchQueue.global(qos: .userInitiated).async {
-            let contents = (try? fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
+            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)) ?? []
             DispatchQueue.main.async {
-                // currentURL が途中で変わっていたら破棄
-                guard self.currentURL == url else { return }
                 self.files = contents
                 self.isLoading = false
             }
@@ -180,13 +183,8 @@ struct FileListContentView: View {
             if selectedFiles.contains(file) { selectedFiles.remove(file) }
             else { selectedFiles.insert(file) }
         } else if file.hasDirectoryPath {
-            guard !isReloading else { return }   // ← 追加
-            isReloading = true                  // ← 追加
             withAnimation {
                 currentURL = file
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                isReloading = false            // ← 追加: 再入防止解除
             }
         }
     }
@@ -217,4 +215,5 @@ struct FileListContentView: View {
         selectedFiles.removeAll()
         asyncLoadFiles()
     }
+}
 }
