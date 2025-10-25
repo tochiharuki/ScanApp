@@ -12,7 +12,7 @@ struct ScanView: View {
     @State private var showScanner = false
     @State private var saveFormat: SaveFormat = .image
     // 保存先フォルダ用
-    @State private var selectedFolderURL: URL? = nil
+    @State private var selectedFolderURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     @State private var showFolderSelection = false
 
     enum SaveFormat: String, CaseIterable, Identifiable {
