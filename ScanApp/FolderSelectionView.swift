@@ -68,6 +68,7 @@ struct FolderSelectionView: View {
                         currentURL: folder,
                         isPresented: $isPresented 
                     )
+                    .accentColor(.black) // ← ここを追加
                 }
             }
 
