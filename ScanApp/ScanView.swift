@@ -120,8 +120,12 @@ struct ScanView: View {
         }
         // ✅ カメラビューをフルスクリーンで開く
         .fullScreenCover(isPresented: $showScanner) {
-            DocumentScannerView(scannedImages: $scannedImages, saveFormat: saveFormat)
-                .ignoresSafeArea()
+            DocumentScannerView(
+                scannedImages: $scannedImages,
+                saveFormat: saveFormat,
+                selectedFolderURL: selectedFolderURL // ✅ 渡す！
+            )
+            .ignoresSafeArea()
         }
         .sheet(isPresented: $showFolderSelection) {
             NavigationStack {
