@@ -27,7 +27,7 @@ struct ScanView: View {
             Color.white.ignoresSafeArea()
 
             VStack {
-                Spacer() // 上部スペースで中央寄せ
+                Spacer(minLength: 40) // 上部スペース
 
                 // 📸 スキャン開始ボタン（大きめ）
                 Button(action: {
@@ -82,13 +82,14 @@ struct ScanView: View {
                             Spacer()
                         }
                         .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 60) // 左右余白を増やす
                     }
                     .padding(8)
                     .foregroundColor(.black)
                     .background(Color.white)
                     .cornerRadius(8)
                     .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                    .padding(.horizontal, 60) // 左右余白を増やす
+                    
 
                     // 選択中のパスを相対パス表示
                     if let url = selectedFolderURL {
@@ -112,6 +113,7 @@ struct ScanView: View {
 
                 Spacer() // 下部余白
             }
+            .frame(maxWidth: .infinity) // VStack を画面幅いっぱいに
 
         }
         // ✅ カメラビューをフルスクリーンで開く
