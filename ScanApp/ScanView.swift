@@ -34,7 +34,7 @@ struct ScanView: View {
                     showScanner = true
                 }) {
                     Label("Start Scanning", systemImage: "camera.fill")
-                        .font(.title2) // 少し大きく
+                        .font(.title) // 少し大きく
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
