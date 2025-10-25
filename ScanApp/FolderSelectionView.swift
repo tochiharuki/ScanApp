@@ -135,7 +135,7 @@ struct FolderSelectionView: View {
 
         DispatchQueue.global(qos: .userInitiated).async {
             let urls = (try? fileManager.contentsOfDirectory(at: target, includingPropertiesForKeys: [.isDirectoryKey]))?
-                .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false }
+                
                 .sorted { $0.lastPathComponent.lowercased() < $1.lastPathComponent.lowercased() } ?? []
 
             DispatchQueue.main.async {
