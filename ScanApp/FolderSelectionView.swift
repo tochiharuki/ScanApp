@@ -86,7 +86,7 @@ struct FolderSelectionView: View {
             }
             .padding()
         }
-        .navigationTitle(currentURL.lastPathComponent)
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

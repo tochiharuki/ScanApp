@@ -26,7 +26,7 @@ struct FileListView: View {
                 // ✅ コンテンツ部分
                 FileListContentView(currentURL: $currentURL)
             }
-            .navigationTitle(currentURL.lastPathComponent)
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
