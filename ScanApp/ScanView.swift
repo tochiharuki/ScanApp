@@ -13,13 +13,8 @@ struct ScanView: View {
     @State private var saveFormat: SaveFormat = .image
     // 保存先フォルダ用
     @State private var showFolderSelection = false
-    @State private var selectedFolderURL: URL? = {
-        if let path = UserDefaults.standard.string(forKey: "scanSaveFolder") {
-            return URL(fileURLWithPath: path)
-        } else {
-            return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        }
-    }()
+    @State private var selectedFolderURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+
 
     enum SaveFormat: String, CaseIterable, Identifiable {
         case image = "Image"
@@ -140,6 +135,11 @@ struct ScanView: View {
                         UserDefaults.standard.set(url.path, forKey: "scanSaveFolder")
                     }
                 }
+            }
+        }
+        .onAppear {
+            if let path = UserDefaults.standard.string(forKey: "scanSaveFolder") {
+                selectedFolderURL = URL(fileURLWithPath: path)
             }
         }
     }
