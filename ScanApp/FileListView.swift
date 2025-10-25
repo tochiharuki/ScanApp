@@ -49,6 +49,9 @@ struct FileListContentView: View {
     @State private var isLoading = false
     @State private var isReloading = false   // ← body の外に書く
     @State private var sortOption: SortOption = .dateDesc  // ← デフォルトを新しい順に変更
+    @State private var showRenameAlert = false
+    @State private var fileToRename: URL? = nil
+    @State private var newFileName = ""
 
     private let fileManager = FileManager.default
 
@@ -64,7 +67,12 @@ struct FileListContentView: View {
                             files: filteredFiles,
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
-                            onTap: handleTap
+                            onTap: handleTap,
+                            onRename: { file in
+                                fileToRename = file
+                                newFileName = file.lastPathComponent
+                                showRenameAlert = true
+                            }
                         )
                     } else {
                         ListFileView(
@@ -72,7 +80,12 @@ struct FileListContentView: View {
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
                             onTap: handleTap,
-                            deleteAction: deleteFiles
+                            deleteAction: deleteFiles,
+                            onRename: { file in
+                                fileToRename = file
+                                newFileName = file.lastPathComponent
+                                showRenameAlert = true
+                            }
                         )
                     }
                 }
@@ -98,6 +111,11 @@ struct FileListContentView: View {
             Button("Create") { createFolder(named: newFolderName) }
             Button("Cancel", role: .cancel) {}
         }
+        .alert("Rename File/Folder", isPresented: $showRenameAlert) {
+            TextField("New name", text: $newFileName)
+            Button("OK") { renameFile() }
+            Button("Cancel", role: .cancel) {}
+        }
         .sheet(isPresented: $showMoveSheet) {
             NavigationStack {
                 FolderSelectionView(
@@ -111,6 +129,7 @@ struct FileListContentView: View {
                 .accentColor(.black) // ここで黒に変更
             }
         }
+        
     }
 
     @ToolbarContentBuilder
@@ -153,7 +172,6 @@ struct FileListContentView: View {
             }
         }
     }
-
     // MARK: - Logic
     private var filteredFiles: [URL] {
         if searchText.isEmpty { return files }
@@ -238,6 +256,17 @@ struct FileListContentView: View {
                 return d1 > d2
             }
         }
+    }
+    private func renameFile() {
+        guard let file = fileToRename, !newFileName.isEmpty else { return }
+        let newURL = file.deletingLastPathComponent().appendingPathComponent(newFileName)
+        do {
+            try fileManager.moveItem(at: file, to: newURL)
+            asyncLoadFiles()
+        } catch {
+            print("Rename failed: \(error)")
+        }
+        fileToRename = nil
     }
 
 

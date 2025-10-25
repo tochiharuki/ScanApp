@@ -14,6 +14,7 @@ struct ListFileView: View {
     @Binding var isEditing: Bool
     var onTap: (URL) -> Void
     var deleteAction: (IndexSet) -> Void
+    var onRename: (URL) -> Void   // ← 追加
 
     var body: some View {
         List {
@@ -26,6 +27,9 @@ struct ListFileView: View {
                     Text(file.lastPathComponent)
                 }
                 .onTapGesture { onTap(file) }
+                .contextMenu {
+                    Button("Rename") { onRename(file) }
+                }
             }
             .onDelete(perform: deleteAction)
         }

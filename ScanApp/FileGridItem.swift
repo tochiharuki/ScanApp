@@ -11,6 +11,7 @@ struct FileGridItem: View {
     let file: URL
     let isSelected: Bool
     let isEditing: Bool
+    var onRename: ((URL) -> Void)?  // ← 追加
 
     var body: some View {
         VStack(spacing: 8) {
@@ -29,6 +30,7 @@ struct FileGridItem: View {
                 }
                 .padding(10)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+
                 if isEditing {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .foregroundColor(isSelected ? .black : .gray)
@@ -37,5 +39,10 @@ struct FileGridItem: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isSelected)
+        .contextMenu {   // ← ここで長押しメニュー
+            Button("Rename") {
+                onRename?(file)
+            }
+        }
     }
 }
