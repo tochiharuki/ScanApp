@@ -53,35 +53,36 @@ struct FileListView: View {
     // MARK: - Helper
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
+        
+        // ドキュメントフォルダを取得
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-
-        var current = currentURL
-
-        // 📁 ファイルの場合は親ディレクトリを基準にする
+        var targetURL = currentURL
+        
+        // ファイルの場合は親フォルダを先にたどるために設定
         var isDirectory: ObjCBool = false
-        FileManager.default.fileExists(atPath: current.path, isDirectory: &isDirectory)
-        if !isDirectory.boolValue {
-            current = current.deletingLastPathComponent()
+        FileManager.default.fileExists(atPath: targetURL.path, isDirectory: &isDirectory)
+        let isFile = !isDirectory.boolValue
+        
+        // ファイルなら親フォルダを対象にする
+        if isFile {
+            targetURL = targetURL.deletingLastPathComponent()
         }
-
-        // 📁 Documentsより上に行かないようにしつつ、上層を追加
-        while true {
-            paths.insert(current, at: 0)
-            if current == documentsURL { break }
-
-            let parent = current.deletingLastPathComponent()
-            if !parent.path.hasPrefix(documentsURL.path) { break } // Documentsより上なら終了
-            current = parent
+        
+        // ルート (Documents) までさかのぼる
+        while targetURL.path.hasPrefix(documentsURL.deletingLastPathComponent().path) {
+            paths.insert(targetURL, at: 0)
+            if targetURL == documentsURL { break }
+            targetURL.deleteLastPathComponent()
         }
-
-        // 📄 最後にファイル自身を追加（もしファイルを開いているなら）
-        FileManager.default.fileExists(atPath: currentURL.path, isDirectory: &isDirectory)
-        if !isDirectory.boolValue {
+        
+        // 最後にファイルを追加（ファイルを開いている場合のみ）
+        if isFile {
             paths.append(currentURL)
         }
-
+        
         return paths
     }
+
 
 }
 
