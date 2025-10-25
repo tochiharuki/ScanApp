@@ -14,55 +14,17 @@ struct FileListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // パスバーは一旦コメントアウト
-//                ScrollView(.horizontal, showsIndicators: false) {
-//                    HStack(spacing: 5) {
-//                        ForEach(pathComponents(), id: \.self) { path in
-//                            Button(action: {
-//                                withAnimation {
-//                                    currentURL = path
-//                                }
-//                            }) {
-//                                Text(path.lastPathComponent)
-//                                    .font(.subheadline)
-//                                    .lineLimit(1)
-//                            }
-//                            if path != pathComponents().last {
-//                                Text("›")
-//                            }
-//                        }
-//                    }
-//                    .padding(.horizontal)
-//                    .padding(.vertical, 8)
-//                }
-//                Divider()
-
+                // パスバーを一旦コメントアウト
+//                ScrollView(.horizontal, showsIndicators: false) { ... }
                 FileListContentView(currentURL: $currentURL)
             }
             .navigationTitle(currentURL.lastPathComponent)
             .navigationBarTitleDisplayMode(.inline)
         }
     }
-
-
-    // MARK: - Helper
-    private func pathComponents() -> [URL] {
-        var paths: [URL] = []
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        var current = self.currentURL   // ← self を付ける
-    
-        while current.path != documentsURL.deletingLastPathComponent().path {
-            paths.insert(current, at: 0)
-            current.deleteLastPathComponent()
-            if current.path == documentsURL.path {
-                paths.insert(current, at: 0)
-                break
-            }
-        }
-    
-        return paths
-    }
 }
+
+
 
 struct FileListContentView: View {
     @Binding var curren}tURL: URL
