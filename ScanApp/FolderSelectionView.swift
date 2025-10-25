@@ -4,6 +4,7 @@ import Foundation
 struct FolderSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedFolderURL: URL?
+    @Binding var isPresented: Bool 
     var onSelect: ((URL) -> Void)? = nil
 
     // 初期表示パスを外から渡せるようにする（デフォルトは Documents）
@@ -12,15 +13,22 @@ struct FolderSelectionView: View {
     @State private var showCreateFolderAlert = false
     @State private var newFolderName = ""
     @State private var isLoading = false
+    
 
     private let fileManager = FileManager.default
     private var documentsURL: URL { fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0] }
 
-    // カスタムイニシャライザ（Binding と optional currentURL）
-    init(selectedFolderURL: Binding<URL?>, onSelect: ((URL) -> Void)? = nil, currentURL: URL? = nil) {
+    // ✅ カスタムイニシャライザを更新
+    init(
+        selectedFolderURL: Binding<URL?>,
+        onSelect: ((URL) -> Void)? = nil,
+        currentURL: URL? = nil,
+        isPresented: Binding<Bool>        
+    ) {
         _selectedFolderURL = selectedFolderURL
         self.onSelect = onSelect
-        _currentURL = State(initialValue: currentURL ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0])
+        _currentURL = State(initialValue: currentURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
+        _isPresented = isPresented 
     }
 
     var body: some View {
@@ -54,8 +62,12 @@ struct FolderSelectionView: View {
                 .listStyle(.plain)
                 // SwiftUI の NavigationStack と組み合わせるため、NavigationDestination をここで追加
                 .navigationDestination(for: URL.self) { folder in
-                    // 子は同じ View 型を使うが NavigationStack は含めない -> ネストしない
-                    FolderSelectionView(selectedFolderURL: $selectedFolderURL, onSelect: onSelect, currentURL: folder)
+                    FolderSelectionView(
+                        selectedFolderURL: $selectedFolderURL,
+                        onSelect: onSelect,
+                        currentURL: folder,
+                        isPresented: $isPresented 
+                    )
                 }
             }
 
@@ -77,16 +89,8 @@ struct FolderSelectionView: View {
         .navigationTitle(currentURL.lastPathComponent)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            // ToolbarItem(placement: .navigationBarLeading) {
-            //     Button {
-            //         goBack()
-            //     } label: {
-            //         Label("Back", systemImage: "chevron.backward")
-            //     }
-            //     .disabled(currentURL.path == documentsURL.path)
-            // }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Cancel") { dismiss() }
+                isPresented = false 
             }
         }
         .onAppear(perform: asyncLoadFolders)

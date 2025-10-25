@@ -98,9 +98,13 @@ struct FileListContentView: View {
         }
         .sheet(isPresented: $showMoveSheet) {
             NavigationStack {
-                FolderSelectionView(selectedFolderURL: $selectedFolderURL) { destination in
-                    moveSelectedFiles(to: destination)
-                }
+                FolderSelectionView(
+                    selectedFolderURL: $selectedFolderURL,
+                    onSelect: { destination in
+                        moveSelectedFiles(to: destination)
+                    },
+                    isPresented: $showMoveSheet   // ← これを追加！
+                )
             }
         }
     }
