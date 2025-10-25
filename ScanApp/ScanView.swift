@@ -159,25 +159,25 @@ struct ScanView: View {
                     showAlert = true
                 }
             }
-        }        .alert(alertMessage, isPresented: $showAlert) {
+        }
+        .alert(alertMessage, isPresented: $showAlert) {
             Button("OK", role: .cancel) {}
         }
-
-    }
-    .onChange(of: selectedFolderURL) { newURL in
-        if let url = newURL {
-            do {
-                let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
-                UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
-                alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
-                showAlert = true
-            } catch {
-                alertMessage = "⚠️ 保存先の記録に失敗しました"
-                showAlert = true
+        .onChange(of: selectedFolderURL) { newURL in
+            if let url = newURL {
+                do {
+                    let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+                    UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
+                    alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
+                    showAlert = true
+                } catch {
+                    alertMessage = "⚠️ 保存先の記録に失敗しました"
+                    showAlert = true
+                }
             }
         }
     }
-}
+    
 
 // MARK: - Document Scanner
 struct DocumentScannerView: UIViewControllerRepresentable {
