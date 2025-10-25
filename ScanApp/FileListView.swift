@@ -52,6 +52,15 @@ struct FileListContentView: View {
     @State private var showRenameAlert = false
     @State private var fileToRename: URL? = nil
     @State private var newFileName = ""
+    @State private var showErrorAlert = false
+    @State private var errorAlertTitle = ""
+    @State private var errorAlertMessage = ""
+    
+    private func showErrorAlert(title: String, message: String) {
+        errorAlertTitle = title
+        errorAlertMessage = message
+        showErrorAlert = true
+    }
 
     private let fileManager = FileManager.default
 
@@ -116,6 +125,11 @@ struct FileListContentView: View {
             TextField("New name", text: $newFileName)
             Button("OK") { renameFile() }
             Button("Cancel", role: .cancel) {}
+        }
+        .alert(errorAlertTitle, isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorAlertMessage)
         }
         .sheet(isPresented: $showMoveSheet) {
             NavigationStack {
@@ -261,18 +275,24 @@ struct FileListContentView: View {
     private func renameFile() {
         guard let file = fileToRename, !newFileName.isEmpty else { return }
     
-        // 元の拡張子を保持
         let ext = file.pathExtension
         let newURL = file.deletingLastPathComponent()
             .appendingPathComponent(newFileName)
             .appendingPathExtension(ext)
     
+        // ⚠️ 同名ファイルがすでに存在するか確認
+        if fileManager.fileExists(atPath: newURL.path) {
+            showErrorAlert(title: "Rename Failed", message: "A file or folder with the same name already exists.")
+            return
+        }
+    
         do {
             try fileManager.moveItem(at: file, to: newURL)
             asyncLoadFiles()
         } catch {
-            print("Rename failed: \(error)")
+            showErrorAlert(title: "Rename Failed", message: error.localizedDescription)
         }
+    
         fileToRename = nil
     }
 
