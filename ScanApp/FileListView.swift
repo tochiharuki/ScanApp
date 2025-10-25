@@ -101,11 +101,11 @@ struct FileListContentView: View {
         .sheet(isPresented: $showMoveSheet) {
             NavigationStack {
                 FolderSelectionView(
+                    selectedFolderURL: $selectedFolderURL,
                     onSelect: { destination in
                         moveSelectedFiles(to: destination)
                     },
                     currentURL: currentURL,
-                    selectedFolderURL: $selectedFolderURL,
                     isPresented: $showMoveSheet
                 )
                 .accentColor(.black) // ここで黒に変更
