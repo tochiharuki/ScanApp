@@ -54,9 +54,17 @@ struct FileListView: View {
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+
         var current = currentURL
 
-        // 📁 Documentsより上に行かないようにしつつ、下層も含めて追加
+        // 📁 ファイルの場合は親ディレクトリを基準にする
+        var isDirectory: ObjCBool = false
+        FileManager.default.fileExists(atPath: current.path, isDirectory: &isDirectory)
+        if !isDirectory.boolValue {
+            current = current.deletingLastPathComponent()
+        }
+
+        // 📁 Documentsより上に行かないようにしつつ、上層を追加
         while true {
             paths.insert(current, at: 0)
             if current == documentsURL { break }
@@ -66,8 +74,15 @@ struct FileListView: View {
             current = parent
         }
 
+        // 📄 最後にファイル自身を追加（もしファイルを開いているなら）
+        FileManager.default.fileExists(atPath: currentURL.path, isDirectory: &isDirectory)
+        if !isDirectory.boolValue {
+            paths.append(currentURL)
+        }
+
         return paths
     }
+
 }
 
 
