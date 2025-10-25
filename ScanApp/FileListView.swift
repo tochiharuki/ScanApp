@@ -212,9 +212,10 @@ struct FileListContentView: View {
     private func moveSelectedFiles(to destination: URL) {
         for file in selectedFiles {
             let target = destination.appendingPathComponent(file.lastPathComponent)
-            try? fileManager.moveItem(at: file, to: target)
+                try? fileManager.moveItem(at: file, to: target)
+            }
+            selectedFiles.removeAll()
+            asyncLoadFiles()
         }
-        selectedFiles.removeAll()
-        asyncLoadFiles()
     }
 }
