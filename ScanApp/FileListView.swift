@@ -78,8 +78,9 @@ struct FileListContentView: View {
                 }
                 .searchable(text: $searchText)
                 .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        if isEditing {
+                    // 条件分岐を ToolbarItemGroup の外に出す
+                    if isEditing {
+                        ToolbarItemGroup(placement: .navigationBarTrailing) {
                             Button("Done") { isEditing = false; selectedFiles.removeAll() }
                                 .font(.system(size: 17))
                             Button {
@@ -90,8 +91,10 @@ struct FileListContentView: View {
                                     .font(.system(size: 17))
                             }
                             Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
-                                .font(.system(size: 17)) // ← ここを追加
-                        } else {
+                                .font(.system(size: 17))
+                        }
+                    } else {
+                        ToolbarItemGroup(placement: .navigationBarTrailing) {
                             Button("Edit") { isEditing = true }
                                 .font(.system(size: 17))
                             Button { showCreateFolderAlert = true } label: {
@@ -114,6 +117,7 @@ struct FileListContentView: View {
                         }
                     }
                 }
+
             }
         }
         .onAppear { asyncLoadFiles() }
