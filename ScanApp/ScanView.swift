@@ -202,7 +202,7 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                     parent.scannedImages.append(image)
                     if let data = image.jpegData(compressionQuality: 0.9) {
                         let fileName = "Scan_\(timestamp)_\(i+1).jpg"
-                        let url = documentsURL.appendingPathComponent(fileName)
+                        let url = baseURL.appendingPathComponent(fileName)
                         do {
                             try data.write(to: url)
                             print("✅ Saved image to:", url.path)
@@ -217,7 +217,7 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "yyyyMMdd_HHmmss"
                 let timestamp = formatter.string(from: Date())
-                let pdfURL = documentsURL.appendingPathComponent("Scan_\(timestamp).pdf")
+                let pdfURL = baseURL.appendingPathComponent("Scan_\(timestamp).pdf")
 
                 let pdfRenderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: scan.imageOfPage(at: 0).size))
                 try? pdfRenderer.writePDF(to: pdfURL, withActions: { context in
