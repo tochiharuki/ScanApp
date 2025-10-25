@@ -25,16 +25,21 @@ struct FileListView: View {
                             }) {
                                 Text(path.lastPathComponent)
                                     .font(.subheadline)
+                                    .foregroundColor(path == currentURL ? .primary : .blue)
                                     .lineLimit(1)
                             }
+
+                            // ➡ 区切り記号
                             if path != pathComponents().last {
                                 Text("›")
+                                    .foregroundColor(.gray)
                             }
                         }
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
                 }
+
                 Divider()
 
                 // ✅ コンテンツ部分（統合）
@@ -47,22 +52,20 @@ struct FileListView: View {
 
     // MARK: - Helper
     private func pathComponents() -> [URL] {
-    var paths: [URL] = []
-    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    var current = currentURL
+        var paths: [URL] = []
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
-    // 📌 Documents より上は表示しない
-    while current.path != documentsURL.deletingLastPathComponent().path {
-        paths.insert(current, at: 0)
-        current.deleteLastPathComponent()
-        if current.path == documentsURL.path { // ← ここで止める
+        var current = currentURL
+        while current.path.hasPrefix(documentsURL.path) {
             paths.insert(current, at: 0)
-            break
+            // 📌 Documentsより上（/Documentsの親）は含めない
+            if current == documentsURL { break }
+            current.deleteLastPathComponent()
         }
+        return paths
     }
-
-    return paths
 }
+
 
 
 struct FileListContentView: View {
