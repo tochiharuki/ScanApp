@@ -14,20 +14,57 @@ struct FileListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // パスバーを一旦コメントアウト
-//                ScrollView(.horizontal, showsIndicators: false) { ... }
+                // ✅ パスバー
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 5) {
+                        ForEach(pathComponents(), id: \.self) { path in
+                            Button(action: {
+                                withAnimation {
+                                    currentURL = path
+                                }
+                            }) {
+                                Text(path.lastPathComponent)
+                                    .font(.subheadline)
+                                    .lineLimit(1)
+                            }
+                            if path != pathComponents().last {
+                                Text("›")
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                Divider()
+
+                // ✅ コンテンツ部分（統合）
                 FileListContentView(currentURL: $currentURL)
             }
             .navigationTitle(currentURL.lastPathComponent)
             .navigationBarTitleDisplayMode(.inline)
         }
     }
+
+    // MARK: - Helper
+    private func pathComponents() -> [URL] {
+    var paths: [URL] = []
+    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    var current = currentURL
+
+    // 📌 Documents より上は表示しない
+    while current.path != documentsURL.deletingLastPathComponent().path {
+        paths.insert(current, at: 0)
+        current.deleteLastPathComponent()
+        if current.path == documentsURL.path { // ← ここで止める
+            paths.insert(current, at: 0)
+            break
+        }
+    }
+    return paths
 }
 
-
-
 struct FileListContentView: View {
-    @Binding var curren}tURL: URL
+    @Binding var currentURL: URL
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
     @State private var isEditing = false
@@ -127,22 +164,20 @@ struct FileListContentView: View {
     }
 
     private func asyncLoadFiles() {
-        isLoading = true
-        isReloading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let contents = (try? fileManager.contentsOfDirectory(
-                at: self.currentURL,
-                includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
-            )) ?? []
-    
-            DispatchQueue.main.async {
-                self.files = contents
-                self.isLoading = false
-                self.isReloading = false
-            }
+    isLoading = true
+    isReloading = true
+    DispatchQueue.global(qos: .userInitiated).async {
+        let contents = (try? fileManager.contentsOfDirectory(
+            at: self.currentURL,
+            includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
+        )) ?? []
+         DispatchQueue.main.async {
+            self.files = contents
+            self.isLoading = false
+            self.isReloading = false
         }
     }
-
+  
     private func handleTap(_ file: URL) {
         if isEditing {
             if selectedFiles.contains(file) { selectedFiles.remove(file) }
