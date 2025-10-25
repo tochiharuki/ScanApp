@@ -14,76 +14,22 @@ struct FileListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ✅ パスバー
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 5) {
-                        ForEach(pathComponents(), id: \.self) { path in
-                            Button(action: {
-                                withAnimation {
-                                    currentURL = path
-                                }
-                            }) {
-                                Text(path.lastPathComponent)
-                                    .font(.subheadline)
-                                    .foregroundColor(path == currentURL ? .primary : .blue)
-                                    .lineLimit(1)
-                            }
-
-                            // ➡ 区切り記号
-                            if path != pathComponents().last {
-                                Text("›")
-                                    .foregroundColor(.gray)
-                            }
-                        }
+                // ✅ パスバー（FolderSelectionViewと同じロジック）
+                PathBarView(currentURL: currentURL) { url in
+                    withAnimation {
+                        currentURL = url
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
                 }
 
                 Divider()
 
-                // ✅ コンテンツ部分（統合）
+                // ✅ コンテンツ部分
                 FileListContentView(currentURL: $currentURL)
             }
             .navigationTitle(currentURL.lastPathComponent)
             .navigationBarTitleDisplayMode(.inline)
         }
     }
-
-    // MARK: - Helper
-    private func pathComponents() -> [URL] {
-        var paths: [URL] = []
-        
-        // ドキュメントフォルダを取得
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        var targetURL = currentURL
-        
-        // ファイルの場合は親フォルダを先にたどるために設定
-        var isDirectory: ObjCBool = false
-        FileManager.default.fileExists(atPath: targetURL.path, isDirectory: &isDirectory)
-        let isFile = !isDirectory.boolValue
-        
-        // ファイルなら親フォルダを対象にする
-        if isFile {
-            targetURL = targetURL.deletingLastPathComponent()
-        }
-        
-        // ルート (Documents) までさかのぼる
-        while targetURL.path.hasPrefix(documentsURL.deletingLastPathComponent().path) {
-            paths.insert(targetURL, at: 0)
-            if targetURL == documentsURL { break }
-            targetURL.deleteLastPathComponent()
-        }
-        
-        // 最後にファイルを追加（ファイルを開いている場合のみ）
-        if isFile {
-            paths.append(currentURL)
-        }
-        
-        return paths
-    }
-
-
 }
 
 
