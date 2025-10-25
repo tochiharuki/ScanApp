@@ -177,7 +177,7 @@ struct ScanView: View {
             }
         }
     }
-    
+}
 
 // MARK: - Document Scanner
 struct DocumentScannerView: UIViewControllerRepresentable {
