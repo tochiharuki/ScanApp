@@ -154,6 +154,12 @@ struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
     var saveFormat: ScanView.SaveFormat 
     var selectedFolderURL: URL?
+        // ✅ 明示的にイニシャライザを追加
+        init(scannedImages: Binding<[UIImage]>, saveFormat: ScanView.SaveFormat, selectedFolderURL: URL?) {
+            self._scannedImages = scannedImages
+            self.saveFormat = saveFormat
+            self.selectedFolderURL = selectedFolderURL
+        }
 
     func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
         let scanner = VNDocumentCameraViewController()
