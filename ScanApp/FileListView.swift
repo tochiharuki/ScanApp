@@ -112,12 +112,7 @@ struct FileListContentView: View {
         }
         .onAppear { asyncLoadFiles() } // ← 追加！
         .onChange(of: currentURL) { _ in
-            guard !isReloading else { return }     // 再入防止
-            isReloading = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                asyncLoadFiles()
-                isReloading = false
-            }
+            asyncLoadFiles()
         }
 
         .alert("No file selected", isPresented: $showNoSelectionAlert) {
@@ -168,9 +163,12 @@ struct FileListContentView: View {
 
     private func asyncLoadFiles() {
         isLoading = true
+        let url = currentURL
         DispatchQueue.global(qos: .userInitiated).async {
-            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)) ?? []
+            let contents = (try? fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
             DispatchQueue.main.async {
+                // currentURL が途中で変わっていたら破棄
+                guard self.currentURL == url else { return }
                 self.files = contents
                 self.isLoading = false
             }
