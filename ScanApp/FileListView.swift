@@ -111,16 +111,10 @@ struct FileListContentView: View {
             }
         }
         .onAppear { asyncLoadFiles() }
-        .onChange(of: currentURL) .onChange(of: currentURL) { _ in
-            guard !isReloading else { return }     // 再入防止
-            isReloading = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                asyncLoadFiles()
-                isReloading = false
-            }
+        .onChange(of: cur
+        .onAppear { asyncLoadFiles() } // ← 追加！rentURL) .onChange(of: currentURL) { _ in
+            asyncLoadFiles()
         }
-        // 🩵 修正箇所ここまで
-
         .alert("No file selected", isPresented: $showNoSelectionAlert) {
             Button("OK", role: .cancel) {}
         }
@@ -169,28 +163,33 @@ Alert) {
 
     private func asyncLoadFiles() {
         isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)) ?? []
-            DispatchQueue.main.async {
-                self.files = contents
-                self.isLoading = false
-            }
+        Diprivate func asyncLoadFiles() {
+    isLoading = true
+    let url = currentURL
+    DispatchQueue.global(qos: .userInitiated).async {
+        let contents = (try? fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
+        DispatchQueue.main.async {
+            // currentURL が途中で変わっていたら破棄
+            guard self.currentURL == url else { return }
+            self.files = contents
+            self.isLoading = false
         }
     }
-
-    private func handleTap(_ file: URL) {
-        if isEditing {
-            if selectedFiles.contains(file) { selectedFiles.remove(file) }
-            else { selectedFiles.insert(file) }
-        } else if file.hasDirectoryPath {
-            withAnimation {
-                currentURL = file
-            }
+}      private func handleTap(_ file: URL) {
+    if isEditing {
+        if selectedFiles.contains(file) { selectedFiles.remove(file) }
+        else { selectedFiles.insert(file) }
+    } else if file.hasDirectoryPath {
+        guard !isReloading else { return }   // ← 追加
+        isReloading = true                  // ← 追加
+        withAnimation {
+            currentURL = file
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            isReloading = false            // ← 追加: 再入防止解除
         }
     }
-
-    private func deleteFiles(at offsets: IndexSet) {
-        for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
+}index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
         asyncLoadFiles()
     }
 
