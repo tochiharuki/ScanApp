@@ -48,6 +48,7 @@ struct FileListContentView: View {
     @State private var selectedFolderURL: URL? = nil
     @State private var isLoading = false
     @State private var isReloading = false   // ← body の外に書く
+    @State private var sortOption: SortOption = .nameAsc
 
     private let fileManager = FileManager.default
 
@@ -128,7 +129,15 @@ struct FileListContentView: View {
                 Button { isGridView.toggle() } label: {
                     Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
                 }
+                Menu {
+                    ForEach(SortOption.allCases, id: \.self) { option in
+                        Button(option.rawValue) { sortOption = option; sortFiles() }
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                }
             }
+
         }
     }
 
@@ -151,6 +160,7 @@ struct FileListContentView: View {
                 self.files = contents
                 self.isLoading = false
                 self.isReloading = false
+                self.sortFiles()   // ← ここを追加！
             }
         }
     }
@@ -185,9 +195,38 @@ struct FileListContentView: View {
     private func moveSelectedFiles(to destination: URL) {
         for file in selectedFiles {
             let target = destination.appendingPathComponent(file.lastPathComponent)
-                try? fileManager.moveItem(at: file, to: target)
-            }
-            selectedFiles.removeAll()
-            asyncLoadFiles()
+            try? fileManager.moveItem(at: file, to: target)
         }
+        selectedFiles.removeAll()
+        asyncLoadFiles()
+    }
+    private enum SortOption: String, CaseIterable {
+        case nameAsc = "Name ↑"
+        case nameDesc = "Name ↓"
+        case dateAsc = "Date ↑"
+        case dateDesc = "Date ↓"
+    }
+    private func sortFiles() {
+        switch sortOption {
+        case .nameAsc:
+            files.sort { $0.lastPathComponent.lowercased() < $1.lastPathComponent.lowercased() }
+        case .nameDesc:
+            files.sort { $0.lastPathComponent.lowercased() > $1.lastPathComponent.lowercased() }
+        case .dateAsc:
+            files.sort {
+                let d1 = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                let d2 = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                return d1 < d2
+            }
+        case .dateDesc:
+            files.sort {
+                let d1 = (try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                let d2 = (try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                return d1 > d2
+            }
+        }
+    }
+
+
+
     }
