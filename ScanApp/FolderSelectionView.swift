@@ -46,7 +46,7 @@ struct FolderSelectionView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
-                ForEach(contents, id: \.self) { url in
+                ForEach(folders, id: \.self) { url in
                     HStack {
                         Image(systemName: isDirectory(url) ? "folder.fill" : "doc.fill")
                             .foregroundColor(isDirectory(url) ? .accentColor : .gray)
@@ -54,19 +54,18 @@ struct FolderSelectionView: View {
                             .foregroundColor(.primary)
                         Spacer()
                     }
-                    .contentShape(Rectangle()) // HStack全体をタップ可能にする
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         if isDirectory(url) {
-                            // フォルダなら深い階層に移動
                             currentURL = url
                         } else {
-                            // ファイルなら選択
                             selectedFolderURL = url
                             onSelect?(url)
                             isPresented = false
                         }
                     }
                 }
+
             }
                 .listStyle(.plain)
                 // SwiftUI の NavigationStack と組み合わせるため、NavigationDestination をここで追加
@@ -159,4 +158,9 @@ struct FolderSelectionView: View {
             }
         }
     }
+
+    private func isDirectory(_ url: URL) -> Bool {
+        (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+    }
+
 }
