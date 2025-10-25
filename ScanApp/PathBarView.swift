@@ -35,29 +35,34 @@ struct PathBarView: View {
 
     // ✅ FolderSelectionViewと同じ構造のロジック
     private func pathChain() -> [URL] {
-        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        var result: [URL] = []
-        var current = currentURL
+    var result: [URL] = []
+    var current = currentURL
+    let fileManager = FileManager.default
+    let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
-        // ファイルなら親を使う
-        var isDirectory: ObjCBool = false
+    // ファイルなら親を対象に
+    var isDirectory: ObjCBool = false
         fileManager.fileExists(atPath: current.path, isDirectory: &isDirectory)
         if !isDirectory.boolValue {
             current = current.deletingLastPathComponent()
         }
 
-        // Documents より上には行かない
-        while current.path.hasPrefix(documentsURL.path) {
+        // ルートまで安全に辿る
+        while true {
             result.insert(current, at: 0)
-            if current == documentsURL { break }
-            current.deleteLastPathComponent()
+            if current.standardizedFileURL == documentsURL.standardizedFileURL { break }
+
+            let parent = current.deletingLastPathComponent()
+            if parent.path == current.path { break } // 無限防止
+            current = parent
         }
 
-        // ファイルだった場合、最後に元のURLを追加
+        // ファイルなら最後に追加
         if !isDirectory.boolValue {
             result.append(currentURL)
         }
 
         return result
     }
+
 }
