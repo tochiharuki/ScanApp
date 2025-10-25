@@ -11,6 +11,9 @@ struct ScanView: View {
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
     @State private var saveFormat: SaveFormat = .image
+    // 保存先フォルダ用
+    @State private var selectedFolderURL: URL? = nil
+    @State private var showFolderSelection = false
 
     enum SaveFormat: String, CaseIterable, Identifiable {
         case image = "Image"
@@ -59,12 +62,50 @@ struct ScanView: View {
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .padding(.horizontal, 40)
+
+
+                // 保存先フォルダ選択
+                VStack(spacing: 6) {
+                    Button(action: { showFolderSelection = true }) {
+                        HStack {
+                            Image(systemName: "folder.fill")
+                            Text(selectedFolderURL?.lastPathComponent ?? "Select Folder")
+                                .lineLimit(1)
+                            Spacer()
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                    }
+                    .foregroundColor(.black)
+
+                    // 選択中のパスを表示
+                    if let url = selectedFolderURL {
+                        Text(url.path)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .padding(.horizontal)
+                    }
+                }
+                .padding(.horizontal, 40)
+
             }
         }
         // ✅ カメラビューをフルスクリーンで開く
         .fullScreenCover(isPresented: $showScanner) {
             DocumentScannerView(scannedImages: $scannedImages, saveFormat: saveFormat)
                 .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showFolderSelection) {
+            NavigationStack {
+                FolderSelectionView(
+                    selectedFolderURL: $selectedFolderURL,
+                    isPresented: $showFolderSelection
+                )
+                .accentColor(.black) // アイコンやテキストを黒に統一
+            }
         }
     }
 }
