@@ -79,10 +79,12 @@ struct FolderSelectionView: View {
                     .buttonStyle(.bordered)
                 Spacer()
                 Button("Select") {
+                    // currentURL が今の階層なのでそのまま選択
                     selectedFolderURL = currentURL
                     onSelect?(currentURL)
                     dismiss()
                 }
+
                 .buttonStyle(.borderedProminent)
             }
             .padding()

@@ -187,6 +187,6 @@ struct DocumentScannerView: UIViewControllerRepresentable {
 
         
             controller.dismiss(animated: true)
-        } // ← ここで documentCameraViewController の閉じ括弧
-    } // ← ここで Coordinator の閉じ括弧
-} // ← ここで DocumentScannerView の閉じ括弧
+        } 
+    } 
+} 
