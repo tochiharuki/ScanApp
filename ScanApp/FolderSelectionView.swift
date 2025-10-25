@@ -65,10 +65,13 @@ struct FolderSelectionView: View {
                     FolderSelectionView(
                         selectedFolderURL: $selectedFolderURL,
                         onSelect: onSelect,
-                        currentURL: folder,
-                        isPresented: $isPresented 
+                        currentURL: folder,  // ここで folder を currentURL に渡す
+                        isPresented: $isPresented
                     )
-                    .accentColor(.black) // ← ここを追加
+                    .onAppear {
+                        self.currentURL = folder // 深い階層に入ったら currentURL を更新
+                    }
+                    .accentColor(.black)
                 }
             }
 
@@ -79,12 +82,11 @@ struct FolderSelectionView: View {
                     .buttonStyle(.bordered)
                 Spacer()
                 Button("Select") {
-                    // currentURL が今の階層なのでそのまま選択
+                    // PathBar で現在表示されているパスを選択
                     selectedFolderURL = currentURL
                     onSelect?(currentURL)
                     dismiss()
                 }
-
                 .buttonStyle(.borderedProminent)
             }
             .padding()
