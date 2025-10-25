@@ -1,3 +1,6 @@
+import SwiftUI
+import Foundation
+
 struct ListFileView: View {
     let files: [URL]
     @Binding var selectedFiles: Set<URL>

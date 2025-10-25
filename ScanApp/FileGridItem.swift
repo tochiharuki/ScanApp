@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct FileGridItem: View {
     let file: URL
