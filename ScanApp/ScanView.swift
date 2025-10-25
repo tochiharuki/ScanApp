@@ -129,8 +129,29 @@ struct ScanView: View {
             )
             .ignoresSafeArea()
         }
-        
-        .onAppear {
+        .sheet(isPresented: $showFolderSelection) {
+            NavigationStack {
+                FolderSelectionView(
+                    selectedFolderURL: $selectedFolderURL,
+                    isPresented: $showFolderSelection
+                )
+                .accentColor(.black)
+                .onChange(of: selectedFolderURL) { newURL in
+                    if let url = newURL {
+                        do {
+                            let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+                            UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
+                            alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
+                            showAlert = true
+                        } catch {
+                            alertMessage = "⚠️ 保存先の記録に失敗しました"
+                            showAlert = true
+                        }
+                    }
+                }
+            }
+        }
+      .onAppear {
             if let bookmarkData = UserDefaults.standard.data(forKey: "scanSaveFolderBookmark") {
                 var isStale = false
                 do {
@@ -151,24 +172,12 @@ struct ScanView: View {
                     showAlert = true
                 }
             }
+        }   
+        .alert(alertMessage, isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
         }
-        .onChange(of: selectedFolderURL) { newURL in
-            if let url = newURL {
-                do {
-                    let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
-                    UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
-                    alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
-                    showAlert = true
-                } catch {
-                    alertMessage = "⚠️ 保存先の記録に失敗しました"
-                    showAlert = true
-                }
-            }
-        }
+
     }
-}
-.alert(alertMessage, isPresented: $showAlert) {
-    Button("OK", role: .cancel) {}
 }
 
 // MARK: - Document Scanner
