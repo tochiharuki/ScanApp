@@ -77,14 +77,14 @@ struct FolderSelectionView: View {
         .navigationTitle(currentURL.lastPathComponent)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    goBack()
-                } label: {
-                    Label("Back", systemImage: "chevron.backward")
-                }
-                .disabled(currentURL.path == documentsURL.path)
-            }
+            // ToolbarItem(placement: .navigationBarLeading) {
+            //     Button {
+            //         goBack()
+            //     } label: {
+            //         Label("Back", systemImage: "chevron.backward")
+            //     }
+            //     .disabled(currentURL.path == documentsURL.path)
+            // }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Cancel") { dismiss() }
             }
