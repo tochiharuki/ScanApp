@@ -115,7 +115,7 @@ struct ScanView: View {
                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                 .padding(.horizontal, 40)
 
-                Spacer() // 下部余白
+                Spacer(minLength: 15) // 上部スペース
             }
             .frame(maxWidth: .infinity) // VStack を画面幅いっぱいに
 
