@@ -129,28 +129,7 @@ struct ScanView: View {
             )
             .ignoresSafeArea()
         }
-        .sheet(isPresented: $showFolderSelection) {
-            NavigationStack {
-                FolderSelectionView(
-                    selectedFolderURL: $selectedFolderURL,
-                    isPresented: $showFolderSelection
-                )
-                .accentColor(.black)
-                .onChange(of: selectedFolderURL) { newURL in
-                    if let url = newURL {
-                        do {
-                            let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
-                            UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
-                            alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
-                            showAlert = true
-                        } catch {
-                            alertMessage = "⚠️ 保存先の記録に失敗しました"
-                            showAlert = true
-                        }
-                    }
-                }
-            }
-        }
+        
         .onAppear {
             if let bookmarkData = UserDefaults.standard.data(forKey: "scanSaveFolderBookmark") {
                 var isStale = false
@@ -169,6 +148,19 @@ struct ScanView: View {
                     }
                 } catch {
                     alertMessage = "⚠️ 保存先を読み込めませんでした"
+                    showAlert = true
+                }
+            }
+        }
+        .onChange(of: selectedFolderURL) { newURL in
+            if let url = newURL {
+                do {
+                    let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+                    UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
+                    alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
+                    showAlert = true
+                } catch {
+                    alertMessage = "⚠️ 保存先の記録に失敗しました"
                     showAlert = true
                 }
             }
