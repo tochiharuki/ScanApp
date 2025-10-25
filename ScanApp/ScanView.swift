@@ -34,7 +34,7 @@ struct ScanView: View {
                     showScanner = true
                 }) {
                     Label("Start Scanning", systemImage: "camera.fill")
-                        .font(.title) // 少し大きく
+                        .font(.headline) // 少し大きく
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
@@ -82,14 +82,14 @@ struct ScanView: View {
                             Spacer()
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 60) // 左右余白を増やす
                     }
                     .padding(8)
                     .foregroundColor(.black)
                     .background(Color.white)
                     .cornerRadius(8)
                     .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                    
+                    .padding(.horizontal, 40) // ボタン自体の左右余白
+
 
                     // 選択中のパスを相対パス表示
                     if let url = selectedFolderURL {
