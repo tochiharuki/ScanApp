@@ -90,7 +90,9 @@ struct FolderSelectionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                isPresented = false 
+                Button("Cancel") {
+                    isPresented = false
+                }
             }
         }
         .onAppear(perform: asyncLoadFolders)
