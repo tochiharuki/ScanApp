@@ -110,6 +110,7 @@ struct FileListContentView: View {
                 .toolbar { toolbarContent }
             }
         }
+        .onAppear { asyncLoadFiles() } // ← 追加！
         .onChange(of: currentURL) { _ in
             guard !isReloading else { return }     // 再入防止
             isReloading = true
