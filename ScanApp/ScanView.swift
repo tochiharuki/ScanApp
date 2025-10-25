@@ -139,7 +139,7 @@ struct ScanView: View {
                 .onChange(of: selectedFolderURL) { newURL in
                     if let url = newURL {
                         do {
-                            let bookmark = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+                            let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
                             UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
                             alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
                             showAlert = true
@@ -157,7 +157,7 @@ struct ScanView: View {
                 do {
                     let url = try URL(
                         resolvingBookmarkData: bookmarkData,
-                        options: .withSecurityScope,
+                        options: [],
                         relativeTo: nil,
                         bookmarkDataIsStale: &isStale
                     )
