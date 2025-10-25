@@ -54,15 +54,18 @@ struct FileListView: View {
     private func pathComponents() -> [URL] {
         var paths: [URL] = []
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-
         var current = currentURL
+
+        // 📁 Documentsより上に行かないようにしつつ、下層も含めて追加
         while true {
             paths.insert(current, at: 0)
-            if current == documentsURL { break } // Documents に到達したら終了
-            current.deleteLastPathComponent()
-            // もし Documents より上に行ってしまったら強制終了
-            if !current.path.hasPrefix(documentsURL.path) { break }
+            if current == documentsURL { break }
+
+            let parent = current.deletingLastPathComponent()
+            if !parent.path.hasPrefix(documentsURL.path) { break } // Documentsより上なら終了
+            current = parent
         }
+
         return paths
     }
 }
