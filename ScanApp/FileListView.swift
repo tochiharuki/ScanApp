@@ -78,39 +78,37 @@ struct FileListContentView: View {
                 }
                 .searchable(text: $searchText)
                 .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        if isEditing {
-                            Button("Done") { isEditing = false; selectedFiles.removeAll() }
+                    if isEditing {
+                        Button("Done") { isEditing = false; selectedFiles.removeAll() }
+                            .font(.system(size: 17))
+                        Button {
+                            if selectedFiles.isEmpty { showNoSelectionAlert = true }
+                            else { showMoveSheet = true }
+                        } label: {
+                            Image(systemName: "arrow.forward")
                                 .font(.system(size: 17))
-                            Button {
-                                if selectedFiles.isEmpty { showNoSelectionAlert = true }
-                                else { showMoveSheet = true }
-                            } label: {
-                                Image(systemName: "arrow.forward")
-                                    .font(.system(size: 17))
-                            }
-                            Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
-                                .font(.system(size: 17)) // ← ここを追加
-                        } else {
-                            Button("Edit") { isEditing = true }
+                        }
+                        Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
+                            .font(.system(size: 17)) // ← ここを追加
+                    } else {
+                        Button("Edit") { isEditing = true }
+                            .font(.system(size: 17))
+                        Button { showCreateFolderAlert = true } label: {
+                            Image(systemName: "folder.badge.plus")
                                 .font(.system(size: 17))
-                            Button { showCreateFolderAlert = true } label: {
-                                Image(systemName: "folder.badge.plus")
+                        }
+                        Button { isGridView.toggle() } label: {
+                            Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                                .font(.system(size: 17))
+                        }
+                        Menu {
+                            ForEach(SortOption.allCases, id: \.self) { option in
+                                Button(option.rawValue) { sortOption = option; sortFiles() }
                                     .font(.system(size: 17))
                             }
-                            Button { isGridView.toggle() } label: {
-                                Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
-                                    .font(.system(size: 17))
-                            }
-                            Menu {
-                                ForEach(SortOption.allCases, id: \.self) { option in
-                                    Button(option.rawValue) { sortOption = option; sortFiles() }
-                                        .font(.system(size: 17))
-                                }
-                            } label: {
-                                Image(systemName: "arrow.up.arrow.down")
-                                    .font(.system(size: 17))
-                            }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .font(.system(size: 17))
                         }
                     }
                 }
