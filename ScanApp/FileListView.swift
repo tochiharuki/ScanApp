@@ -167,11 +167,18 @@ struct FileListContentView: View {
 
     private func asyncLoadFiles() {
         isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let contents = try? fileManager.contentsOfDirectory(
+        DispatchQueue.global(qos: .userInitiated).async { [currentURL] in
+            // ファイル取得（安全のため optional で nil なら空配列）
+            let contents = (try? fileManager.contentsOfDirectory(
                 at: currentURL,
                 includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
-            )
+            )) ?? []
+            
+            // メインスレッドで更新
+            DispatchQueue.main.async {
+                self.files = contents
+                self.isLoading = false
+            }
         }
     }
 
