@@ -30,7 +30,7 @@ struct PathBarView: View {
             .padding(.horizontal, 8)
         }
         .frame(height: 40)
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(Color.white)
     }
 
     // ✅ FolderSelectionViewと同じ構造のロジック
