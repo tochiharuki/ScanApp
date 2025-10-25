@@ -43,7 +43,7 @@ struct FileListView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
     }
-}
+
 
     // MARK: - Helper
     private func pathComponents() -> [URL] {
@@ -65,7 +65,7 @@ struct FileListView: View {
 }
 
 struct FileListContentView: View {
-    @Binding var currentURL: URL
+    @Binding var curren}tURL: URL
     @State private var files: [URL] = []
     @State private var selectedFiles: Set<URL> = []
     @State private var isEditing = false
