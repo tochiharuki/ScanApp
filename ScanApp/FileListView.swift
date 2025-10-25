@@ -78,11 +78,11 @@ struct FileListContentView: View {
     @State private var showNoSelectionAlert = false
     @State private var selectedFolderURL: URL? = nil
     @State private var isLoading = false
+    @State private var isReloading = false   // ← body の外に書く
 
     private let fileManager = FileManager.default
 
-    var body
-    @State private var isReloading = false: some View {
+    var body: some View {   // ← 正しく body を宣言
         VStack(spacing: 0) {
             if isLoading {
                 ProgressView("Loading...")
@@ -111,9 +111,8 @@ struct FileListContentView: View {
             }
         }
         .onAppear { asyncLoadFiles() }
-        .onChange(of: cur
-        rentURL) .onChange(of: currentURL) { _ in
-            guard !isReloading else { return }     // 再入防止
+        .onChange(of: currentURL) { _ in
+            guard !isReloading else { return }
             isReloading = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 asyncLoadFiles()
@@ -123,7 +122,7 @@ struct FileListContentView: View {
         .alert("No file selected", isPresented: $showNoSelectionAlert) {
             Button("OK", role: .cancel) {}
         }
-Alert) {
+        .alert("Create New Folder", isPresented: $showCreateFolderAlert) {
             TextField("Folder name", text: $newFolderName)
             Button("Create") { createFolder(named: newFolderName) }
             Button("Cancel", role: .cancel) {}
