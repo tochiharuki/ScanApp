@@ -60,8 +60,10 @@ struct FileListView: View {
             break
         }
     }
+
     return paths
 }
+
 
 struct FileListContentView: View {
     @Binding var currentURL: URL
@@ -164,20 +166,22 @@ struct FileListContentView: View {
     }
 
     private func asyncLoadFiles() {
-    isLoading = true
-    isReloading = true
-    DispatchQueue.global(qos: .userInitiated).async {
-        let contents = (try? fileManager.contentsOfDirectory(
-            at: self.currentURL,
-            includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
-        )) ?? []
-         DispatchQueue.main.async {
-            self.files = contents
-            self.isLoading = false
-            self.isReloading = false
+        isLoading = true
+        isReloading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let contents = (try? fileManager.contentsOfDirectory(
+                at: self.currentURL,
+                includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
+            )) ?? []
+    
+            DispatchQueue.main.async {
+                self.files = contents
+                self.isLoading = false
+                self.isReloading = false
+            }
         }
     }
-  
+
     private func handleTap(_ file: URL) {
         if isEditing {
             if selectedFiles.contains(file) { selectedFiles.remove(file) }
@@ -213,5 +217,4 @@ struct FileListContentView: View {
         selectedFiles.removeAll()
         asyncLoadFiles()
     }
-}
 }
