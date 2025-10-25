@@ -59,9 +59,7 @@ struct FolderSelectionView: View {
                         if isDirectory(url) {
                             currentURL = url
                         } else {
-                            selectedFolderURL = url
-                            onSelect?(url)
-                            isPresented = false
+                            // ファイルは無反応
                         }
                     }
                 }
