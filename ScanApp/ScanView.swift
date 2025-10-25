@@ -27,88 +27,91 @@ struct ScanView: View {
             Color.white.ignoresSafeArea()
 
             VStack {
-            // 📸 スキャン開始ボタン（大きめ）
-            Button(action: {
-                showScanner = true
-            }) {
-                Label("Start Scanning", systemImage: "camera.fill")
-                    .font(.title2) // 少し大きく
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.black)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 60) // 上部余白を調整
-            }
+                Spacer() // 上部スペースで中央寄せ
 
-            Spacer().frame(height: 20)
-
-            // Save As ピッカー（少し小さく）
-            VStack(spacing: 4) {
-                Text("Save as")
-                    .font(.footnote) // 小さめ
-                    .foregroundColor(.black)
-                
-                Picker("", selection: $saveFormat) {
-                    ForEach(SaveFormat.allCases) { format in
-                        Text(format.rawValue).tag(format)
-                    }
+                // 📸 スキャン開始ボタン（大きめ）
+                Button(action: {
+                    showScanner = true
+                }) {
+                    Label("Start Scanning", systemImage: "camera.fill")
+                        .font(.title2) // 少し大きく
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.black)
+                        .cornerRadius(12)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 60) // 上部余白を調整
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .frame(maxWidth: .infinity)
-            }
-            .padding(8)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-            .padding(.horizontal, 40)
 
-            Spacer().frame(height: 20)
+                Spacer().frame(height: 20)
 
-            // 保存先フォルダ選択
-            VStack(spacing: 4) {
-                Text("Save To")
-                    .font(.footnote)
-                    .foregroundColor(.black)
-                
-                Button(action: { showFolderSelection = true }) {
-                    HStack {
-                        Image(systemName: "folder.fill")
-                        Text(selectedFolderURL?.lastPathComponent ?? "Select Folder")
-                            .lineLimit(1)
-                        Spacer()
+                // Save As ピッカー（少し小さく）
+                VStack(spacing: 4) {
+                    Text("Save as")
+                        .font(.footnote) // 小さめ
+                        .foregroundColor(.black)
+                    
+                    Picker("", selection: $saveFormat) {
+                        ForEach(SaveFormat.allCases) { format in
+                            Text(format.rawValue).tag(format)
+                        }
                     }
+                    .pickerStyle(SegmentedPickerStyle())
                     .frame(maxWidth: .infinity)
                 }
                 .padding(8)
-                .foregroundColor(.black)
-                .background(Color.white)
-                .cornerRadius(8)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                .padding(.horizontal, 40)
 
-                // 選択中のパスを相対パス表示
-                if let url = selectedFolderURL {
-                    let relativePath = url.pathComponents
-                        .drop(while: { $0 != "Documents" })
-                        .joined(separator: "/")
+                Spacer().frame(height: 20)
+
+                // 保存先フォルダ選択
+                VStack(spacing: 4) {
+                    Text("Save To")
+                        .font(.footnote)
+                        .foregroundColor(.black)
                     
-                    Text(relativePath)
-                        .font(.caption2) // 小さく
-                        .foregroundColor(.gray)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .padding(.horizontal)
-                }
-            }
-            .padding(6)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-            .padding(.horizontal, 40)
+                    Button(action: { showFolderSelection = true }) {
+                        HStack {
+                            Image(systemName: "folder.fill")
+                            Text(selectedFolderURL?.lastPathComponent ?? "Select Folder")
+                                .lineLimit(1)
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .padding(8)
+                    .foregroundColor(.black)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .padding(.horizontal, 60) // 左右余白を増やす
 
-            Spacer() // 下部余白
-        }
+                    // 選択中のパスを相対パス表示
+                    if let url = selectedFolderURL {
+                        let relativePath = url.pathComponents
+                            .drop(while: { $0 != "Documents" })
+                            .joined(separator: "/")
+                        
+                        Text(relativePath)
+                            .font(.caption2) // 小さく
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .padding(.horizontal)
+                    }
+                }
+                .padding(6)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                .padding(.horizontal, 40)
+
+                Spacer() // 下部余白
+            }
 
         }
         // ✅ カメラビューをフルスクリーンで開く
