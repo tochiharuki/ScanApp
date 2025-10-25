@@ -62,7 +62,7 @@ struct FileListView: View {
     
         return paths
     }
-
+}
 
 struct FileListContentView: View {
     @Binding var currentURL: URL
