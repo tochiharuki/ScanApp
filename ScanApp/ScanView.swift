@@ -80,6 +80,7 @@ struct ScanView: View {
                         .frame(maxWidth: .infinity)
                     }
                     .foregroundColor(.black)
+                    .backgroundColor(.white)
 
                     // 選択中のパスを表示
                     if let url = selectedFolderURL {
