@@ -70,7 +70,7 @@ struct FileListContentView: View {
                             onTap: handleTap,
                             onRename: { file in
                                 fileToRename = file
-                                newFileName = file.lastPathComponent
+                                newFileName = file.deletingPathExtension().lastPathComponent // ← 拡張子を除外
                                 showRenameAlert = true
                             }
                         )
@@ -259,17 +259,19 @@ struct FileListContentView: View {
     }
     private func renameFile() {
         guard let file = fileToRename, !newFileName.isEmpty else { return }
+    
+        // 元の拡張子を保持
         let ext = file.pathExtension
-        let newFullName = ext.isEmpty ? newFileName : "\(newFileName).\(ext)"
-        let newURL = file.deletingLastPathComponent().appendingPathComponent(newFullName)
-        
+        let newURL = file.deletingLastPathComponent()
+            .appendingPathComponent(newFileName)
+            .appendingPathExtension(ext)
+    
         do {
             try fileManager.moveItem(at: file, to: newURL)
             asyncLoadFiles()
         } catch {
             print("Rename failed: \(error)")
         }
-        
         fileToRename = nil
     }
 
