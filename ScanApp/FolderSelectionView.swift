@@ -46,15 +46,24 @@ struct FolderSelectionView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
-                    // NavigationLink を使って子 FolderSelectionView（ビュー自体には NavigationStack を含めない）
-                    ForEach(folders, id: \.self) { folder in
-                        NavigationLink(value: folder) {
-                            HStack {
-                                Image(systemName: "folder.fill")
-                                    .foregroundColor(.accentColor)
-                                Text(folder.lastPathComponent)
-                                    .foregroundColor(.primary)
-                                Spacer()
+                    ForEach(contents, id: \.self) { url in
+                        HStack {
+                            Image(systemName: isDirectory(url) ? "folder.fill" : "doc.fill")
+                                .foregroundColor(isDirectory(url) ? .accentColor : .gray)
+                            Text(url.lastPathComponent)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                        .contentShape(Rectangle()) // HStack全体をタップ可能にする
+                        .onTapGesture {
+                            if isDirectory(url) {
+                                // フォルダなら深い階層に移動
+                                currentURL = url
+                            } else {
+                                // ファイルなら選択
+                                selectedFolderURL = url
+                                onSelect?(url)
+                                isPresented = false
                             }
                         }
                     }
