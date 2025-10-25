@@ -85,7 +85,7 @@ struct FolderSelectionView: View {
                     // PathBar で現在表示されているパスを選択
                     selectedFolderURL = currentURL
                     onSelect?(currentURL)
-                    dismiss()
+                    isPresented = false
                 }
                 .buttonStyle(.borderedProminent)
             }
