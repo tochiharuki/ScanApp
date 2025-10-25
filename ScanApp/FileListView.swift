@@ -83,9 +83,10 @@ struct FileListContentView: View {
                             deleteAction: deleteFiles,
                             onRename: { file in
                                 fileToRename = file
-                                newFileName = file.lastPathComponent
+                                newFileName = file.deletingPathExtension().lastPathComponent  // ← 拡張子を除外
                                 showRenameAlert = true
                             }
+
                         )
                     }
                 }
