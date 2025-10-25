@@ -14,6 +14,8 @@ struct ScanView: View {
     // 保存先フォルダ用
     @State private var showFolderSelection = false
     @State private var selectedFolderURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
 
     enum SaveFormat: String, CaseIterable, Identifiable {
@@ -136,17 +138,45 @@ struct ScanView: View {
                 .accentColor(.black)
                 .onChange(of: selectedFolderURL) { newURL in
                     if let url = newURL {
-                        UserDefaults.standard.set(url.path, forKey: "scanSaveFolder")
+                        do {
+                            let bookmark = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+                            UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
+                            alertMessage = "✅ 保存先を設定しました:\n\(url.lastPathComponent)"
+                            showAlert = true
+                        } catch {
+                            alertMessage = "⚠️ 保存先の記録に失敗しました"
+                            showAlert = true
+                        }
                     }
                 }
             }
         }
         .onAppear {
-            if let path = UserDefaults.standard.string(forKey: "scanSaveFolder") {
-                selectedFolderURL = URL(fileURLWithPath: path)
+            if let bookmarkData = UserDefaults.standard.data(forKey: "scanSaveFolderBookmark") {
+                var isStale = false
+                do {
+                    let url = try URL(
+                        resolvingBookmarkData: bookmarkData,
+                        options: .withSecurityScope,
+                        relativeTo: nil,
+                        bookmarkDataIsStale: &isStale
+                    )
+                    if !isStale {
+                        selectedFolderURL = url
+                        _ = url.startAccessingSecurityScopedResource()
+                        alertMessage = "📂 前回の保存先を読み込みました:\n\(url.lastPathComponent)"
+                        showAlert = true
+                    }
+                } catch {
+                    alertMessage = "⚠️ 保存先を読み込めませんでした"
+                    showAlert = true
+                }
             }
         }
     }
+}
+.alert(alertMessage, isPresented: $showAlert) {
+    Button("OK", role: .cancel) {}
 }
 
 // MARK: - Document Scanner
