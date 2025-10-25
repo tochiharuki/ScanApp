@@ -78,6 +78,7 @@ struct FileListContentView: View {
     @State private var showNoSelectionAlert = false
     @State private var selectedFolderURL: URL? = nil
     @State private var isLoading = false
+    @State private var isReloading = false
 
     private let fileManager = FileManager.default
 
@@ -109,8 +110,15 @@ struct FileListContentView: View {
                 .toolbar { toolbarContent }
             }
         }
-        .onAppear { asyncLoadFiles() }
-        .onChange(of: currentURL) { _ in asyncLoadFiles() }
+        .onChange(of: currentURL) { _ in
+            guard !isReloading else { return }     // 再入防止
+            isReloading = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                asyncLoadFiles()
+                isReloading = false
+            }
+        }
+
         .alert("No file selected", isPresented: $showNoSelectionAlert) {
             Button("OK", role: .cancel) {}
         }
