@@ -168,6 +168,7 @@ struct ScanView: View {
          }
      }
 }
+}
 struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
     var saveFormat: ScanView.SaveFormat 
