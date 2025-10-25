@@ -139,33 +139,35 @@ struct ScanView: View {
                             }
         }
       .onAppear {
-            if let bookmarkData = UserDefaults.standard.data(forKey: "scanSaveFolderBookmark") {
-                var isStale = false
-                do {
-                    let url = try URL(
-                        resolvingBookmarkData: bookmarkData,
-                        options: [],
-                        relativeTo: nil,
-                        bookmarkDataIsStale: &isStale
-                    )
-                    if !isStale {
-                        selectedFolderURL = url
-                        _ = url.startAccessingSecurityScopedResource()
-                      
-            }
-        }
-       
-        .onChange(of: selectedFolderURL) { newURL in
-            if let url = newURL {
-                do {
-                    let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
-                    UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
-            }
-        }
-    }
+          if let bookmarkData = UserDefaults.standard.data(forKey: "scanSaveFolderBookmark") {
+              var isStale = false
+              do {
+                  let url = try URL(
+                      resolvingBookmarkData: bookmarkData,
+                      options: [],
+                      relativeTo: nil,
+                      bookmarkDataIsStale: &isStale
+                  )
+                  if !isStale {
+                      selectedFolderURL = url
+                      _ = url.startAccessingSecurityScopedResource()
+                  }
+              } catch {
+                  print("⚠️ 保存先の読み込みに失敗しました")
+              }
+          }
+      }
+      .onChange(of: selectedFolderURL) { newURL in
+          if let url = newURL {
+              do {
+                  let bookmark = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+                  UserDefaults.standard.set(bookmark, forKey: "scanSaveFolderBookmark")
+              } catch {
+                  print("⚠️ 保存先の記録に失敗しました")
+             }
+         }
+     }
 }
-
-// MARK: - Document Scanner
 struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
     var saveFormat: ScanView.SaveFormat 
