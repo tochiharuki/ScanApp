@@ -56,11 +56,12 @@ struct FileListView: View {
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
         var current = currentURL
-        while current.path.hasPrefix(documentsURL.path) {
+        while true {
             paths.insert(current, at: 0)
-            // 📌 Documentsより上（/Documentsの親）は含めない
-            if current == documentsURL { break }
+            if current == documentsURL { break } // Documents に到達したら終了
             current.deleteLastPathComponent()
+            // もし Documents より上に行ってしまったら強制終了
+            if !current.path.hasPrefix(documentsURL.path) { break }
         }
         return paths
     }
