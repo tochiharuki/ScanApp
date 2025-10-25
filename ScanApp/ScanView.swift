@@ -90,7 +90,7 @@ struct ScanView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.black)
                             Text(relativePath)
-                                .font(.caption)
+                                .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .lineLimit(1)
                                 .truncationMode(.middle)
