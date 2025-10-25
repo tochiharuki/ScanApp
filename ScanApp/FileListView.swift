@@ -168,11 +168,10 @@ struct FileListContentView: View {
     private func asyncLoadFiles() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let contents = (try? fileManager.contentsOfDirectory(at: currentURL, includingPropertiesForKeys: nil)) ?? []
-            DispatchQueue.main.async {
-                self.files = contents
-                self.isLoading = false
-            }
+            let contents = try? fileManager.contentsOfDirectory(
+                at: currentURL,
+                includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
+            )
         }
     }
 
@@ -181,9 +180,7 @@ struct FileListContentView: View {
             if selectedFiles.contains(file) { selectedFiles.remove(file) }
             else { selectedFiles.insert(file) }
         } else if file.hasDirectoryPath {
-            withAnimation {
-                currentURL = file
-            }
+            currentURL = file // まずはアニメーションなしで
         }
     }
 
