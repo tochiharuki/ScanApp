@@ -48,7 +48,7 @@ struct FileListContentView: View {
     @State private var selectedFolderURL: URL? = nil
     @State private var isLoading = false
     @State private var isReloading = false   // ← body の外に書く
-    @State private var sortOption: SortOption = .nameAsc
+    @State private var sortOption: SortOption = .dateDesc  // ← デフォルトを新しい順に変更
 
     private let fileManager = FileManager.default
 
