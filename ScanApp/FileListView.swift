@@ -78,42 +78,38 @@ struct FileListContentView: View {
                 }
                 .searchable(text: $searchText)
                 .toolbar {
-                    if isEditing {
-                        ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        if isEditing {
                             Button("Done") { isEditing = false; selectedFiles.removeAll() }
-                        }
-                        ToolbarItem(placement: .navigationBarTrailing) {
+                                .font(.system(size: 17))
                             Button {
                                 if selectedFiles.isEmpty { showNoSelectionAlert = true }
                                 else { showMoveSheet = true }
                             } label: {
                                 Image(systemName: "arrow.forward")
+                                    .font(.system(size: 17))
                             }
-                        }
-                        ToolbarItem(placement: .navigationBarTrailing) {
                             Button { deleteSelectedFiles() } label: { Image(systemName: "trash") }
-                        }
-                    } else {
-                        ToolbarItem(placement: .navigationBarTrailing) {
+                                .font(.system(size: 17)) // ← ここを追加
+                        } else {
                             Button("Edit") { isEditing = true }
-                        }
-                        ToolbarItem(placement: .navigationBarTrailing) {
+                                .font(.system(size: 17))
                             Button { showCreateFolderAlert = true } label: {
                                 Image(systemName: "folder.badge.plus")
+                                    .font(.system(size: 17))
                             }
-                        }
-                        ToolbarItem(placement: .navigationBarTrailing) {
                             Button { isGridView.toggle() } label: {
                                 Image(systemName: isGridView ? "list.bullet" : "square.grid.2x2")
+                                    .font(.system(size: 17))
                             }
-                        }
-                        ToolbarItem(placement: .navigationBarTrailing) {
                             Menu {
                                 ForEach(SortOption.allCases, id: \.self) { option in
                                     Button(option.rawValue) { sortOption = option; sortFiles() }
+                                        .font(.system(size: 17))
                                 }
                             } label: {
                                 Image(systemName: "arrow.up.arrow.down")
+                                    .font(.system(size: 17))
                             }
                         }
                     }
