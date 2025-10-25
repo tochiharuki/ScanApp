@@ -77,9 +77,7 @@ struct ScanView: View {
                                 .lineLimit(1)
                             Spacer()
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
+                        .frame(maxWidth: .infinity)
                     }
                     .foregroundColor(.black)
 
@@ -91,7 +89,7 @@ struct ScanView: View {
                         
                         Text(relativePath)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(.black)
                             .lineLimit(1)
                             .truncationMode(.middle)
                             .padding(.horizontal)
