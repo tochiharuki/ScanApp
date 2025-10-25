@@ -5,21 +5,22 @@ struct PathBarView: View {
     let currentURL: URL
     let onNavigate: (URL) -> Void
 
-    // height を固定してレイアウトの安定化も図る
+    private let fileManager = FileManager.default
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
-                ForEach(makePathComponents(), id: \.self) { url in
+                ForEach(pathChain(), id: \.self) { url in
                     Button(action: { onNavigate(url) }) {
                         Text(url.lastPathComponent)
                             .font(.subheadline)
                             .lineLimit(1)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 6)
-                            .background(url == currentURL ? Color(UIColor.systemGray4) : Color.clear)
+                            .background(url == currentURL ? Color(UIColor.systemGray5) : Color.clear)
                             .cornerRadius(6)
                     }
-                    if url != makePathComponents().last {
+                    if url != pathChain().last {
                         Image(systemName: "chevron.right")
                             .font(.caption2)
                             .foregroundColor(.gray)
@@ -32,21 +33,31 @@ struct PathBarView: View {
         .background(Color(UIColor.secondarySystemBackground))
     }
 
-    // Documents 配下のみを返す、安全な実装
-    private func makePathComponents() -> [URL] {
-        var components: [URL] = []
-        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        var url = currentURL
+    // ✅ FolderSelectionViewと同じ構造のロジック
+    private func pathChain() -> [URL] {
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var result: [URL] = []
+        var current = currentURL
 
-        // safety counter で無限ループ防止
-        var safety = 0
-        while url.path.hasPrefix(documents.path) {
-            components.insert(url, at: 0)
-            if url == documents { break }
-            url.deleteLastPathComponent()
-            safety += 1
-            if safety > 50 { break }
+        // ファイルなら親を使う
+        var isDirectory: ObjCBool = false
+        fileManager.fileExists(atPath: current.path, isDirectory: &isDirectory)
+        if !isDirectory.boolValue {
+            current = current.deletingLastPathComponent()
         }
-        return components
+
+        // Documents より上には行かない
+        while current.path.hasPrefix(documentsURL.path) {
+            result.insert(current, at: 0)
+            if current == documentsURL { break }
+            current.deleteLastPathComponent()
+        }
+
+        // ファイルだった場合、最後に元のURLを追加
+        if !isDirectory.boolValue {
+            result.append(currentURL)
+        }
+
+        return result
     }
 }
