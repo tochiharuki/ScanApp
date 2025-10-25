@@ -81,14 +81,14 @@ struct ScanView: View {
                                 .lineLimit(1)
                             Spacer()
                         }
-                        .padding(12)
-                        .frame(width: 250) // ボタン幅を固定して小さく
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                        .frame(maxWidth: .infinity)
                     }
+                    .padding(8)
                     .foregroundColor(.black)
-                    .frame(maxWidth: .infinity) // 親VStack内で中央寄せ
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .padding(.horizontal, 15) // ボタン自体の左右余白
 
 
                     // 選択中のパスを相対パス表示
