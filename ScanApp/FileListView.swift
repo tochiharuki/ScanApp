@@ -47,22 +47,21 @@ struct FileListView: View {
 
     // MARK: - Helper
     private func pathComponents() -> [URL] {
-    var paths: [URL] = []
-    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    var current = currentURL
-
-    // 📌 Documents より上は表示しない
-    while current.path != documentsURL.deletingLastPathComponent().path {
-        paths.insert(current, at: 0)
-        current.deleteLastPathComponent()
-        if current.path == documentsURL.path { // ← ここで止める
+        var paths: [URL] = []
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var current = self.currentURL   // ← self を付ける
+    
+        while current.path != documentsURL.deletingLastPathComponent().path {
             paths.insert(current, at: 0)
-            break
+            current.deleteLastPathComponent()
+            if current.path == documentsURL.path {
+                paths.insert(current, at: 0)
+                break
+            }
         }
+    
+        return paths
     }
-
-    return paths
-}
 
 
 struct FileListContentView: View {
