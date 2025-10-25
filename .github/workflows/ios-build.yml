@@ -64,7 +64,7 @@
             -project ScanApp.xcodeproj \
             -scheme ScanApp \
             -sdk iphoneos \
-            -destination 'generic/platform=iOS \
+            -destination 'generic/platform=iOS' \
             -configuration Release \
             -archivePath $PWD/build/ScanApp.xcarchive \
             archive \
