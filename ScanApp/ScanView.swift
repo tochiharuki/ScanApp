@@ -57,6 +57,7 @@ struct ScanView: View {
                     .pickerStyle(SegmentedPickerStyle())
                     .frame(maxWidth: .infinity) // ← これを追加
                 }
+                .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
@@ -79,7 +80,9 @@ struct ScanView: View {
                         .frame(maxWidth: .infinity)
                     }
                     .foregroundColor(.black)
-                    .background(Color.white) 
+                    .background(Color.white)
+                    .cornerRadius(8)       // 角丸を追加
+                    .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1) // optional
 
                     // 選択中のパスを表示
                     if let url = selectedFolderURL {
@@ -95,6 +98,7 @@ struct ScanView: View {
                             .padding(.horizontal)
                     }
                 }
+                .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
