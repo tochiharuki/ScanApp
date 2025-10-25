@@ -153,6 +153,7 @@ struct ScanView: View {
 struct DocumentScannerView: UIViewControllerRepresentable {
     @Binding var scannedImages: [UIImage]
     var saveFormat: ScanView.SaveFormat 
+    var selectedFolderURL: URL?
 
     func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
         let scanner = VNDocumentCameraViewController()
@@ -182,7 +183,7 @@ struct DocumentScannerView: UIViewControllerRepresentable {
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
             let fileManager = FileManager.default
-            let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let baseURL = parent.selectedFolderURL ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
             if parent.saveFormat == .image {
                 // 画像として保存
@@ -198,10 +199,11 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                         let url = documentsURL.appendingPathComponent(fileName)
                         do {
                             try data.write(to: url)
-                            print("✅ Saved image: \(fileName)")
+                            print("✅ Saved image to:", url.path)
                         } catch {
                             print("❌ Failed saving image:", error)
                         }
+          
                     }
                 }
             } else {
@@ -220,7 +222,7 @@ struct DocumentScannerView: UIViewControllerRepresentable {
                         parent.scannedImages.append(image)
                     }
                 })
-                print("✅ Saved PDF: Scan_\(timestamp).pdf")
+                print("✅ Saved PDF to:", pdfURL.path)
             }
 
 
