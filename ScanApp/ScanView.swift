@@ -63,7 +63,7 @@ struct ScanView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .padding(.horizontal, 40)
 
-
+                Spacer().frame(height: 20)
                 // 保存先フォルダ選択
                 VStack(spacing: 6) {
                     Button(action: { showFolderSelection = true }) {
@@ -79,18 +79,24 @@ struct ScanView: View {
                     }
                     .foregroundColor(.black)
 
-                    // 選択中のパスを表示
+                    // 選択中のパスを表示（項目名付き）
                     if let url = selectedFolderURL {
                         let relativePath = url.pathComponents
-                            .drop(while: { $0 != "Documents" }) // Documents までスキップ
+                            .drop(while: { $0 != "Documents" }) // Documents以降を表示
                             .joined(separator: "/")
                         
-                        Text(relativePath)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("Save To:")
+                                .font(.subheadline)
+                                .foregroundColor(.black)
+                            Text(relativePath)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                     }
                 }
                 .padding(.horizontal, 40)
