@@ -77,7 +77,9 @@ struct FileListContentView: View {
                     }
                 }
                 .searchable(text: $searchText)
-                .toolbar { toolbarContent }
+                .toolbar {
+                    toolbarContent
+                }
             }
         }
         .onAppear { asyncLoadFiles() }
@@ -101,7 +103,7 @@ struct FileListContentView: View {
             NavigationStack {
                 FolderSelectionView(
                     selectedFolderURL: $selectedFolderURL,
-                    currentURL: currentFolder,  // ← ここで現在のディレクトリを渡す
+                    currentURL: currentURL,  // ← ここで現在のディレクトリを渡す
                     onSelect: { destination in
                         moveSelectedFiles(to: destination)
                     },
