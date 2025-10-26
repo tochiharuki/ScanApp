@@ -67,7 +67,7 @@ struct ScanView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 60)
 
                 Spacer().frame(height: 20)
 
@@ -113,7 +113,7 @@ struct ScanView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 60)
 
                 
             }
