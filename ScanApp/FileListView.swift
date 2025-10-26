@@ -87,18 +87,24 @@ struct FileListContentView: View {
                             files: files,
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
-                            onTap: handleTap,
+                            onTap: { url in
+                                // タップ時の処理
+                                print("Tapped: \(url.lastPathComponent)")
+                            },
                             deleteAction: { indexSet in
                                 // 削除処理
                                 indexSet.forEach { index in
                                     let fileURL = files[index]
                                     try? FileManager.default.removeItem(at: fileURL)
                                 }
+                                files.remove(atOffsets: indexSet)
                             },
                             onRename: { url in
                                 // 名前変更処理
+                                print("Rename: \(url.lastPathComponent)")
                             }
-                            )
+                        )
+
                     }
 
                 }
