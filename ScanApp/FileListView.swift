@@ -72,32 +72,35 @@ struct FileListContentView: View {
             } else {
                 Group {
                     if isGridView {
+                        // 🧩 アイコン（サムネイル）表示
                         GridFileView(
-                            files: filteredFiles,
+                            files: files,
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
-                            onTap: handleTap,
-                            onRename: { file in
-                                fileToRename = file
-                                newFileName = file.deletingPathExtension().lastPathComponent // ← 拡張子を除外
-                                showRenameAlert = true
-                            }
+                            onTap: onTap,
+                            deleteAction: deleteAction,
+                            onRename: onRename
                         )
                     } else {
+                        // 📄 リスト表示
                         ListFileView(
-                            files: filteredFiles,
+                            files: files,
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
                             onTap: handleTap,
-                            deleteAction: deleteFiles,
-                            onRename: { file in
-                                fileToRename = file
-                                newFileName = file.deletingPathExtension().lastPathComponent  // ← 拡張子を除外
-                                showRenameAlert = true
+                            deleteAction: { indexSet in
+                                // 削除処理
+                                indexSet.forEach { index in
+                                    let fileURL = files[index]
+                                    try? FileManager.default.removeItem(at: fileURL)
+                                }
+                            },
+                            onRename: { url in
+                                // 名前変更処理
                             }
-
-                        )
+                            )
                     }
+
                 }
                 .searchable(text: $searchText)
                 .toolbar(content: toolbarContent)
