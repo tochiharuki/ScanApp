@@ -13,6 +13,15 @@ struct ListFileView: View {
         List {
             ForEach(files, id: \.self) { url in
                 HStack(spacing: 12) {
+                    if isEditing {
+                        Image(systemName: selectedFiles.contains(url) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selectedFiles.contains(url) ? .blue : .gray)
+                            .onTapGesture {
+                                toggleSelection(for: url)
+                            }
+                    }
+
+
                     // アイコン表示
                     if isDirectory(url) {
                         // フォルダ
@@ -38,7 +47,9 @@ struct ListFileView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    if !isEditing {
+                    if isEditing {
+                        toggleSelection(for: url)
+                    } else {
                         onTap(url)
                     }
                 }
