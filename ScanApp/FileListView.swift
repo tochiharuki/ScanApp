@@ -39,11 +39,14 @@ struct FileListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showPreview) {
                 if let fileURL = selectedFileURL {
-                    DocumentInteractionView(url: fileURL)
-                        .ignoresSafeArea()
-                        
+                    DocumentInteractionView(
+                        url: fileURL,
+                        onDebugMessage: { message in
+                            debugMessage = message  // ← 🔹 デバッグメッセージを更新
+                        }
+                    )
+                    .ignoresSafeArea()
                 }
-            
             }
             
         }

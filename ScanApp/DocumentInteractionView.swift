@@ -8,27 +8,32 @@ import UIKit
 
 struct DocumentInteractionView: UIViewControllerRepresentable {
     let url: URL
+    var onDebugMessage: ((String) -> Void)?  // ← 🔹 追加：デバッグ用コールバック
 
     func makeUIViewController(context: Context) -> UIViewController {
         let viewController = UIViewController()
         viewController.view.backgroundColor = .systemBackground
 
-        // ✅ UIDocumentInteractionController の作成
+        let fileExists = FileManager.default.fileExists(atPath: url.path)
+        onDebugMessage?("📂 Opening: \(url.lastPathComponent)\nExists: \(fileExists)")
+
         let docController = UIDocumentInteractionController(url: url)
         docController.delegate = context.coordinator
 
-        // ✅ 表示（ファイルタイプに応じたプレビュー＋共有など）
         DispatchQueue.main.async {
-            docController.presentPreview(animated: true)
+            if fileExists {
+                onDebugMessage?("✅ Presenting preview for \(url.lastPathComponent)")
+                docController.presentPreview(animated: true)
+            } else {
+                onDebugMessage?("⚠️ File not found: \(url.path)")
+            }
         }
 
         context.coordinator.controller = docController
         return viewController
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        // 更新時は特に処理なし
-    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) { }
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -37,9 +42,8 @@ struct DocumentInteractionView: UIViewControllerRepresentable {
     class Coordinator: NSObject, UIDocumentInteractionControllerDelegate {
         var controller: UIDocumentInteractionController?
 
-        // ✅ プレビューをどのViewController上に出すか指定
         func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
-            return UIApplication.shared.connectedScenes
+            UIApplication.shared.connectedScenes
                 .compactMap { ($0 as? UIWindowScene)?.keyWindow?.rootViewController }
                 .first ?? UIViewController()
         }
