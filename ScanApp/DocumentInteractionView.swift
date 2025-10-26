@@ -2,10 +2,7 @@
 //  DocumentInteractionView.swift
 //  ScanApp
 //
-//  Created by Tochishita Haruki on 2025/10/26.
-//
 
-import Foundation
 import SwiftUI
 import UIKit
 
@@ -14,24 +11,35 @@ struct DocumentInteractionView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIViewController {
         let viewController = UIViewController()
+        viewController.view.backgroundColor = .systemBackground
+
+        // ✅ UIDocumentInteractionController の作成
+        let docController = UIDocumentInteractionController(url: url)
+        docController.delegate = context.coordinator
+
+        // ✅ 表示（ファイルタイプに応じたプレビュー＋共有など）
         DispatchQueue.main.async {
-            let docController = UIDocumentInteractionController(url: url)
-            docController.delegate = context.coordinator
-            // ✅ プレビューと共有メニューを表示
             docController.presentPreview(animated: true)
         }
+
+        context.coordinator.controller = docController
         return viewController
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // 更新時は特に処理なし
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 
     class Coordinator: NSObject, UIDocumentInteractionControllerDelegate {
+        var controller: UIDocumentInteractionController?
+
+        // ✅ プレビューをどのViewController上に出すか指定
         func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
-            UIApplication.shared.connectedScenes
+            return UIApplication.shared.connectedScenes
                 .compactMap { ($0 as? UIWindowScene)?.keyWindow?.rootViewController }
                 .first ?? UIViewController()
         }
