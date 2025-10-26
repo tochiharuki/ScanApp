@@ -15,21 +15,21 @@ struct ListFileView: View {
                 HStack(spacing: 12) {
                     // MARK: - アイコン表示
                     if isDirectory(url) {
-                        // 📁 フォルダの場合
-                        Image(systemName: "folder.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                            .foregroundStyle(.black)
-                    } else {
-                        // 📄 ファイルの場合は汎用アイコンのみ
-                        Image(systemName: "doc.text.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                            .foregroundStyle(.gray)
-                    }   
-               }
+                    // 📁 フォルダの場合
+                    Image(systemName: "folder.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(.black)
+                } else {
+                    // 📄 ファイルの場合は汎用アイコンのみ
+                    Image(systemName: "doc.text.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(.gray)
+                 }
+           }
 
                     // MARK: - ファイル名
                     Text(url.lastPathComponent)
