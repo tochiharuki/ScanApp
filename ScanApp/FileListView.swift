@@ -7,6 +7,15 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
+
+extension FileListView: UIDocumentInteractionControllerDelegate {
+    public func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
+        return UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow?.rootViewController }
+            .first ?? UIViewController()
+    }
+}
 
 struct FileListView: View {
     @State private var currentURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -35,12 +44,6 @@ struct FileListView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showPreview) {
-                if let fileURL = selectedFileURL {
-                    DocumentInteractionView(url: fileURL)
-                        .ignoresSafeArea()
-                }
-            }
         }
     }
 }
@@ -256,9 +259,9 @@ struct FileListContentView: View {
         } else if file.hasDirectoryPath {
             currentURL = file
         } else {
-            // ✅ ファイルを開く
-            selectedFileURL = file
-            showPreview = true
+            // ✅ ファイルを開く（直接DocumentInteractionViewを呼び出す）
+            let controller = UIDocumentInteractionController(url: file)
+            controller.presentPreview(animated: true)
         }
     }
 
