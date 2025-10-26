@@ -24,7 +24,7 @@ struct GridFileView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 60, height: 60)
-                                .foregroundStyle(.yellow)
+                                .foregroundStyle(.black)
                         } else if let image = UIImage(contentsOfFile: url.path) {
                             // 🖼 実際の画像
                             Image(uiImage: image)
