@@ -37,6 +37,12 @@ struct FileListView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showPreview) {
+                if let fileURL = selectedFileURL {
+                    DocumentInteractionView(url: fileURL)
+                        .ignoresSafeArea()
+                }
+            }
         }
     }
 }
