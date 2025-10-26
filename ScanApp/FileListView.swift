@@ -89,42 +89,18 @@ struct FileListContentView: View {
             } else {
                 Group {
                     if isGridView {
-                        // 🧩 アイコン（サムネイル）表示
-                            GridFileView(
-                                files: files,
-                                selectedFiles: $selectedFiles,
-                                isEditing: $isEditing,
-                                onTap: handleTap,
-                                deleteAction: { indexSet in
-                                    for index in indexSet {
-                                        let file = files[index]
-                                        try? FileManager.default.removeItem(at: file)
-                                    }
-                                    asyncLoadFiles()
-                                },
-                                // ListFileView 呼び出し内の onRename も同様にする
-                                onRename: { file in
-                                    fileToRename = file
-                                    let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
-                                    newFileName = name
-                                    showRenameAlert = true
-                                }
-)
-                    } else {
-                        // 📄 リスト表示
-                        ListFileView(
-                            files: files,
+                        GridFileView(
+                            files: filteredFiles, // ← 修正！
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
                             onTap: handleTap,
                             deleteAction: { indexSet in
                                 for index in indexSet {
-                                    let fileURL = files[index]
-                                    try? FileManager.default.removeItem(at: fileURL)
+                                    let file = filteredFiles[index]
+                                    try? FileManager.default.removeItem(at: file)
                                 }
                                 asyncLoadFiles()
                             },
-                            // ListFileView 呼び出し内の onRename も同様にする
                             onRename: { file in
                                 fileToRename = file
                                 let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
@@ -132,7 +108,26 @@ struct FileListContentView: View {
                                 showRenameAlert = true
                             }
                         )
-
+                    } else {
+                        ListFileView(
+                            files: filteredFiles, // ← 修正！
+                            selectedFiles: $selectedFiles,
+                            isEditing: $isEditing,
+                            onTap: handleTap,
+                            deleteAction: { indexSet in
+                                for index in indexSet {
+                                    let fileURL = filteredFiles[index]
+                                    try? FileManager.default.removeItem(at: fileURL)
+                                }
+                                asyncLoadFiles()
+                            },
+                            onRename: { file in
+                                fileToRename = file
+                                let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
+                                newFileName = name
+                                showRenameAlert = true
+                            }
+                        )
                     }
 
                 }
