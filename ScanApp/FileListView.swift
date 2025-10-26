@@ -41,8 +41,14 @@ struct FileListView: View {
                 if let fileURL = selectedFileURL {
                     DocumentInteractionView(url: fileURL)
                         .ignoresSafeArea()
+                        
                 }
+            
             }
+            Text(debugMessage)
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(4)
         }
     }
 }
@@ -70,6 +76,7 @@ struct FileListContentView: View {
     @State private var showErrorAlert = false
     @State private var errorAlertTitle = ""
     @State private var errorAlertMessage = ""
+    @State private var debugMessage: String = ""
     @Binding var selectedFileURL: URL?
     @Binding var showPreview: Bool
     
@@ -226,24 +233,28 @@ struct FileListContentView: View {
     }
 
     private func asyncLoadFiles() {
+        debugMessage = "Loading files from: \(currentURL.lastPathComponent)"
         isLoading = true
         isReloading = true
+        
         DispatchQueue.global(qos: .userInitiated).async {
             let contents = (try? fileManager.contentsOfDirectory(
                 at: self.currentURL,
                 includingPropertiesForKeys: [.isDirectoryKey, .creationDateKey]
             )) ?? []
-    
+            
             DispatchQueue.main.async {
                 self.files = contents
                 self.isLoading = false
                 self.isReloading = false
-                self.sortFiles()   // ← ここを追加！
+                self.sortFiles()
+                self.debugMessage = "Loaded \(contents.count) items from \(self.currentURL.lastPathComponent)"
             }
         }
     }
 
     private func handleTap(_ file: URL) {
+        debugMessage = "Tapped: \(file.lastPathComponent)"
         if isEditing {
             if selectedFiles.contains(file) {
                 selectedFiles.remove(file)
