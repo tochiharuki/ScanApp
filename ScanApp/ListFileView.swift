@@ -20,7 +20,7 @@ struct ListFileView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 40, height: 40)
-                            .foregroundStyle(.yellow)
+                            .foregroundStyle(.black)
                     } else {
                         // 🖼 ファイル（画像）
                         if let image = UIImage(contentsOfFile: url.path) {
@@ -63,5 +63,5 @@ struct ListFileView: View {
         var isDir: ObjCBool = false
         FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
         return isDir.boolValue
-    }
+    
 }
