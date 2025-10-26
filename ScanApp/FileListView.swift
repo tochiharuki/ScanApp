@@ -37,7 +37,7 @@ struct FileListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showPreview) {
                 if let fileURL = selectedFileURL {
-                    QuickLookPreview(url: fileURL)
+                    DocumentInteractionView(url: fileURL)
                         .ignoresSafeArea()
                 }
             }
