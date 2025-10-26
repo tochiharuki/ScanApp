@@ -29,7 +29,7 @@ struct GridFileView: View {
                             // 🖼 実際の画像
                             Image(uiImage: image)
                                 .resizable()
-                                .scaledToFill()
+                                .scaledToFit()
                                 .frame(width: 80, height: 80)
                                 .cornerRadius(10)
                                 .clipped()
