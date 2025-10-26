@@ -78,12 +78,18 @@ struct FileListContentView: View {
                                 selectedFiles: $selectedFiles,
                                 isEditing: $isEditing,
                                 onTap: handleTap,
-                                deleteAction: deleteSelectedFiles,
+                                deleteAction: { indexSet in
+                                    for index in indexSet {
+                                        let file = files[index]
+                                        try? FileManager.default.removeItem(at: file)
+                                    }
+                                    asyncLoadFiles()
+                                },
                                 onRename: { file in
                                     fileToRename = file
                                     showRenameAlert = true
                                 }
-                            )
+)
                     } else {
                         // 📄 リスト表示
                         ListFileView(
@@ -91,20 +97,18 @@ struct FileListContentView: View {
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
                             onTap: { url in
-                                // タップ時の処理
                                 print("Tapped: \(url.lastPathComponent)")
                             },
                             deleteAction: { indexSet in
-                                // 削除処理
-                                indexSet.forEach { index in
+                                for index in indexSet {
                                     let fileURL = files[index]
                                     try? FileManager.default.removeItem(at: fileURL)
                                 }
-                                files.remove(atOffsets: indexSet)
+                                asyncLoadFiles()
                             },
                             onRename: { url in
-                                // 名前変更処理
-                                print("Rename: \(url.lastPathComponent)")
+                                fileToRename = url
+                                showRenameAlert = true
                             }
                         )
 
