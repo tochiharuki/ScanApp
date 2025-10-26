@@ -63,5 +63,7 @@ struct ListFileView: View {
         var isDir: ObjCBool = false
         FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
         return isDir.boolValue
+        
+    }
     
 }
