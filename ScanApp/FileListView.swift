@@ -68,8 +68,8 @@ struct FileListContentView: View {
     @State private var showErrorAlert = false
     @State private var errorAlertTitle = ""
     @State private var errorAlertMessage = ""
-    @State private var selectedFileURL: URL? = nil     // ✅ プレビュー対象ファイル
-    @State private var showPreview = false              // ✅ QuickLook 表示用フラグ
+    @Binding var selectedFileURL: URL?
+    @Binding var showPreview: Bool
     
     private func showErrorAlert(title: String, message: String) {
         errorAlertTitle = title
