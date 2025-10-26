@@ -7,39 +7,36 @@ struct ListFileView: View {
     @Binding var isEditing: Bool
     var onTap: (URL) -> Void
     var deleteAction: (IndexSet) -> Void
-    var onRename: (URL) -> Void   // ←追加
+    var onRename: (URL) -> Void
 
     var body: some View {
         List {
             ForEach(files, id: \.self) { url in
                 HStack(spacing: 12) {
-                    // MARK: -アイコン表示
+                    // アイコン表示
                     if isDirectory(url) {
-                    // 📁 フォルダの場合
-                    Image(systemName: "folder.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .foregroundStyle(.black)
+                        // フォルダ
+                        Image(systemName: "folder.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                            .foregroundStyle(.black)
                     } else {
-                        // 📄 ファイルの場合は汎用アイコンのみ
+                        // ファイル（リスト表示では汎用アイコン）
                         Image(systemName: "doc.text.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 40, height: 40)
                             .foregroundStyle(.gray)
-                     }
-                 
-                }
-           }
+                    }
 
-                    // MARK: - ファイル名
+                    // ファイル名
                     Text(url.lastPathComponent)
                         .font(.body)
                         .lineLimit(1)
                     Spacer()
                 }
-                .contentShape(Rectangle()) // ← タップ範囲拡大
+                .contentShape(Rectangle())
                 .onTapGesture {
                     if !isEditing {
                         onTap(url)
@@ -51,12 +48,10 @@ struct ListFileView: View {
         .listStyle(.plain)
     }
 
-    // MARK: - フォルダ判定
+    // フォルダ判定
     func isDirectory(_ url: URL) -> Bool {
         var isDir: ObjCBool = false
         FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
         return isDir.boolValue
-        
     }
-    
 }
