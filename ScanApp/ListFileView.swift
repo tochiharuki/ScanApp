@@ -16,7 +16,14 @@ struct ListFileView: View {
                     if isEditing {
                         Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
                     }
-                    FileThumbnailView(url: file)   // ← ここを変更
+        
+                    // ✅ サムネイルではなくアイコンを表示
+                    Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(file.hasDirectoryPath ? .black : .gray)
+        
                     Text(file.lastPathComponent)
                         .lineLimit(1)
                 }
