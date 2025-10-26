@@ -10,6 +10,8 @@ import UniformTypeIdentifiers
 
 struct FileListView: View {
     @State private var currentURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    @State private var selectedFileURL: URL? = nil
+    @State private var showPreview = false
     
 
     var body: some View {
@@ -25,7 +27,11 @@ struct FileListView: View {
                 Divider()
 
                 // ✅ コンテンツ部分
-                FileListContentView(currentURL: $currentURL)
+                FileListContentView(
+                    currentURL: $currentURL,
+                    selectedFileURL: $selectedFileURL,
+                    showPreview: $showPreview
+                )
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
