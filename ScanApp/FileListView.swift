@@ -10,6 +10,8 @@ import UniformTypeIdentifiers
 
 struct FileListView: View {
     @State private var currentURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    @State private var selectedFileURL: URL? = nil     // ✅ プレビュー対象ファイル
+    @State private var showPreview = false              // ✅ QuickLook 表示用フラグ
 
     var body: some View {
         NavigationStack {
@@ -28,6 +30,12 @@ struct FileListView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showPreview) {
+                if let fileURL = selectedFileURL {
+                    QuickLookPreview(url: fileURL)
+                        .ignoresSafeArea()
+                }
+            }
         }
     }
 }
@@ -233,10 +241,17 @@ struct FileListContentView: View {
 
     private func handleTap(_ file: URL) {
         if isEditing {
-            if selectedFiles.contains(file) { selectedFiles.remove(file) }
-            else { selectedFiles.insert(file) }
+            if selectedFiles.contains(file) {
+                selectedFiles.remove(file)
+            } else {
+                selectedFiles.insert(file)
+            }
         } else if file.hasDirectoryPath {
-            currentURL = file // まずはアニメーションなしで
+            currentURL = file
+        } else {
+            // ✅ ファイルを開く
+            selectedFileURL = file
+            showPreview = true
         }
     }
 
