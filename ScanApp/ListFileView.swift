@@ -13,7 +13,7 @@ struct ListFileView: View {
         List {
             ForEach(files, id: \.self) { url in
                 HStack(spacing: 12) {
-                    // MARK: - アイコン表示
+                    // MARK: -アイコン表示
                     if isDirectory(url) {
                     // 📁 フォルダの場合
                     Image(systemName: "folder.fill")
