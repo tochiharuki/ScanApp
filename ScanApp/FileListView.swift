@@ -96,9 +96,7 @@ struct FileListContentView: View {
                             files: files,
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
-                            onTap: { url in
-                                print("Tapped: \(url.lastPathComponent)")
-                            },
+                            onTap: handleTap,
                             deleteAction: { indexSet in
                                 for index in indexSet {
                                     let fileURL = files[index]
