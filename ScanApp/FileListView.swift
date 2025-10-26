@@ -73,14 +73,17 @@ struct FileListContentView: View {
                 Group {
                     if isGridView {
                         // 🧩 アイコン（サムネイル）表示
-                        GridFileView(
-                            files: files,
-                            selectedFiles: $selectedFiles,
-                            isEditing: $isEditing,
-                            onTap: onTap,
-                            deleteAction: deleteAction,
-                            onRename: onRename
-                        )
+                            GridFileView(
+                                files: files,
+                                selectedFiles: $selectedFiles,
+                                isEditing: $isEditing,
+                                onTap: handleTap,
+                                deleteAction: deleteSelectedFiles,
+                                onRename: { file in
+                                    fileToRename = file
+                                    showRenameAlert = true
+                                }
+                            )
                     } else {
                         // 📄 リスト表示
                         ListFileView(
