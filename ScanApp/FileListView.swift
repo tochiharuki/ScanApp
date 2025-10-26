@@ -85,8 +85,11 @@ struct FileListContentView: View {
                                     }
                                     asyncLoadFiles()
                                 },
+                                // ListFileView 呼び出し内の onRename も同様にする
                                 onRename: { file in
                                     fileToRename = file
+                                    let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
+                                    newFileName = name
                                     showRenameAlert = true
                                 }
 )
@@ -104,8 +107,11 @@ struct FileListContentView: View {
                                 }
                                 asyncLoadFiles()
                             },
-                            onRename: { url in
-                                fileToRename = url
+                            // ListFileView 呼び出し内の onRename も同様にする
+                            onRename: { file in
+                                fileToRename = file
+                                let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
+                                newFileName = name
                                 showRenameAlert = true
                             }
                         )
