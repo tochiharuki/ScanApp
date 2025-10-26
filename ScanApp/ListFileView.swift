@@ -16,12 +16,13 @@ struct ListFileView: View {
                     if isEditing {
                         Image(systemName: selectedFiles.contains(file) ? "checkmark.circle.fill" : "circle")
                     }
-                    Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
+                    FileThumbnailView(url: file)   // ← ここを変更
                     Text(file.lastPathComponent)
+                        .lineLimit(1)
                 }
                 .onTapGesture { onTap(file) }
                 .onLongPressGesture {
-                    onRename(file)   // 長押しでリネーム
+                    onRename(file)
                 }
             }
             .onDelete(perform: deleteAction)

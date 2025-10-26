@@ -18,11 +18,8 @@ struct FileGridItem: View {
         VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 VStack {
-                    Image(systemName: file.hasDirectoryPath ? "folder.fill" : "doc.text.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(file.hasDirectoryPath ? .black : .gray)
+                    FileThumbnailView(url: file)   // ← 新しいビューを使う
+                        .frame(width: 60, height: 60)
                     Text(file.lastPathComponent)
                         .font(.caption)
                         .multilineTextAlignment(.center)
