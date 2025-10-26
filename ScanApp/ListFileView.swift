@@ -22,23 +22,14 @@ struct ListFileView: View {
                             .frame(width: 40, height: 40)
                             .foregroundStyle(.black)
                     } else {
-                        // 🖼 ファイル（画像）
-                        if let image = UIImage(contentsOfFile: url.path) {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 60, height: 60)
-                                .cornerRadius(6)
-                                .clipped()
-                        } else {
-                            // 📄 その他のファイル
-                            Image(systemName: "doc.text.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 40, height: 40)
-                                .foregroundStyle(.gray)
-                        }
-                    }
+                        // 📄 ファイルの場合は汎用アイコンのみ
+                        Image(systemName: "doc.text.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                            .foregroundStyle(.gray)
+                    }   
+               }
 
                     // MARK: - ファイル名
                     Text(url.lastPathComponent)
