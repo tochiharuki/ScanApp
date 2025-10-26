@@ -25,7 +25,7 @@
 		88860B032EAAAFA8006948EE /* GridFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B022EAAAFA8006948EE /* GridFileView.swift */; };
 		88860B052EAAAFD0006948EE /* ListFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B042EAAAFD0006948EE /* ListFileView.swift */; };
 		88860B072EADA4BF006948EE /* FileThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B062EADA4BF006948EE /* FileThumbnailView.swift */; };
-		88860B0D2EAE659A006948EE /* DocumentInteractionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B0C2EAE659A006948EE /* DocumentInteractionView.swift */; };
+		88860B0F2EAE6A11006948EE /* DocumentInteractionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B0E2EAE6A11006948EE /* DocumentInteractionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,7 +69,7 @@
 		88860B022EAAAFA8006948EE /* GridFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridFileView.swift; sourceTree = "<group>"; };
 		88860B042EAAAFD0006948EE /* ListFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileView.swift; sourceTree = "<group>"; };
 		88860B062EADA4BF006948EE /* FileThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileThumbnailView.swift; sourceTree = "<group>"; };
-		88860B0C2EAE659A006948EE /* DocumentInteractionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentInteractionView.swift; sourceTree = "<group>"; };
+		88860B0E2EAE6A11006948EE /* DocumentInteractionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentInteractionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,7 +137,7 @@
 				88860B022EAAAFA8006948EE /* GridFileView.swift */,
 				88860B042EAAAFD0006948EE /* ListFileView.swift */,
 				88860B062EADA4BF006948EE /* FileThumbnailView.swift */,
-				88860B0C2EAE659A006948EE /* DocumentInteractionView.swift */,
+				88860B0E2EAE6A11006948EE /* DocumentInteractionView.swift */,
 			);
 			path = ScanApp;
 			sourceTree = "<group>";
@@ -309,7 +309,7 @@
 				88860AC32EA7AB35006948EE /* ContentView.swift in Sources */,
 				88860AC12EA7AB35006948EE /* ScanAppApp.swift in Sources */,
 				88860AEC2EA7BCD2006948EE /* ScanView.swift in Sources */,
-				88860B0D2EAE659A006948EE /* DocumentInteractionView.swift in Sources */,
+				88860B0F2EAE6A11006948EE /* DocumentInteractionView.swift in Sources */,
 				88860AF92EA91FB3006948EE /* FolderSelectionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
