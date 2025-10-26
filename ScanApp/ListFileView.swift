@@ -21,14 +21,16 @@ struct ListFileView: View {
                         .scaledToFit()
                         .frame(width: 40, height: 40)
                         .foregroundStyle(.black)
-                } else {
-                    // 📄 ファイルの場合は汎用アイコンのみ
-                    Image(systemName: "doc.text.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .foregroundStyle(.gray)
-                 }
+                    } else {
+                        // 📄 ファイルの場合は汎用アイコンのみ
+                        Image(systemName: "doc.text.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                            .foregroundStyle(.gray)
+                     }
+                 
+                }
            }
 
                     // MARK: - ファイル名
