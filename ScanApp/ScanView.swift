@@ -118,6 +118,7 @@ struct ScanView: View {
                 
             }
             .frame(maxWidth: .infinity) // VStack を画面幅いっぱいに
+            .padding(.bottom, 80)
 
         }
         // ✅ カメラビューをフルスクリーンで開く
