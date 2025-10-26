@@ -54,6 +54,9 @@ struct GridFileView: View {
                             onTap(url)
                         }
                     }
+                    .onLongPressGesture {
+                        onRename(url) // 長押しでリネーム
+                    }
                 }
             }
             .padding(.horizontal, 16)

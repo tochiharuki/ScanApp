@@ -42,6 +42,9 @@ struct ListFileView: View {
                         onTap(url)
                     }
                 }
+                .onLongPressGesture {
+                    onRename(url) // 長押しでリネーム
+                }
             }
             .onDelete(perform: deleteAction)
         }
