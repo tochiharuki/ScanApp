@@ -19,14 +19,14 @@ struct ListFileView: View {
                         Image(systemName: "folder.fill")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 20, height: 20)
                             .foregroundStyle(.black)
                     } else {
                         // ファイル（リスト表示では汎用アイコン）
                         Image(systemName: "doc.text.fill")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 20, height: 20)
                             .foregroundStyle(.gray)
                     }
 
