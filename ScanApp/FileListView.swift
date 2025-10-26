@@ -45,10 +45,7 @@ struct FileListView: View {
                 }
             
             }
-            Text(debugMessage)
-                .font(.caption)
-                .foregroundColor(.gray)
-                .padding(4)
+            
         }
     }
 }
@@ -170,6 +167,10 @@ struct FileListContentView: View {
         } message: {
             Text(errorAlertMessage)
         }
+        Text(debugMessage)
+            .font(.caption)
+            .foregroundColor(.gray)
+            .padding(4)
         .sheet(isPresented: $showMoveSheet) {
             NavigationStack {
                 FolderSelectionView(
