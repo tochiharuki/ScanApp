@@ -35,7 +35,9 @@ struct FileListView: View {
                 FileListContentView(
                     currentURL: $currentURL,
                     selectedFileURL: $selectedFileURL,
-                    showPreview: $showPreview
+                    showPreview: $showPreview,
+                    showPhotoPicker: $showPhotoPicker,       // ← 追加
+                    showFileImporter: $showFileImporter      // ← 追加
                 )
             }
             .navigationTitle("")
@@ -96,6 +98,11 @@ struct FileListContentView: View {
     @State private var debugMessage: String = ""
     @Binding var selectedFileURL: URL?
     @Binding var showPreview: Bool
+    @Binding var currentURL: URL
+    @Binding var showPreview: Bool
+
+    @Binding var showPhotoPicker: Bool       // ✅ 追加
+    @Binding var showFileImporter: Bool
     @State private var docController: UIDocumentInteractionController?
     @State private var docCoordinator: DocumentInteractionCoordinator?
     
