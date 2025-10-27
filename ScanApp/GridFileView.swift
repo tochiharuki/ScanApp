@@ -11,7 +11,8 @@ struct GridFileView: View {
     private let columns = [
         GridItem(.adaptive(minimum: 100), spacing: 12)
     ]
-    @State private var showMoveSheet = false
+    var onMove: (URL) -> Void    // ← 追加
+    var onShare: (URL) -> Void
 
     var body: some View {
         ScrollView {
@@ -59,14 +60,8 @@ struct GridFileView: View {
                         FileContextMenu(
                             file: url,
                             onRename: onRename,
-                            onMove: { file in
-                                selectedFiles = [file]
-                                showMoveSheet = true
-                            },
-                            onShare: { file in
-                                let controller = UIActivityViewController(activityItems: [file], applicationActivities: nil)
-                                UIApplication.shared.topMostViewController()?.present(controller, animated: true)
-                            }
+                            onMove: onMove,     // 親の onMove を呼ぶ
+                            onShare: onShare    // 親の onShare を呼ぶ
                         )
                     }
                     

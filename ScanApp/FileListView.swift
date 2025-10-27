@@ -87,22 +87,37 @@ struct FileListContentView: View {
                 Group {
                     if isGridView {
                         GridFileView(
-                            files: filteredFiles, // ← 修正！
+                            files: filteredFiles,
                             selectedFiles: $selectedFiles,
                             isEditing: $isEditing,
                             onTap: handleTap,
                             deleteAction: { indexSet in
-                                for index in indexSet {
-                                    let file = filteredFiles[index]
-                                    try? FileManager.default.removeItem(at: file)
-                                }
-                                asyncLoadFiles()
+                                ...
                             },
                             onRename: { file in
                                 fileToRename = file
                                 let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
                                 newFileName = name
                                 showRenameAlert = true
+                            },
+                            onMove: { file in
+                                // 親側で選択とシート表示を行う
+                                selectedFiles = [file]
+                                showMoveSheet = true
+                            },
+                            onShare: { file in
+                                // 親で UIActivityViewController を出す
+                                let items: [Any] = [file]
+                                let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                                if let top = UIApplication.shared.topMostViewController() {
+                                    // iPad でクラッシュしないように popoverPresentationController を設定すること（必要なら）
+                                    if let pop = activity.popoverPresentationController {
+                                        pop.sourceView = top.view
+                                        pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
+                                        pop.permittedArrowDirections = []
+                                    }
+                                    top.present(activity, animated: true)
+                                }
                             }
                         )
                     } else {
