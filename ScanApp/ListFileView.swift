@@ -8,6 +8,7 @@ struct ListFileView: View {
     var onTap: (URL) -> Void
     var deleteAction: (IndexSet) -> Void
     var onRename: (URL) -> Void
+    @State private var showMoveSheet = false
 
     var body: some View {
         List {
@@ -58,9 +59,19 @@ struct ListFileView: View {
                         onTap(url)
                     }
                 }
-                .onLongPressGesture {
-                    // 長押しでリネーム呼び出し（既にあった挙動）
-                    onRename(url)
+                .contextMenu {
+                    FileContextMenu(
+                        file: url,
+                        onRename: onRename,
+                        onMove: { file in
+                            selectedFiles = [file]
+                            showMoveSheet = true
+                        },
+                        onShare: { file in
+                            let controller = UIActivityViewController(activityItems: [file], applicationActivities: nil)
+                            UIApplication.shared.topMostViewController()?.present(controller, animated: true)
+                        }
+                    )
                 }
             }
             .onDelete(perform: deleteAction)
