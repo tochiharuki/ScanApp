@@ -157,7 +157,7 @@ struct FileListContentView: View {
                                 }
                             }
                         )
-}
+                    }
 
                 }
                 .searchable(text: $searchText)
