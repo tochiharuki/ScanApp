@@ -46,7 +46,7 @@ struct DocumentInteractionView: UIViewControllerRepresentable {
 
     class Coordinator: NSObject, UIDocumentInteractionControllerDelegate {
         weak var controller: UIDocumentInteractionController?
-        weak var parent: DocumentInteractionView?
+        var parent: DocumentInteractionView?
 
         func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
             UIApplication.shared.topMostViewController() ?? UIViewController()
