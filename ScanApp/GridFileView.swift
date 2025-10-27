@@ -11,6 +11,7 @@ struct GridFileView: View {
     private let columns = [
         GridItem(.adaptive(minimum: 100), spacing: 12)
     ]
+    @State private var showMoveSheet = false
 
     var body: some View {
         ScrollView {
@@ -68,9 +69,7 @@ struct GridFileView: View {
                             }
                         )
                     }
-                    .onLongPressGesture {
-                        onRename(url) // 長押しでリネーム
-                    }
+                    
                 }
             }
             .padding(.horizontal, 16)
