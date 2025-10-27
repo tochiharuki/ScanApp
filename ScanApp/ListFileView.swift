@@ -73,6 +73,10 @@ struct ListFileView: View {
                         }
                     )
                 }
+                onMove: { file in
+                    selectedFiles = [file]
+                    showMoveSheet = true
+                }
             }
             .onDelete(perform: deleteAction)
         }
