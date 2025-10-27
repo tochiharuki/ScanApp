@@ -22,9 +22,7 @@ struct FileListView: View {
             VStack(spacing: 0) {
                 // ✅ パスバー（FolderSelectionViewと同じロジック）
                 PathBarView(currentURL: currentURL) { url in
-                    withAnimation {
-                        currentURL = url
-                    }
+                    currentURL = url  // ← アニメーション削除
                 }
 
                 Divider()
