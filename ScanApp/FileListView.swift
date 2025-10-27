@@ -87,8 +87,8 @@ struct FileListContentView: View {
     @State private var showNoSelectionAlert = false
     @State private var selectedFolderURL: URL? = nil
     @State private var isLoading = false
-    @State private var isReloading = false   // ← body の外に書く
-    @State private var sortOption: SortOption = .dateDesc  // ← デフォルトを新しい順に変更
+    @State private var isReloading = false
+    @State private var sortOption: SortOption = .dateDesc
     @State private var showRenameAlert = false
     @State private var fileToRename: URL? = nil
     @State private var newFileName = ""
@@ -96,12 +96,10 @@ struct FileListContentView: View {
     @State private var errorAlertTitle = ""
     @State private var errorAlertMessage = ""
     @State private var debugMessage: String = ""
+
     @Binding var selectedFileURL: URL?
     @Binding var showPreview: Bool
-    @Binding var currentURL: URL
-    @Binding var showPreview: Bool
-
-    @Binding var showPhotoPicker: Bool       // ✅ 追加
+    @Binding var showPhotoPicker: Bool
     @Binding var showFileImporter: Bool
     @State private var docController: UIDocumentInteractionController?
     @State private var docCoordinator: DocumentInteractionCoordinator?
