@@ -12,23 +12,22 @@ struct DocumentInteractionView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIViewController {
         let viewController = UIViewController()
-        viewController.view.backgroundColor = .systemBackground
+        viewController.view.backgroundColor = .clear  // ✅ 真っ白防止
 
-        // ✅ ドキュメントコントローラを初期化
+        // ✅ UIDocumentInteractionController を設定
         let docController = UIDocumentInteractionController(url: url)
         docController.delegate = context.coordinator
         context.coordinator.controller = docController
         context.coordinator.parent = self
 
-        // ✅ 少し遅らせてプレビューを表示（View階層が確立してから）
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        // ✅ ViewController が画面に表示されてからプレビューを開く
+        DispatchQueue.main.async {
             if FileManager.default.fileExists(atPath: url.path) {
-                onDebugMessage?("✅ Presenting preview for \(url.lastPathComponent)")
-                if let topVC = UIApplication.shared.topMostViewController() {
+                if let presenter = viewController.presentingViewController ?? UIApplication.shared.topMostViewController() {
+                    onDebugMessage?("✅ Opening preview for \(url.lastPathComponent)")
                     docController.presentPreview(animated: true)
-                    onDebugMessage?("📄 Preview opened successfully from \(String(describing: topVC))")
                 } else {
-                    onDebugMessage?("⚠️ Could not find top view controller")
+                    onDebugMessage?("⚠️ Could not find presenter VC")
                 }
             } else {
                 onDebugMessage?("❌ File not found: \(url.lastPathComponent)")
@@ -38,7 +37,7 @@ struct DocumentInteractionView: UIViewControllerRepresentable {
         return viewController
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) { }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -61,7 +60,6 @@ struct DocumentInteractionView: UIViewControllerRepresentable {
         }
     }
 }
-
 
 // MARK: - Helper Extension
 extension UIApplication {
