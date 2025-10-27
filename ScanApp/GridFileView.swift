@@ -54,6 +54,20 @@ struct GridFileView: View {
                             onTap(url)  // ← フォルダでもファイルでも呼ぶ
                         }
                     }
+                    .contextMenu {
+                        FileContextMenu(
+                            file: url,
+                            onRename: onRename,
+                            onMove: { file in
+                                selectedFiles = [file]
+                                showMoveSheet = true
+                            },
+                            onShare: { file in
+                                let controller = UIActivityViewController(activityItems: [file], applicationActivities: nil)
+                                UIApplication.shared.topMostViewController()?.present(controller, animated: true)
+                            }
+                        )
+                    }
                     .onLongPressGesture {
                         onRename(url) // 長押しでリネーム
                     }

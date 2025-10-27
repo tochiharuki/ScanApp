@@ -386,3 +386,33 @@ extension UIViewController {
     }
 }
 
+// MARK: - 共通コンテキストメニュー
+struct FileContextMenu: View {
+    let file: URL
+    let onRename: (URL) -> Void
+    let onMove: (URL) -> Void
+    let onShare: (URL) -> Void
+
+    var body: some View {
+        Group {
+            Button {
+                onRename(file)
+            } label: {
+                Label("Rename", systemImage: "pencil")
+            }
+
+            Button {
+                onMove(file)
+            } label: {
+                Label("Move", systemImage: "folder")
+            }
+
+            Button {
+                onShare(file)
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+        }
+    }
+}
+
