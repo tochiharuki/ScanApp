@@ -8,6 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import UIKit
+import PhotosUI
 
 
 struct FileListView: View {
@@ -15,6 +16,9 @@ struct FileListView: View {
     @State private var selectedFileURL: URL? = nil
     @State private var showPreview = false
     @State private var debugMessage = ""
+    @State private var showPhotoPicker = false
+    @State private var showFileImporter = false
+    @State private var selectedItem: PhotosPickerItem? = nil
     
 
     var body: some View {
@@ -36,7 +40,28 @@ struct FileListView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            
+            .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItem, matching: [.images, .pdf]) // 画像＋PDF対応
+            .onChange(of: selectedItem) { newItem in
+                guard let newItem else { return }
+                Task {
+                    if let data = try? await newItem.loadTransferable(type: Data.self) {
+                        let filename = (newItem.itemIdentifier ?? UUID().uuidString) + ".jpg"
+                        let destinationURL = currentURL.appendingPathComponent(filename)
+                        try? data.write(to: destinationURL)
+                        NotificationCenter.default.post(name: .reloadFileList, object: nil)
+                    }
+                }
+            }
+            .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item, .data, .image, .pdf]) { result in
+                switch result {
+                case .success(let selectedURL):
+                    let destinationURL = currentURL.appendingPathComponent(selectedURL.lastPathComponent)
+                    try? FileManager.default.copyItem(at: selectedURL, to: destinationURL)
+                    NotificationCenter.default.post(name: .reloadFileList, object: nil)
+                case .failure:
+                    break
+                }
+            }
         }
     }
 }
@@ -166,6 +191,9 @@ struct FileListContentView: View {
             }
         }
         .onAppear { asyncLoadFiles() }
+        .onReceive(NotificationCenter.default.publisher(for: .reloadFileList)) { _ in
+            asyncLoadFiles()
+        }
         .onChange(of: currentURL) { _ in
             guard !isReloading else { return }
             isReloading = true
@@ -249,6 +277,22 @@ struct FileListContentView: View {
                     Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 17))
                 }
+                Menu {
+                    Button {
+                        showPhotoPicker = true
+                    } label: {
+                        Label("Import from Photos", systemImage: "photo.on.rectangle")
+                    }
+        
+                    Button {
+                        showFileImporter = true
+                    } label: {
+                        Label("Import from Files", systemImage: "doc")
+                    }
+                } label: {
+                    Image(systemName: "plus")
+                }
+
             }
         }
     }
@@ -446,5 +490,10 @@ struct FileContextMenu: View {
             }
         }
     }
+}
+
+
+extension Notification.Name {
+    static let reloadFileList = Notification.Name("reloadFileList")
 }
 
