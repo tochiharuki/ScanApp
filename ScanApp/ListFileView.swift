@@ -63,16 +63,11 @@ struct ListFileView: View {
                     FileContextMenu(
                         file: url,
                         onRename: onRename,
-                        onMove: { file in
-                            selectedFiles = [file]
-                            showMoveSheet = true
-                        },
-                        onShare: { file in
-                            let controller = UIActivityViewController(activityItems: [file], applicationActivities: nil)
-                            UIApplication.shared.topMostViewController()?.present(controller, animated: true)
-                        }
+                        onMove: onMove,     // ✅ 共通の移動アクション
+                        onShare: onShare    // ✅ 共通の共有アクション
                     )
                 }
+               
                 onMove: { file in
                     selectedFiles = [file]
                     showMoveSheet = true
