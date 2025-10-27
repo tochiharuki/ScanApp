@@ -40,7 +40,11 @@ struct FileListView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItem, matching: [.images, .pdf]) // 画像＋PDF対応
+            .photosPicker(
+                isPresented: $showPhotoPicker,
+                selection: $selectedItem,
+                matching: PHPickerFilter.any(of: [.images, .livePhotos]) // ← PDFは非対応
+            )
             .onChange(of: selectedItem) { newItem in
                 guard let newItem else { return }
                 Task {
