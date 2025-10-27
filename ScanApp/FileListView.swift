@@ -38,17 +38,6 @@ struct FileListView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showPreview) {
-                if let fileURL = selectedFileURL {
-                    DocumentInteractionView(
-                        url: fileURL,
-                        onDebugMessage: { message in
-                            debugMessage = message  // ← 🔹 デバッグメッセージを更新
-                        }
-                    )
-                    .ignoresSafeArea()
-                }
-            }
             
         }
     }
@@ -80,6 +69,8 @@ struct FileListContentView: View {
     @State private var debugMessage: String = ""
     @Binding var selectedFileURL: URL?
     @Binding var showPreview: Bool
+    @State private var docController: UIDocumentInteractionController?
+    @State private var docCoordinator: DocumentInteractionCoordinator?
     
     private func showErrorAlert(title: String, message: String) {
         errorAlertTitle = title
@@ -269,11 +260,26 @@ struct FileListContentView: View {
         } else if file.hasDirectoryPath {
             currentURL = file
         } else {
-            // ✅ ファイルを選択して sheet を開く
-            selectedFileURL = file
-            showPreview = true
-        }
-    }
+            // ✅ ファイルを直接開く（.sheetなし）
+            if FileManager.default.fileExists(atPath: file.path) {
+                debugMessage = "📄 Opening file: \(file.lastPathComponent)"
+                
+                let controller = UIDocumentInteractionController(url: file)
+                let coordinator = DocumentInteractionCoordinator(onDebugMessage: { msg in
+                    debugMessage = msg
+                })
+                controller.delegate = coordinator
+                
+                // 🔹 プロパティに保持してメモリ解放されないようにする
+                self.docController = controller
+                self.docCoordinator = coordinator
+                
+                UIApplication.shared.topMostViewController()?.presentPreview(for: controller)
+            } else {
+                debugMessage = "❌ File not found: \(file.lastPathComponent)"
+            }
+        } 
+   }
 
     private func deleteFiles(at offsets: IndexSet) {
         for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
@@ -354,3 +360,31 @@ struct FileListContentView: View {
 
 
     }
+    
+// MARK: - Document Interaction Helper
+class DocumentInteractionCoordinator: NSObject, UIDocumentInteractionControllerDelegate {
+    var onDebugMessage: ((String) -> Void)?
+    init(onDebugMessage: ((String) -> Void)? = nil) {
+        self.onDebugMessage = onDebugMessage
+    }
+
+    func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
+        UIApplication.shared.topMostViewController() ?? UIViewController()
+    }
+
+    func documentInteractionControllerWillBeginPreview(_ controller: UIDocumentInteractionController) {
+        onDebugMessage?("👁️ Will begin preview")
+    }
+
+    func documentInteractionControllerDidEndPreview(_ controller: UIDocumentInteractionController) {
+        onDebugMessage?("✅ Preview closed")
+    }
+}
+
+// MARK: - Helper Extension
+extension UIViewController {
+    func presentPreview(for controller: UIDocumentInteractionController) {
+        controller.presentPreview(animated: true)
+    }
+}
+
