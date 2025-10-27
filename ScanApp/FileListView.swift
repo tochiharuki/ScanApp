@@ -14,6 +14,7 @@ struct FileListView: View {
     @State private var currentURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     @State private var selectedFileURL: URL? = nil
     @State private var showPreview = false
+    @State private var debugMessage = ""
     
 
     var body: some View {
