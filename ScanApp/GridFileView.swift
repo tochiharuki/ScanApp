@@ -50,8 +50,8 @@ struct GridFileView: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        if !isEditing, isDirectory(url) {
-                            onTap(url)
+                        if !isEditing {
+                            onTap(url)  // ← フォルダでもファイルでも呼ぶ
                         }
                     }
                     .onLongPressGesture {
