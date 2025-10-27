@@ -258,28 +258,28 @@ struct FileListContentView: View {
         } else if file.hasDirectoryPath {
             currentURL = file
         } else {
-            // ✅ ファイルを直接開く（.sheetなし）
+            // ✅ ファイルを共有・保存できるようにする
             if FileManager.default.fileExists(atPath: file.path) {
                 debugMessage = "📄 Opening file: \(file.lastPathComponent)"
                 
-                let controller = UIDocumentInteractionController(url: file)
-                let coordinator = DocumentInteractionCoordinator(onDebugMessage: { msg in
-                    debugMessage = msg
-                })
-                controller.delegate = coordinator
-                
-                // 🔹 プロパティに保持してメモリ解放されないようにする
-                self.docController = controller
-                self.docCoordinator = coordinator
-                
-                UIApplication.shared.topMostViewController()?.presentPreview(for: controller)
+                // 🔹 iOS標準の共有パネル
+                let activityVC = UIActivityViewController(
+                    activityItems: [file],
+                    applicationActivities: nil
+                )
+    
+                // iPad対応（必須）
+                if let topVC = UIApplication.shared.topMostViewController() {
+                    activityVC.popoverPresentationController?.sourceView = topVC.view
+                    topVC.present(activityVC, animated: true)
+                }
             } else {
                 debugMessage = "❌ File not found: \(file.lastPathComponent)"
             }
-        } 
-   }
+        }
+    }  
 
-    private func deleteFiles(at offsets: IndexSet) {
+  private func deleteFiles(at offsets: IndexSet) {
         for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
         asyncLoadFiles()
     }
