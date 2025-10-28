@@ -58,14 +58,38 @@ struct FileListView: View {
                     }
                 }
             }
-            .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item, .data, .image, .pdf]) { result in
+            .fileImporter(
+                isPresented: $showFileImporter,
+                allowedContentTypes: [.image, .pdf, .data],
+                allowsMultipleSelection: false
+            ) { result in
                 switch result {
-                case .success(let selectedURL):
+                case .success(let urls):
+                    // urls は [URL] 型
+                    guard let selectedURL = urls.first else { return }
+            
+                    // アクセス権を取得（iCloudなどの場合に必須）
+                    _ = selectedURL.startAccessingSecurityScopedResource()
+                    defer { selectedURL.stopAccessingSecurityScopedResource() }
+            
                     let destinationURL = currentURL.appendingPathComponent(selectedURL.lastPathComponent)
-                    try? FileManager.default.copyItem(at: selectedURL, to: destinationURL)
-                    NotificationCenter.default.post(name: .reloadFileList, object: nil)
-                case .failure:
-                    break
+            
+                    do {
+                        if FileManager.default.fileExists(atPath: destinationURL.path) {
+                            // 同名ファイルは上書きしないようリネーム
+                            let newName = UUID().uuidString + "_" + selectedURL.lastPathComponent
+                            let newDest = currentURL.appendingPathComponent(newName)
+                            try FileManager.default.copyItem(at: selectedURL, to: newDest)
+                        } else {
+                            try FileManager.default.copyItem(at: selectedURL, to: destinationURL)
+                        }
+                        NotificationCenter.default.post(name: .reloadFileList, object: nil)
+                    } catch {
+                        print("❌ Copy failed: \(error.localizedDescription)")
+                    }
+            
+                case .failure(let error):
+                    print("❌ Import failed: \(error.localizedDescription)")
                 }
             }
         }
