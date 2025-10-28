@@ -20,6 +20,7 @@ struct FileListView: View {
     @State private var showFileImporter = false
     @State private var selectedItem: PhotosPickerItem? = nil
     
+    
 
     var body: some View {
         NavigationStack {
@@ -152,6 +153,12 @@ struct FileListContentView: View {
                             deleteAction: { indexSet in
                                 for index in indexSet {
                                     let fileURL = filteredFiles[index]
+                                    moveToTrash(file: fileURL)  // ← ゴミ箱に移動
+                                }
+                                                            asyncLoadFiles()
+                            }, { indexSet in
+                                for index in indexSet {
+                                    let fileURL = filteredFiles[index]
                                     try? FileManager.default.removeItem(at: fileURL)
                                 }
                                 asyncLoadFiles()
@@ -223,7 +230,10 @@ struct FileListContentView: View {
 
             }
         }
-        .onAppear { asyncLoadFiles() }
+        .onAppear {
+            ensureTrashFolderExists()  // ← ここを追加
+            asyncLoadFiles()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .reloadFileList)) { _ in
             asyncLoadFiles()
         }
@@ -365,7 +375,9 @@ struct FileListContentView: View {
                 selectedFiles.insert(file)
             }
         } else if file.hasDirectoryPath {
-            currentURL = file
+            withAnimation(.none) {
+                currentURL = file
+            }
         } else {
             // ✅ ファイルを直接開く（.sheetなし）
             if FileManager.default.fileExists(atPath: file.path) {
@@ -394,7 +406,9 @@ private func deleteFiles(at offsets: IndexSet) {
     }
 
     private func deleteSelectedFiles() {
-        for file in selectedFiles { try? fileManager.removeItem(at: file) }
+        for file in selectedFiles {
+            moveToTrash(file: file)   // ← ゴミ箱に移動
+        }
         selectedFiles.removeAll()
         asyncLoadFiles()
     }
@@ -530,3 +544,41 @@ extension Notification.Name {
     static let reloadFileList = Notification.Name("reloadFileList")
 }
 
+// MARK: - ゴミ箱フォルダを用意
+private let trashFolderName = "Trash"
+
+private func ensureTrashFolderExists() {
+    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    let trashURL = documentsURL.appendingPathComponent(trashFolderName)
+    
+    if !FileManager.default.fileExists(atPath: trashURL.path) {
+        try? FileManager.default.createDirectory(at: trashURL, withIntermediateDirectories: true)
+        print("🗑️ Trash folder created at \(trashURL.path)")
+    }
+}
+
+// MARK: - 削除 → ゴミ箱へ移動
+private func moveToTrash(file: URL) {
+    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    let trashURL = documentsURL.appendingPathComponent(trashFolderName)
+    try? FileManager.default.createDirectory(at: trashURL, withIntermediateDirectories: true)
+    
+    let destinationURL = trashURL.appendingPathComponent(file.lastPathComponent)
+    
+    
+    // 重複時は _1, _2 と連番を付ける
+    var finalURL = destinationURL
+    var counter = 1
+    while FileManager.default.fileExists(atPath: finalURL.path) {
+        let newName = "\(file.deletingPathExtension().lastPathComponent)_\(counter).\(file.pathExtension)"
+        finalURL = trashURL.appendingPathComponent(newName)
+        counter += 1
+    }
+
+    do {
+        try FileManager.default.moveItem(at: file, to: finalURL)
+        print("🗑️ Moved \(file.lastPathComponent) to Trash")
+    } catch {
+        print("❌ Failed to move to Trash: \(error)")
+    }
+}
