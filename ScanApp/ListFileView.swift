@@ -62,11 +62,11 @@ struct ListFileView: View {
                         file: url,
                         onRename: onRename,
                         onMove: onMove,
-                        onShare: onShare
-                        onDelete: { file in    // ← 追加
+                        onShare: onShare,
+                        onDelete: { file in    // ← ✅ 同様に
                             moveToTrash(file: file)
                             asyncLoadFiles()
-
+                        }
                     )
                 }
             }

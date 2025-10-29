@@ -60,12 +60,12 @@ struct GridFileView: View {
                         FileContextMenu(
                             file: url,
                             onRename: onRename,
-                            onMove: onMove,     // 親の onMove を呼ぶ
-                            onShare: onShare    // 親の onShare を呼ぶ
-                            onDelete: { file in    // ← 追加
+                            onMove: onMove,
+                            onShare: onShare,
+                            onDelete: { file in    // ← ✅ カンマを付けてクロージャをここに書く
                                 moveToTrash(file: file)
                                 asyncLoadFiles()
-
+                            }
                         )
                     }
                     
