@@ -62,6 +62,10 @@ struct GridFileView: View {
                             onRename: onRename,
                             onMove: onMove,     // 親の onMove を呼ぶ
                             onShare: onShare    // 親の onShare を呼ぶ
+                            onDelete: { file in    // ← 追加
+                                moveToTrash(file: file)
+                                asyncLoadFiles()
+
                         )
                     }
                     

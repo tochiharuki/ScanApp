@@ -129,6 +129,8 @@ struct FileListContentView: View {
     @State private var docController: UIDocumentInteractionController?
     @State private var docCoordinator: DocumentInteractionCoordinator?
     
+    
+    
     private func showErrorAlert(title: String, message: String) {
         errorAlertTitle = title
         errorAlertMessage = message
@@ -516,6 +518,7 @@ struct FileContextMenu: View {
     let onRename: (URL) -> Void
     let onMove: (URL) -> Void
     let onShare: (URL) -> Void
+    let onDelete: ((URL) -> Void)?
 
     var body: some View {
         Group {
@@ -530,6 +533,13 @@ struct FileContextMenu: View {
             } label: {
                 Label("Move", systemImage: "folder")
             }
+            
+            Button(role: .destructive) {
+                onDelete?(file)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+
 
             Button {
                 onShare(file)
