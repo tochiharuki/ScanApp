@@ -137,106 +137,25 @@ struct FileListContentView: View {
 
     private let fileManager = FileManager.default
 
-    var body: some View {   // ← 正しく body を宣言
+    var body: some View {
         VStack(spacing: 0) {
             if isLoading {
                 ProgressView("Loading...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                Group {
-                    if isGridView {
-                        GridFileView(
-                            files: filteredFiles,
-                            selectedFiles: $selectedFiles,
-                            isEditing: $isEditing,
-                            onTap: handleTap,
-                            deleteAction: { indexSet in
-                                for index in indexSet {
-                                    let fileURL = filteredFiles[index]
-                                    moveToTrash(file: fileURL)  // ← ゴミ箱に移動
-                                }
-                                                            asyncLoadFiles()
-                            }, { indexSet in
-                                for index in indexSet {
-                                    let fileURL = filteredFiles[index]
-                                    try? FileManager.default.removeItem(at: fileURL)
-                                }
-                                asyncLoadFiles()
-                            },
-                            onRename: { file in
-                                fileToRename = file
-                                let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
-                                newFileName = name
-                                showRenameAlert = true
-                            },
-                            onMove: { file in
-                                selectedFiles = [file]
-                                showMoveSheet = true
-                            },
-                            onShare: { file in
-                                let items: [Any] = [file]
-                                let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
-                                if let top = UIApplication.shared.topMostViewController() {
-                                    if let pop = activity.popoverPresentationController {
-                                        pop.sourceView = top.view
-                                        pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
-                                        pop.permittedArrowDirections = []
-                                    }
-                                    top.present(activity, animated: true)
-                                }
-                            }
-                        )
-                    } else {
-                        ListFileView(
-                            files: filteredFiles,
-                            selectedFiles: $selectedFiles,
-                            isEditing: $isEditing,
-                            onTap: handleTap,
-                            deleteAction: { indexSet in
-                                for index in indexSet {
-                                    let fileURL = filteredFiles[index]
-                                    try? FileManager.default.removeItem(at: fileURL)
-                                }
-                                asyncLoadFiles()
-                            },
-                            onRename: { file in
-                                fileToRename = file
-                                let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
-                                newFileName = name
-                                showRenameAlert = true
-                            },
-                            onMove: { file in
-                                selectedFiles = [file]
-                                showMoveSheet = true
-                            },
-                            onShare: { file in
-                                let items: [Any] = [file]
-                                let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
-                                if let top = UIApplication.shared.topMostViewController() {
-                                    if let pop = activity.popoverPresentationController {
-                                        pop.sourceView = top.view
-                                        pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
-                                        pop.permittedArrowDirections = []
-                                    }
-                                    top.present(activity, animated: true)
-                                }
-                            }
-                        )
-                    }
-
-                }
-                .searchable(text: $searchText)
-                .toolbar(content: toolbarContent)
-
+                contentView()   // ← 巨大な部分を関数化！
+                    .searchable(text: $searchText)
+                    .toolbar(content: toolbarContent)
             }
         }
         .onAppear {
-            ensureTrashFolderExists()  // ← ここを追加
+            ensureTrashFolderExists()
             asyncLoadFiles()
         }
         .onReceive(NotificationCenter.default.publisher(for: .reloadFileList)) { _ in
             asyncLoadFiles()
         }
+
         .onChange(of: currentURL) { _ in
             guard !isReloading else { return }
             isReloading = true
@@ -282,6 +201,75 @@ struct FileListContentView: View {
         }
         
     }
+    
+    @ViewBuilder
+    private func contentView() -> some View {
+        Group {
+            if isGridView {
+                gridContent()
+            } else {
+                listContent()
+            }
+        }
+    }
+        
+    @ViewBuilder
+    private func gridContent() -> some View {
+        GridFileView(
+            files: filteredFiles,
+            selectedFiles: $selectedFiles,
+            isEditing: $isEditing,
+            onTap: handleTap,
+            deleteAction: { indexSet in
+                for index in indexSet {
+                    let fileURL = filteredFiles[index]
+                    moveToTrash(file: fileURL)
+                }
+                asyncLoadFiles()
+            },
+            onRename: { file in
+                fileToRename = file
+                let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
+                newFileName = name
+                showRenameAlert = true
+            },
+            onMove: { file in
+                selectedFiles = [file]
+                showMoveSheet = true
+            },
+            onShare: shareFile
+        )
+    }
+    
+    
+    @ViewBuilder
+    private func listContent() -> some View {
+        ListFileView(
+            files: filteredFiles,
+            selectedFiles: $selectedFiles,
+            isEditing: $isEditing,
+            onTap: handleTap,
+            deleteAction: { indexSet in
+                for index in indexSet {
+                    let fileURL = filteredFiles[index]
+                    moveToTrash(file: fileURL)
+                }
+                asyncLoadFiles()
+            },
+            onRename: { file in
+                fileToRename = file
+                let name = file.hasDirectoryPath ? file.lastPathComponent : file.deletingPathExtension().lastPathComponent
+                newFileName = name
+                showRenameAlert = true
+            },
+            onMove: { file in
+                selectedFiles = [file]
+                showMoveSheet = true
+            },
+            onShare: shareFile
+        )
+    }
+    
 
     @ToolbarContentBuilder
     private func toolbarContent() -> some ToolbarContent {
@@ -478,7 +466,7 @@ private func deleteFiles(at offsets: IndexSet) {
         fileToRename = nil
     }
 
-
+    
 
     }
     
@@ -506,6 +494,19 @@ class DocumentInteractionCoordinator: NSObject, UIDocumentInteractionControllerD
 extension UIViewController {
     func presentPreview(for controller: UIDocumentInteractionController) {
         controller.presentPreview(animated: true)
+    }
+}
+
+private func shareFile(_ file: URL) {
+    let items: [Any] = [file]
+    let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
+    if let top = UIApplication.shared.topMostViewController() {
+        if let pop = activity.popoverPresentationController {
+            pop.sourceView = top.view
+            pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
+            pop.permittedArrowDirections = []
+        }
+        top.present(activity, animated: true)
     }
 }
 
