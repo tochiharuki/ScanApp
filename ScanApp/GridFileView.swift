@@ -63,8 +63,9 @@ struct GridFileView: View {
                             onRename: onRename,
                             onMove: onMove,
                             onShare: onShare,
-                            onDelete: { file in
-                                onDelete(file)   // ← ✅ 直接親に伝える
+                            onDelete: onDelete,
+                            onEmptyTrash: {
+                                emptyTrashFolder()
                             }
                         )
                     }

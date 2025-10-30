@@ -528,32 +528,42 @@ struct FileContextMenu: View {
     let onMove: (URL) -> Void
     let onShare: (URL) -> Void
     let onDelete: ((URL) -> Void)?
+    var onEmptyTrash: (() -> Void)? = nil
 
     var body: some View {
         Group {
-            Button {
-                onRename(file)
-            } label: {
-                Label("Rename", systemImage: "pencil")
-            }
+            // 🗑 ゴミ箱フォルダ専用メニュー
+            if file.lastPathComponent == "Trash" {
+                Button(role: .destructive) {
+                    onEmptyTrash?()
+                } label: {
+                    Label("Empty Trash", systemImage: "trash.slash")
+                }
+            } else {
+                // 🔹 通常ファイル用メニュー
+                Button {
+                    onRename(file)
+                } label: {
+                    Label("Rename", systemImage: "pencil")
+                }
 
-            Button {
-                onMove(file)
-            } label: {
-                Label("Move", systemImage: "folder")
-            }
-            
-            Button(role: .destructive) {
-                onDelete?(file)
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
+                Button {
+                    onMove(file)
+                } label: {
+                    Label("Move", systemImage: "folder")
+                }
 
+                Button(role: .destructive) {
+                    onDelete?(file)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
 
-            Button {
-                onShare(file)
-            } label: {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Button {
+                    onShare(file)
+                } label: {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
             }
         }
     }
@@ -586,6 +596,7 @@ private func moveToTrash(file: URL) {
     let destinationURL = trashURL.appendingPathComponent(file.lastPathComponent)
     
     
+    
     // 重複時は _1, _2 と連番を付ける
     var finalURL = destinationURL
     var counter = 1
@@ -600,5 +611,23 @@ private func moveToTrash(file: URL) {
         print("🗑️ Moved \(file.lastPathComponent) to Trash")
     } catch {
         print("❌ Failed to move to Trash: \(error)")
+    }
+}
+
+private func emptyTrashFolder() {
+    let trashURL = currentURL.appendingPathComponent("Trash")
+
+    do {
+        let fileManager = FileManager.default
+        let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
+
+        for file in files {
+            try fileManager.removeItem(at: file)
+        }
+
+        debugMessage = "Trash emptied successfully."
+        asyncLoadFiles()
+    } catch {
+        debugMessage = "Failed to empty trash: \(error.localizedDescription)"
     }
 }
