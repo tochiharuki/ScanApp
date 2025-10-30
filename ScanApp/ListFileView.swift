@@ -9,7 +9,8 @@ struct ListFileView: View {
     var deleteAction: (IndexSet) -> Void
     var onRename: (URL) -> Void
     var onMove: (URL) -> Void      // ✅ 追加
-    var onShare: (URL) -> Void     // ✅ 追加
+    var onShare: (URL) -> Void
+    var onDelete: (URL) -> Void
 
     var body: some View {
         List {
@@ -63,9 +64,8 @@ struct ListFileView: View {
                         onRename: onRename,
                         onMove: onMove,
                         onShare: onShare,
-                        onDelete: { file in    // ← ✅ 同様に
-                            moveToTrash(file: file)
-                            asyncLoadFiles()
+                        onDelete: { file in
+                            onDelete(file)   // ← ✅ 直接親に伝える
                         }
                     )
                 }

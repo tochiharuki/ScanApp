@@ -7,6 +7,7 @@ struct GridFileView: View {
     var onTap: (URL) -> Void
     var deleteAction: (IndexSet) -> Void
     var onRename: (URL) -> Void
+    var onDelete: (URL) -> Void
 
     private let columns = [
         GridItem(.adaptive(minimum: 100), spacing: 12)
@@ -62,9 +63,8 @@ struct GridFileView: View {
                             onRename: onRename,
                             onMove: onMove,
                             onShare: onShare,
-                            onDelete: { file in    // ← ✅ カンマを付けてクロージャをここに書く
-                                moveToTrash(file: file)
-                                asyncLoadFiles()
+                            onDelete: { file in
+                                onDelete(file)   // ← ✅ 直接親に伝える
                             }
                         )
                     }
