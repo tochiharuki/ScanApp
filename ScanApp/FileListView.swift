@@ -235,6 +235,11 @@ struct FileListContentView: View {
                 newFileName = name
                 showRenameAlert = true
             },
+            onDelete: { file in
+                moveToTrash(file: file)
+                asyncLoadFiles()
+            },
+
             onMove: { file in
                 selectedFiles = [file]
                 showMoveSheet = true
@@ -264,6 +269,11 @@ struct FileListContentView: View {
                 newFileName = name
                 showRenameAlert = true
             },
+            onDelete: { file in
+                moveToTrash(file: file)
+                asyncLoadFiles()
+            },
+
             onMove: { file in
                 selectedFiles = [file]
                 showMoveSheet = true
