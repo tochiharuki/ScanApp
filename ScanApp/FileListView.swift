@@ -398,6 +398,25 @@ struct FileListContentView: View {
             }
         } 
    }
+   
+   private func emptyTrashFolder() {
+        let trashURL = currentURL.appendingPathComponent("Trash")
+    
+        do {
+            let fileManager = FileManager.default
+            let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
+    
+            for file in files {
+                try fileManager.removeItem(at: file)
+            }
+    
+            debugMessage = "Trash emptied successfully."
+            asyncLoadFiles()
+        } catch {
+            debugMessage = "Failed to empty trash: \(error.localizedDescription)"
+        }
+    }
+   
 
 private func deleteFiles(at offsets: IndexSet) {
         for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
@@ -614,20 +633,3 @@ private func moveToTrash(file: URL) {
     }
 }
 
-private func emptyTrashFolder() {
-    let trashURL = currentURL.appendingPathComponent("Trash")
-
-    do {
-        let fileManager = FileManager.default
-        let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
-
-        for file in files {
-            try fileManager.removeItem(at: file)
-        }
-
-        debugMessage = "Trash emptied successfully."
-        asyncLoadFiles()
-    } catch {
-        debugMessage = "Failed to empty trash: \(error.localizedDescription)"
-    }
-}
