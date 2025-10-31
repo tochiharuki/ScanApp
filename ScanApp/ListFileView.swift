@@ -66,7 +66,7 @@ struct ListFileView: View {
                         onMove: onMove,
                         onShare: onShare,
                         onDelete: onDelete,
-                        onEmptyTrash: onEmptyTrash
+                        onEmptyTrash: emptyTrashFolder
                     )
                 }
             }
