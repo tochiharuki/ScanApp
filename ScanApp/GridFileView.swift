@@ -14,6 +14,7 @@ struct GridFileView: View {
     ]
     var onMove: (URL) -> Void    // ← 追加
     var onShare: (URL) -> Void
+    var onEmptyTrash: () -> Void
 
     var body: some View {
         ScrollView {
@@ -59,12 +60,12 @@ struct GridFileView: View {
                     }
                     .contextMenu {
                         FileContextMenu(
-                            file: file,
+                            fileURL: url,
                             onRename: onRename,
                             onMove: onMove,
                             onShare: onShare,
                             onDelete: onDelete,
-                            onEmptyTrash: { emptyTrashFolder() } // ← ここ追加！
+                            onEmptyTrash: onEmptyTrash
                         )
                     }
                     

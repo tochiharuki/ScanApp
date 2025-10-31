@@ -11,6 +11,7 @@ struct ListFileView: View {
     var onMove: (URL) -> Void      // ✅ 追加
     var onShare: (URL) -> Void
     var onDelete: (URL) -> Void
+    var onEmptyTrash: () -> Void
 
     var body: some View {
         List {
@@ -60,12 +61,12 @@ struct ListFileView: View {
                 // ✅ コンテキストメニュー（共通化）
                 .contextMenu {
                     FileContextMenu(
-                        file: file,
+                        fileURL: url,
                         onRename: onRename,
                         onMove: onMove,
                         onShare: onShare,
                         onDelete: onDelete,
-                        onEmptyTrash: { emptyTrashFolder() } // ← ここ追加！
+                        onEmptyTrash: onEmptyTrash
                     )
                 }
             }
