@@ -65,9 +65,16 @@ struct ListFileView: View {
                         onMove: onMove,
                         onShare: onShare,
                         onDelete: onDelete,
-                        onEmptyTrash: {
-                            emptyTrashFolder()
+                        // ✅ Trash フォルダそのものを長押しした場合のみ表示
+                        if file.lastPathComponent == "Trash" {
+                            Divider()
+                            Button(role: .destructive) {
+                                onEmptyTrash?()
+                            } label: {
+                                Label("Empty Trash", systemImage: "trash.slash")
+                            }
                         }
+   
                     )
                 }
             }
