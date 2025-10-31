@@ -399,23 +399,7 @@ struct FileListContentView: View {
         } 
    }
    
-   private func emptyTrashFolder() {
-        let trashURL = currentURL.appendingPathComponent("Trash")
-    
-        do {
-            let fileManager = FileManager.default
-            let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
-    
-            for file in files {
-                try fileManager.removeItem(at: file)
-            }
-    
-            debugMessage = "Trash emptied successfully."
-            asyncLoadFiles()
-        } catch {
-            debugMessage = "Failed to empty trash: \(error.localizedDescription)"
-        }
-    }
+   
    
 
 private func deleteFiles(at offsets: IndexSet) {
@@ -542,12 +526,13 @@ private func shareFile(_ file: URL) {
 
 // MARK: - 共通コンテキストメニュー
 struct FileContextMenu: View {
-    let file: URL
+    let fileURL: URL
     let onRename: (URL) -> Void
     let onMove: (URL) -> Void
     let onShare: (URL) -> Void
     let onDelete: ((URL) -> Void)?
     var onEmptyTrash: (() -> Void)? = nil
+    
 
     var body: some View {
         Group {
@@ -561,25 +546,25 @@ struct FileContextMenu: View {
             } else {
                 // 🔹 通常ファイル・フォルダ用メニュー
                 Button {
-                    onRename(file)
+                    onRename(fileURL)
                 } label: {
                     Label("Rename", systemImage: "pencil")
                 }
 
                 Button {
-                    onMove(file)
+                    onMove(fileURL)
                 } label: {
                     Label("Move", systemImage: "folder")
                 }
 
                 Button(role: .destructive) {
-                    onDelete?(file)
+                    onDelete?(fileURL)
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
 
                 Button {
-                    onShare(file)
+                    onShare(fileURL)
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
@@ -589,7 +574,7 @@ struct FileContextMenu: View {
 }
 
 
-extension Notification.Name {
+extension.Name {
     static let reloadFileList = Notification.Name("reloadFileList")
 }
 
@@ -632,4 +617,22 @@ private func moveToTrash(file: URL) {
         print("❌ Failed to move to Trash: \(error)")
     }
 }
+
+private func emptyTrashFolder() {
+        let trashURL = currentURL.appendingPathComponent("Trash")
+    
+        do {
+            let fileManager = FileManager.default
+            let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
+    
+            for file in files {
+                try fileManager.removeItem(at: file)
+            }
+    
+            debugMessage = "Trash emptied successfully."
+            asyncLoadFiles()
+        } catch {
+            debugMessage = "Failed to empty trash: \(error.localizedDescription)"
+        }
+    }
 
