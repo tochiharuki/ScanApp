@@ -60,21 +60,12 @@ struct ListFileView: View {
                 // ✅ コンテキストメニュー（共通化）
                 .contextMenu {
                     FileContextMenu(
-                        file: url,
+                        file: file,
                         onRename: onRename,
                         onMove: onMove,
                         onShare: onShare,
                         onDelete: onDelete,
-                        // ✅ Trash フォルダそのものを長押しした場合のみ表示
-                        if file.lastPathComponent == "Trash" {
-                            Divider()
-                            Button(role: .destructive) {
-                                onEmptyTrash?()
-                            } label: {
-                                Label("Empty Trash", systemImage: "trash.slash")
-                            }
-                        }
-   
+                        onEmptyTrash: { emptyTrashFolder() } // ← ここ追加！
                     )
                 }
             }
