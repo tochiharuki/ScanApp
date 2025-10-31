@@ -550,39 +550,37 @@ struct FileContextMenu: View {
     var onEmptyTrash: (() -> Void)? = nil
 
     var body: some View {
-        Group {
+        if file.lastPathComponent == "Trash" {
             // 🗑 ゴミ箱フォルダ専用メニュー
-            if file.lastPathComponent == "Trash" {
-                Button(role: .destructive) {
-                    onEmptyTrash?()
-                } label: {
-                    Label("Empty Trash", systemImage: "trash.slash")
-                }
-            } else {
-                // 🔹 通常ファイル用メニュー
-                Button {
-                    onRename(file)
-                } label: {
-                    Label("Rename", systemImage: "pencil")
-                }
+            Button(role: .destructive) {
+                onEmptyTrash?()
+            } label: {
+                Label("Empty Trash", systemImage: "trash.slash")
+            }
+        } else {
+            // 🔹 通常ファイル用メニュー
+            Button {
+                onRename(file)
+            } label: {
+                Label("Rename", systemImage: "pencil")
+            }
 
-                Button {
-                    onMove(file)
-                } label: {
-                    Label("Move", systemImage: "folder")
-                }
+            Button {
+                onMove(file)
+            } label: {
+                Label("Move", systemImage: "folder")
+            }
 
-                Button(role: .destructive) {
-                    onDelete?(file)
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
+            Button(role: .destructive) {
+                onDelete?(file)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
 
-                Button {
-                    onShare(file)
-                } label: {
-                    Label("Share", systemImage: "square.and.arrow.up")
-                }
+            Button {
+                onShare(file)
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
             }
         }
     }
