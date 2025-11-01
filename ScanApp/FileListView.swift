@@ -577,6 +577,7 @@ struct FileContextMenu: View {
     let onDelete: ((URL) -> Void)?
     let onShare: (URL) -> Void
     var onEmptyTrash: (() -> Void)? = nil
+    var onConvertToPDF: ((URL) -> Void)?
     
 
     var body: some View {
