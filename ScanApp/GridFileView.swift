@@ -62,8 +62,8 @@ struct GridFileView: View {
                             fileURL: url,
                             onRename: onRename,
                             onMove: onMove,
-                            onShare: onShare,
                             onDelete: onDelete,
+                            onShare: onShare,
                             onEmptyTrash: onEmptyTrash
                         )
                     }
