@@ -1,15 +1,11 @@
-//
-//  SettingsView.swift
-//  ScanApp
-//
-
 import SwiftUI
+
 
 struct SettingsView: View {
     // Save the selected retention period in UserDefaults
-    
     @AppStorage("trashRetentionDays") private var retentionDays: Int = 30
-    @AppStorage("trashDeleteImmediately") private var deleteImmediately: Bool = false  
+    
+    // 既存の日数オプション
     private let options: [Int] = [0, 10, 30, 60]
 
     var body: some View {
@@ -21,11 +17,20 @@ struct SettingsView: View {
                             Text(days == 0 ? "0 days (Delete immediately)" : "\(days) days")
                                 .tag(days)
                         }
+                        // 追加：削除しないオプション
+                        Text("Do not delete trash files")
+                            .tag(-1)  // 特殊な値として -1 を使用
                     }
                     .pickerStyle(.menu)
-                
-                    Toggle("Delete Trash files immediately when selected", isOn: $deleteImmediately)
+                    .onChange(of: retentionDays) { newValue in
+                        if newValue == -1 {
+                            print("🗑 Trash files will never be deleted automatically")
+                        } else {
+                            print("🗑 Trash retention set to \(newValue) days")
+                        }
+                    }
                 }
+
                 Section {
                     Text("Default retention period is 30 days.")
                         .font(.footnote)

@@ -487,12 +487,11 @@ struct FileListContentView: View {
         for index in offsets {
             let file = filteredFiles[index]
             if file.deletingLastPathComponent().lastPathComponent == trashFolderName {
-                // ゴミ箱内のファイル
-                if UserDefaults.standard.bool(forKey: "trashDeleteImmediately") {
-                    try? fileManager.removeItem(at: file)
-                    UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
-                }
+                // ゴミ箱内のファイルは完全削除
+                try? fileManager.removeItem(at: file)
+                UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
             } else {
+                // 通常ファイルはゴミ箱へ移動
                 moveToTrash(file: file)
             }
         }
@@ -502,11 +501,11 @@ struct FileListContentView: View {
     private func deleteSelectedFiles() {
         for file in selectedFiles {
             if file.deletingLastPathComponent().lastPathComponent == trashFolderName {
-                if UserDefaults.standard.bool(forKey: "trashDeleteImmediately") {
-                    try? fileManager.removeItem(at: file)
-                    UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
-                }
+                // ゴミ箱内のファイルは完全削除
+                try? fileManager.removeItem(at: file)
+                UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
             } else {
+                // 通常ファイルはゴミ箱へ移動
                 moveToTrash(file: file)
             }
         }
