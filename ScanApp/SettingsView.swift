@@ -2,11 +2,15 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("trashRetentionDays") private var retentionDays: Int = 30
-    
     private let options: [Int] = [0, 10, 30, 60]
-
+    
     @State private var showAlert = false
-    @State private var pendingRetentionDays: Int = 30  // ユーザーが選択した値を一時保存
+    @State private var pendingRetentionDays: Int
+    
+    init() {
+        // AppStorage で保存されている値を初期値として使用
+        _pendingRetentionDays = State(initialValue: UserDefaults.standard.integer(forKey: "trashRetentionDays"))
+    }
     
     var body: some View {
         NavigationView {
