@@ -395,6 +395,32 @@ struct FileListContentView: View {
         }
     }
 
+    private func onConvertToPDF(_ file: URL) {
+        // 対象が画像ファイルであるか確認
+        guard ["jpg", "jpeg", "png", "heic"].contains(file.pathExtension.lowercased()) else {
+            print("Not an image file")
+            return
+        }
+
+        guard let image = UIImage(contentsOfFile: file.path) else {
+            print("Failed to load image")
+            return
+        }
+
+        // PDFに変換
+        let pdfURL = file.deletingPathExtension().appendingPathExtension("pdf")
+        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: image.size))
+        do {
+            try renderer.writePDF(to: pdfURL) { context in
+                context.beginPage()
+                image.draw(in: CGRect(origin: .zero, size: image.size))
+            }
+            print("✅ PDF saved at \(pdfURL.path)")
+        } catch {
+            print("❌ PDF generation failed: \(error)")
+        }
+    }
+
     private func handleTap(_ file: URL) {
         debugMessage = "Tapped: \(file.lastPathComponent)"
         if isEditing {
@@ -592,12 +618,33 @@ struct FileContextMenu: View {
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
-
                 Button {
                     onShare(fileURL)
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
+                // ✅ PDF→画像変換ボタン
+                if fileURL.pathExtension.lowercased() == "pdf" {
+                    Button {
+                        if let images = FileConverter.convertPDFToImages(pdfURL: fileURL) {
+                            print("Converted \(images.count) pages to images")
+                            // TODO: 保存処理を追加する
+                        }
+                    } label: {
+                        Label("Convert to Images", systemImage: "photo")
+                    }
+                }
+
+                // ✅ 画像→PDF変換（例: jpg/png のみ）
+                if ["jpg", "jpeg", "png"].contains(fileURL.pathExtension.lowercased()) {
+                    Button {
+                        let image = UIImage(contentsOfFile: fileURL.path)!
+                        let output = fileURL.deletingPathExtension().appendingPathExtension("pdf")
+                        let success = FileConverter.convertImagesToPDF(images: [image], outputURL: output)
+                        print(success ? "PDF saved: \(output)" : "Conversion failed")
+                    } label: {
+                        Label("Convert to PDF", systemImage: "doc.richtext")
+                    }
             }
         }
     }

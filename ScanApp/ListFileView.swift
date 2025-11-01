@@ -12,6 +12,7 @@ struct ListFileView: View {
     var onDelete: (URL) -> Void
     var onShare: (URL) -> Void  
     var onEmptyTrash: () -> Void
+    var onConvertToPDF: (URL) -> Void 
     
 
     var body: some View {
@@ -67,11 +68,12 @@ struct ListFileView: View {
                         onMove: onMove,
                         onDelete: onDelete,
                         onShare: onShare,
-                        onEmptyTrash: onEmptyTrash
+                        onEmptyTrash: onEmptyTrash,
+                        onConvertToPDF: onConvertToPDF 
                     )
                 }
             }
-            // .onDelete(perform: deleteAction)
+            .onDelete(perform: deleteAction)
         }
         .listStyle(.plain)
     }

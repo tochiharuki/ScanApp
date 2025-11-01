@@ -26,6 +26,7 @@
 		88860B052EAAAFD0006948EE /* ListFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B042EAAAFD0006948EE /* ListFileView.swift */; };
 		88860B072EADA4BF006948EE /* FileThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B062EADA4BF006948EE /* FileThumbnailView.swift */; };
 		88860B0F2EAE6A11006948EE /* DocumentInteractionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88860B0E2EAE6A11006948EE /* DocumentInteractionView.swift */; };
+		8899CA752EB5F27900BA83E6 /* FileConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8899CA742EB5F26D00BA83E6 /* FileConverter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		88860B042EAAAFD0006948EE /* ListFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileView.swift; sourceTree = "<group>"; };
 		88860B062EADA4BF006948EE /* FileThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileThumbnailView.swift; sourceTree = "<group>"; };
 		88860B0E2EAE6A11006948EE /* DocumentInteractionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentInteractionView.swift; sourceTree = "<group>"; };
+		8899CA742EB5F26D00BA83E6 /* FileConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileConverter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				88860AF12EA7CF40006948EE /* Info.plist */,
+				8899CA742EB5F26D00BA83E6 /* FileConverter.swift */,
 				88860AFE2EAAA7C5006948EE /* FileListItem.swift */,
 				88860AFC2EAAA790006948EE /* FileGridItem.swift */,
 				88860AFA2EAA9F94006948EE /* PathBarView.swift */,
@@ -301,6 +304,7 @@
 				88860AF02EA7BD10006948EE /* SettingsView.swift in Sources */,
 				88860AFF2EAAA7C5006948EE /* FileListItem.swift in Sources */,
 				88860B072EADA4BF006948EE /* FileThumbnailView.swift in Sources */,
+				8899CA752EB5F27900BA83E6 /* FileConverter.swift in Sources */,
 				88860B012EAAAA02006948EE /* FileListContentView.swift in Sources */,
 				88860AEE2EA7BCEF006948EE /* FileListView.swift in Sources */,
 				88860B032EAAAFA8006948EE /* GridFileView.swift in Sources */,
@@ -488,10 +492,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.ScanApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -527,10 +532,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.ScanApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

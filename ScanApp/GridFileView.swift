@@ -11,6 +11,8 @@ struct GridFileView: View {
     var onDelete: (URL) -> Void
     var onShare: (URL) -> Void
     var onEmptyTrash: () -> Void
+    var onConvertToPDF: (URL) -> Void 
+    
 
     private let columns = [
         GridItem(.adaptive(minimum: 100), spacing: 12)
@@ -64,7 +66,8 @@ struct GridFileView: View {
                             onMove: onMove,
                             onDelete: onDelete,
                             onShare: onShare,
-                            onEmptyTrash: onEmptyTrash
+                            onEmptyTrash: onEmptyTrash,
+                            onConvertToPDF: onConvertToPDF 
                         )
                     }
                     
