@@ -7,8 +7,9 @@ import SwiftUI
 
 struct SettingsView: View {
     // Save the selected retention period in UserDefaults
-    @AppStorage("trashRetentionDays") private var retentionDays: Int = 30
-
+    
+    @AppStorage("trashDeleteImmediately") private var deleteImmediately: Bool = false 
+    private var retentionDays: Int = 30
     private let options: [Int] = [0, 10, 30, 60]
 
     var body: some View {
@@ -22,11 +23,9 @@ struct SettingsView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .onChange(of: retentionDays) { newValue in
-                        print("🗑 Trash retention changed to \(newValue) days")
-                    }
+                
+                    Toggle("Delete Trash files immediately when selected", isOn: $deleteImmediately)
                 }
-
                 Section {
                     Text("Default retention period is 30 days.")
                         .font(.footnote)

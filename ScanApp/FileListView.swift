@@ -486,14 +486,29 @@ struct FileListContentView: View {
     private func deleteFiles(at offsets: IndexSet) {
         for index in offsets {
             let file = filteredFiles[index]
-            moveToTrash(file: file)   // 直接削除ではなく Trash に移動
+            if file.deletingLastPathComponent().lastPathComponent == trashFolderName {
+                // ゴミ箱内のファイル
+                if UserDefaults.standard.bool(forKey: "trashDeleteImmediately") {
+                    try? fileManager.removeItem(at: file)
+                    UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
+                }
+            } else {
+                moveToTrash(file: file)
+            }
         }
         asyncLoadFiles()
     }
-
+    
     private func deleteSelectedFiles() {
         for file in selectedFiles {
-            moveToTrash(file: file)   // ← ゴミ箱に移動
+            if file.deletingLastPathComponent().lastPathComponent == trashFolderName {
+                if UserDefaults.standard.bool(forKey: "trashDeleteImmediately") {
+                    try? fileManager.removeItem(at: file)
+                    UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
+                }
+            } else {
+                moveToTrash(file: file)
+            }
         }
         selectedFiles.removeAll()
         asyncLoadFiles()
