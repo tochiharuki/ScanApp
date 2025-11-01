@@ -9,23 +9,32 @@ import Foundation
 
 struct FileConverter {
     
-    /// JPG, PNG などの画像 → PDF へ変換
-    static func convertImageToPDF(imageURL: URL, outputURL: URL) throws {
-        guard let image = UIImage(contentsOfFile: imageURL.path) else {
-            throw NSError(domain: "ImageLoadError", code: -1, userInfo: [NSLocalizedDescriptionKey: "画像を読み込めませんでした"])
+    /// JPG, PNG などの画像 → PDF へ変換（非同期版）
+    static func convertImageToPDFAsync(inputURL: URL) async throws -> URL {
+        // 出力先のPDFファイルURLを作成
+        let outputURL = inputURL.deletingPathExtension().appendingPathExtension("pdf")
+        
+        // 画像を読み込む
+        guard let image = UIImage(contentsOfFile: inputURL.path) else {
+            throw NSError(domain: "ImageLoadError", code: -1,
+                          userInfo: [NSLocalizedDescriptionKey: "画像を読み込めませんでした"])
         }
         
+        // PDFレンダラーで書き出す
         let pdfRenderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: image.size))
         try pdfRenderer.writePDF(to: outputURL) { context in
             context.beginPage()
             image.draw(in: CGRect(origin: .zero, size: image.size))
         }
+        
+        return outputURL
     }
     
     /// PDF → 各ページを画像に変換
     static func convertPDFToImages(pdfURL: URL, outputDir: URL) throws -> [URL] {
         guard let pdfDoc = PDFDocument(url: pdfURL) else {
-            throw NSError(domain: "PDFLoadError", code: -1, userInfo: [NSLocalizedDescriptionKey: "PDFを開けませんでした"])
+            throw NSError(domain: "PDFLoadError", code: -1,
+                          userInfo: [NSLocalizedDescriptionKey: "PDFを開けませんでした"])
         }
         
         var imageURLs: [URL] = []

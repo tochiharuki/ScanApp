@@ -400,7 +400,8 @@ struct FileListContentView: View {
     private func convertFileToPDF(_ fileURL: URL) {
         Task {
             do {
-                let pdfURL = try await FileConverter.convertToPDF(inputURL: fileURL)
+                // 画像→PDF の変換
+                let pdfURL = try await FileConverter.convertImageToPDFAsync(inputURL: fileURL)
                 print("✅ Converted to PDF: \(pdfURL.lastPathComponent)")
                 NotificationCenter.default.post(name: .reloadFileList, object: nil)
             } catch {
@@ -611,34 +612,43 @@ struct FileContextMenu: View {
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
-                // ✅ PDF→画像変換ボタン
+                
                 if fileURL.pathExtension.lowercased() == "pdf" {
                     Button {
-                        if let images = FileConverter.convertPDFToImages(pdfURL: fileURL) {
-                            print("Converted \(images.count) pages to images")
-                            // TODO: 保存処理を追加する
+                        Task {
+                            do {
+                                let images = try FileConverter.convertPDFToImages(pdfURL: fileURL, outputDir: fileURL.deletingLastPathComponent())
+                                print("Converted \(images.count) pages to images")
+                                NotificationCenter.default.post(name: .reloadFileList, object: nil)
+                            } catch {
+                                print("❌ PDF→画像変換失敗: \(error.localizedDescription)")
+                            }
                         }
                     } label: {
                         Label("Convert to Images", systemImage: "photo")
                     }
                 }
 
-                // ✅ 画像→PDF変換（例: jpg/png のみ）
                 if ["jpg", "jpeg", "png"].contains(fileURL.pathExtension.lowercased()) {
                     Button {
-                        let image = UIImage(contentsOfFile: fileURL.path)!
-                        let output = fileURL.deletingPathExtension().appendingPathExtension("pdf")
-                        let success = FileConverter.convertImagesToPDF(images: [image], outputURL: output)
-                        print(success ? "PDF saved: \(output)" : "Conversion failed")
+                        Task {
+                            do {
+                                let pdfURL = try await FileConverter.convertImageToPDFAsync(inputURL: fileURL)
+                                print("✅ PDF saved: \(pdfURL.lastPathComponent)")
+                                NotificationCenter.default.post(name: .reloadFileList, object: nil)
+                            } catch {
+                                print("❌ 画像→PDF変換失敗: \(error.localizedDescription)")
+                            }
+                        }
                     } label: {
                         Label("Convert to PDF", systemImage: "doc.richtext")
                     }
+                }
             }
         }
     }
 }
 
-}
 
 extension Notification.Name {
     static let reloadFileList = Notification.Name("reloadFileList")
