@@ -71,7 +71,7 @@ struct ListFileView: View {
                     )
                 }
             }
-            .onDelete(perform: deleteAction)
+            // .onDelete(perform: deleteAction)
         }
         .listStyle(.plain)
     }
