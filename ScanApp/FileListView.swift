@@ -244,8 +244,7 @@ struct FileListContentView: View {
                 selectedFiles = [file]
                 showMoveSheet = true
             },
-            onShare: shareFile,
-            onEmptyTrash: emptyTrashFolder
+            onShare: shareFile
         )
     }
     
@@ -278,8 +277,7 @@ struct FileListContentView: View {
             onDelete: { file in
                 moveToTrash(file: file)
                 asyncLoadFiles()
-            },
-            onEmptyTrash: emptyTrashFolder
+            }
 )
     }
     
