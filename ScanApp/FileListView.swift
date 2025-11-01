@@ -153,6 +153,7 @@ struct FileListContentView: View {
         }
         .onAppear {
             ensureTrashFolderExists()
+            autoCleanTrash()
             asyncLoadFiles()
         }
         .onReceive(NotificationCenter.default.publisher(for: .reloadFileList)) { _ in
@@ -395,7 +396,43 @@ struct FileListContentView: View {
             print("⚠️ Failed to empty trash: \(error.localizedDescription)")
         }
     }
-
+    
+    func autoCleanTrash() {
+        let retentionDays = UserDefaults.standard.integer(forKey: "trashRetentionDays")
+        
+        let trashURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Trash")
+        
+        let now = Date()
+        let files = (try? FileManager.default.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)) ?? []
+        
+        for file in files {
+            // Trash に移動した日付を UserDefaults から取得
+            if let moveDate = UserDefaults.standard.object(forKey: file.lastPathComponent) as? Date {
+                let days = Calendar.current.dateComponents([.day], from: moveDate, to: now).day ?? 0
+                
+                if retentionDays == 0 || days >= retentionDays {
+                    do {
+                        try FileManager.default.removeItem(at: file)
+                        // 削除したファイルの UserDefaults キーも削除
+                        UserDefaults.standard.removeObject(forKey: file.lastPathComponent)
+                        print("🗑 Deleted \(file.lastPathComponent) after \(days) days")
+                    } catch {
+                        print("⚠️ Failed to delete \(file.lastPathComponent): \(error.localizedDescription)")
+                    }
+                }
+            } else {
+                // 万が一 UserDefaults に日付が無ければ creationDate を fallback
+                if let creationDate = try? file.resourceValues(forKeys: [.creationDateKey]).creationDate {
+                    let days = Calendar.current.dateComponents([.day], from: creationDate, to: now).day ?? 0
+                    if retentionDays == 0 || days >= retentionDays {
+                        try? FileManager.default.removeItem(at: file)
+                        print("🗑 Deleted \(file.lastPathComponent) (fallback creationDate) after \(days) days")
+                    }
+                }
+            }
+        }
+    }
     private func convertFileToPDF(_ fileURL: URL) {
         Task {
             do {
@@ -446,8 +483,11 @@ struct FileListContentView: View {
    
    
 
-private func deleteFiles(at offsets: IndexSet) {
-        for index in offsets { try? fileManager.removeItem(at: filteredFiles[index]) }
+    private func deleteFiles(at offsets: IndexSet) {
+        for index in offsets {
+            let file = filteredFiles[index]
+            moveToTrash(file: file)   // 直接削除ではなく Trash に移動
+        }
         asyncLoadFiles()
     }
 
@@ -660,8 +700,6 @@ private func moveToTrash(file: URL) {
     
     let destinationURL = trashURL.appendingPathComponent(file.lastPathComponent)
     
-    
-    
     // 重複時は _1, _2 と連番を付ける
     var finalURL = destinationURL
     var counter = 1
@@ -674,8 +712,11 @@ private func moveToTrash(file: URL) {
     do {
         try FileManager.default.moveItem(at: file, to: finalURL)
         print("🗑️ Moved \(file.lastPathComponent) to Trash")
+        
+        // ✅ 移動日を保存
+        let now = Date()
+        UserDefaults.standard.set(now, forKey: finalURL.lastPathComponent)
     } catch {
         print("❌ Failed to move to Trash: \(error)")
     }
 }
-
