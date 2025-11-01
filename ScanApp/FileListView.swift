@@ -624,6 +624,7 @@ struct FileContextMenu: View {
     }
 }
 
+}
 
 extension Notification.Name {
     static let reloadFileList = Notification.Name("reloadFileList")
