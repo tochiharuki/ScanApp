@@ -235,16 +235,18 @@ struct FileListContentView: View {
                 newFileName = name
                 showRenameAlert = true
             },
-            onDelete: { file in
-                moveToTrash(file: file)
-                asyncLoadFiles()
-            },
+            
 
             onMove: { file in
                 selectedFiles = [file]
                 showMoveSheet = true
             },
-            onShare: shareFile
+            onDelete: { file in
+                moveToTrash(file: file)
+                asyncLoadFiles()
+            },
+            onShare: shareFile,
+            onEmptyTrash: emptyTrashFolder
         )
     }
     
@@ -273,11 +275,12 @@ struct FileListContentView: View {
                 selectedFiles = [file]
                 showMoveSheet = true
             },
-            onShare: shareFile,
             onDelete: { file in
                 moveToTrash(file: file)
                 asyncLoadFiles()
-            }
+            },
+            onShare: shareFile,
+            onEmptyTrash: emptyTrashFolder
 )
     }
     

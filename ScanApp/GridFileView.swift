@@ -65,7 +65,7 @@ struct GridFileView: View {
                             onMove: onMove,
                             onShare: onShare,
                             onDelete: onDelete,
-                            onEmptyTrash: emptyTrashFolder
+                            onEmptyTrash: onEmptyTrash
                         )
                     }
                     
