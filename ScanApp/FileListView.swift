@@ -367,6 +367,33 @@ struct FileListContentView: View {
         }
     }
 
+    private func emptyTrashFolder() {
+        // ドキュメントディレクトリ内の Trash フォルダパスを取得
+        let trashURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Trash")
+    
+        do {
+            let fileManager = FileManager.default
+    
+            // Trashフォルダが存在する場合のみ処理
+            if fileManager.fileExists(atPath: trashURL.path) {
+                let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
+    
+                // 中のファイルをすべて削除
+                for file in files {
+                    try fileManager.removeItem(at: file)
+                }
+            }
+    
+            // ファイルリスト再読み込みを通知
+            NotificationCenter.default.post(name: .reloadFileList, object: nil)
+            print("🗑 Trash emptied successfully.")
+    
+        } catch {
+            print("⚠️ Failed to empty trash: \(error.localizedDescription)")
+        }
+    }
+
     private func handleTap(_ file: URL) {
         debugMessage = "Tapped: \(file.lastPathComponent)"
         if isEditing {
@@ -480,33 +507,6 @@ private func deleteFiles(at offsets: IndexSet) {
         }
     
         fileToRename = nil
-    }
-    
-    private func emptyTrashFolder() {
-        // ドキュメントディレクトリ内の Trash フォルダパスを取得
-        let trashURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("Trash")
-    
-        do {
-            let fileManager = FileManager.default
-    
-            // Trashフォルダが存在する場合のみ処理
-            if fileManager.fileExists(atPath: trashURL.path) {
-                let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
-    
-                // 中のファイルをすべて削除
-                for file in files {
-                    try fileManager.removeItem(at: file)
-                }
-            }
-    
-            // ファイルリスト再読み込みを通知
-            NotificationCenter.default.post(name: .reloadFileList, object: nil)
-            print("🗑 Trash emptied successfully.")
-    
-        } catch {
-            print("⚠️ Failed to empty trash: \(error.localizedDescription)")
-        }
     }
 
     
