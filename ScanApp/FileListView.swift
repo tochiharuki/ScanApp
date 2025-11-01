@@ -559,8 +559,8 @@ struct FileContextMenu: View {
     let fileURL: URL
     let onRename: (URL) -> Void
     let onMove: (URL) -> Void
-    let onShare: (URL) -> Void
     let onDelete: ((URL) -> Void)?
+    let onShare: (URL) -> Void
     var onEmptyTrash: (() -> Void)? = nil
     
 
