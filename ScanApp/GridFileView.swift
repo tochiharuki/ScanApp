@@ -7,15 +7,14 @@ struct GridFileView: View {
     var onTap: (URL) -> Void
     var deleteAction: (IndexSet) -> Void
     var onRename: (URL) -> Void
+    var onMove: (URL) -> Void   
     var onDelete: (URL) -> Void
+    var onShare: (URL) -> Void
+    var onEmptyTrash: () -> Void
 
     private let columns = [
         GridItem(.adaptive(minimum: 100), spacing: 12)
     ]
-    var onMove: (URL) -> Void    // ← 追加
-    var onShare: (URL) -> Void
-    var onEmptyTrash: () -> Void
-
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {

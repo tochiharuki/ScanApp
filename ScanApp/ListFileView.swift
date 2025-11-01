@@ -9,8 +9,8 @@ struct ListFileView: View {
     var deleteAction: (IndexSet) -> Void
     var onRename: (URL) -> Void
     var onMove: (URL) -> Void      // ✅ 追加
-    var onShare: (URL) -> Void
     var onDelete: (URL) -> Void
+    var onShare: (URL) -> Void  
     var onEmptyTrash: () -> Void
     
 
