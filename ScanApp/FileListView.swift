@@ -246,7 +246,8 @@ struct FileListContentView: View {
                 asyncLoadFiles()
             },
             onShare: shareFile,
-            onEmptyTrash: emptyTrashFolder
+            onEmptyTrash: emptyTrashFolder,
+            onConvertToPDF: convertFileToPDF
         )
     }
     
@@ -280,7 +281,8 @@ struct FileListContentView: View {
                 asyncLoadFiles()
             },
             onShare: shareFile,
-            onEmptyTrash: emptyTrashFolder
+            onEmptyTrash: emptyTrashFolder,
+            onConvertToPDF: convertFileToPDF
 )
     }
     
@@ -392,6 +394,18 @@ struct FileListContentView: View {
     
         } catch {
             print("⚠️ Failed to empty trash: \(error.localizedDescription)")
+        }
+    }
+
+    private func convertFileToPDF(_ fileURL: URL) {
+        Task {
+            do {
+                let pdfURL = try await FileConverter.convertToPDF(inputURL: fileURL)
+                print("✅ Converted to PDF: \(pdfURL.lastPathComponent)")
+                NotificationCenter.default.post(name: .reloadFileList, object: nil)
+            } catch {
+                print("❌ PDF conversion failed: \(error.localizedDescription)")
+            }
         }
     }
 
