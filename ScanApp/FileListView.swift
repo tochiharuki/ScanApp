@@ -121,6 +121,7 @@ struct FileListContentView: View {
     @State private var errorAlertTitle = ""
     @State private var errorAlertMessage = ""
     @State private var debugMessage: String = ""
+    
 
     @Binding var selectedFileURL: URL?
     @Binding var showPreview: Bool
@@ -246,8 +247,7 @@ struct FileListContentView: View {
                 asyncLoadFiles()
             },
             onShare: shareFile,
-            onEmptyTrash: emptyTrashFolder,
-            onConvertToPDF: convertFileToPDF
+            onEmptyTrash: emptyTrashFolder
         )
     }
     
@@ -281,8 +281,7 @@ struct FileListContentView: View {
                 asyncLoadFiles()
             },
             onShare: shareFile,
-            onEmptyTrash: emptyTrashFolder,
-            onConvertToPDF: convertFileToPDF
+            onEmptyTrash: emptyTrashFolder
 )
     }
     
@@ -577,7 +576,7 @@ struct FileContextMenu: View {
     let onDelete: ((URL) -> Void)?
     let onShare: (URL) -> Void
     var onEmptyTrash: (() -> Void)? = nil
-    var onConvertToPDF: ((URL) -> Void)?
+    var onConvertToPDF: ((URL) -> Void)? = nil
     
 
     var body: some View {
@@ -616,31 +615,15 @@ struct FileContextMenu: View {
                 
                 if fileURL.pathExtension.lowercased() == "pdf" {
                     Button {
-                        Task {
-                            do {
-                                let images = try FileConverter.convertPDFToImages(pdfURL: fileURL, outputDir: fileURL.deletingLastPathComponent())
-                                print("Converted \(images.count) pages to images")
-                                NotificationCenter.default.post(name: .reloadFileList, object: nil)
-                            } catch {
-                                print("❌ PDF→画像変換失敗: \(error.localizedDescription)")
-                            }
-                        }
+                        onConvertToPDF?(fileURL)  // PDFもクロージャ経由で呼ぶ
                     } label: {
-                        Label("Convert to Images", systemImage: "photo")
+                        Label("Convert to PDF", systemImage: "doc.richtext")
                     }
                 }
 
                 if ["jpg", "jpeg", "png"].contains(fileURL.pathExtension.lowercased()) {
                     Button {
-                        Task {
-                            do {
-                                let pdfURL = try await FileConverter.convertImageToPDFAsync(inputURL: fileURL)
-                                print("✅ PDF saved: \(pdfURL.lastPathComponent)")
-                                NotificationCenter.default.post(name: .reloadFileList, object: nil)
-                            } catch {
-                                print("❌ 画像→PDF変換失敗: \(error.localizedDescription)")
-                            }
-                        }
+                        onConvertToPDF?(fileURL)  // 画像も同じクロージャ経由
                     } label: {
                         Label("Convert to PDF", systemImage: "doc.richtext")
                     }
@@ -648,6 +631,7 @@ struct FileContextMenu: View {
             }
         }
     }
+
 }
 
 
