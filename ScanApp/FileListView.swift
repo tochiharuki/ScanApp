@@ -700,9 +700,21 @@ private func ensureTrashFolderExists() {
     let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     let trashURL = documentsURL.appendingPathComponent(trashFolderName)
     
+    let retentionDays = UserDefaults.standard.integer(forKey: "trashRetentionDays")
+
+    if retentionDays == 0 {
+        // 0日の場合は Trash フォルダを削除して存在させない
+        if FileManager.default.fileExists(atPath: trashURL.path) {
+            try? FileManager.default.removeItem(at: trashURL)
+            print("🗑 Trash folder removed because retentionDays = 0")
+        }
+        return
+    }
+    
+    // 通常は Trash フォルダを作成
     if !FileManager.default.fileExists(atPath: trashURL.path) {
         try? FileManager.default.createDirectory(at: trashURL, withIntermediateDirectories: true)
-        print("🗑️ Trash folder created at \(trashURL.path)")
+        print("🗑 Trash folder created at \(trashURL.path)")
     }
 }
 
