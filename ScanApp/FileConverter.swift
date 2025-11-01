@@ -5,6 +5,7 @@
 
 import UIKit
 import PDFKit
+import Foundation
 
 struct FileConverter {
     

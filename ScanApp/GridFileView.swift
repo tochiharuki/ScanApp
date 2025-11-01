@@ -11,7 +11,7 @@ struct GridFileView: View {
     var onDelete: (URL) -> Void
     var onShare: (URL) -> Void
     var onEmptyTrash: () -> Void
-    var onConvertToPDF: (URL) -> Void 
+    var onConvertToPDF: ((URL) -> Void)?
     
 
     private let columns = [
