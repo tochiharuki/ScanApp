@@ -11,6 +11,7 @@ struct ListFileView: View {
     var onMove: (URL) -> Void      // ✅ 追加
     var onDelete: (URL) -> Void
     var onShare: (URL) -> Void  
+    var onEmptyTrashRequest: () -> Void
     var onEmptyTrash: () -> Void
     var onConvertToPDF: ((URL) -> Void)?
     
@@ -68,8 +69,9 @@ struct ListFileView: View {
                         onMove: onMove,
                         onDelete: onDelete,
                         onShare: onShare,
-                        onEmptyTrash: onEmptyTrash,
-                        onConvertToPDF: onConvertToPDF 
+                        onEmptyTrashRequest: onEmptyTrashRequest,
+                        onEmptyTrash: onEmptyTrash,                           // ← 実行専用
+                        onConvertToPDF: onConvertToPDF
                     )
                 }
             }

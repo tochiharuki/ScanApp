@@ -10,6 +10,7 @@ struct GridFileView: View {
     var onMove: (URL) -> Void   
     var onDelete: (URL) -> Void
     var onShare: (URL) -> Void
+    var onEmptyTrashRequest: () -> Void
     var onEmptyTrash: () -> Void
     var onConvertToPDF: ((URL) -> Void)?
     
@@ -66,8 +67,9 @@ struct GridFileView: View {
                             onMove: onMove,
                             onDelete: onDelete,
                             onShare: onShare,
-                            onEmptyTrash: onEmptyTrash,
-                            onConvertToPDF: onConvertToPDF 
+                            onEmptyTrashRequest: onEmptyTrashRequest,
+                            onEmptyTrash: onEmptyTrash,                           // ← 実行専用
+                            onConvertToPDF: onConvertToPDF
                         )
                     }
                     

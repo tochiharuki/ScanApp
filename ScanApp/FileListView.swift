@@ -121,6 +121,8 @@ struct FileListContentView: View {
     @State private var errorAlertTitle = ""
     @State private var errorAlertMessage = ""
     @State private var debugMessage: String = ""
+    @State private var showEmptyTrashAlert = false
+    
     
 
     @Binding var selectedFileURL: URL?
@@ -186,6 +188,14 @@ struct FileListContentView: View {
         } message: {
             Text(errorAlertMessage)
         }
+        .alert("Empty Trash?", isPresented: $showEmptyTrashAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Empty", role: .destructive) {
+                emptyTrashFolder()
+            }
+        } message: {
+            Text("This will permanently delete all files in the Trash folder.")
+        }
         Text(debugMessage)
             .font(.caption)
             .foregroundColor(.gray)
@@ -248,6 +258,7 @@ struct FileListContentView: View {
                 asyncLoadFiles()
             },
             onShare: shareFile,
+            onEmptyTrashRequest: { showEmptyTrashAlert = true }, // ✅ ここを追加
             onEmptyTrash: emptyTrashFolder
         )
     }
@@ -282,8 +293,9 @@ struct FileListContentView: View {
                 asyncLoadFiles()
             },
             onShare: shareFile,
+            onEmptyTrashRequest: { showEmptyTrashAlert = true }, // ✅ ここを追加
             onEmptyTrash: emptyTrashFolder
-)
+        )
     }
     
 
@@ -629,8 +641,9 @@ struct FileContextMenu: View {
     let onMove: (URL) -> Void
     let onDelete: ((URL) -> Void)?
     let onShare: (URL) -> Void
-    var onEmptyTrash: (() -> Void)? = nil
-    var onConvertToPDF: ((URL) -> Void)? = nil
+    let onEmptyTrashRequest: (() -> Void)?
+    let onEmptyTrash: (() -> Void)?
+    let onConvertToPDF: ((URL) -> Void)?
     
 
     var body: some View {
@@ -638,10 +651,11 @@ struct FileContextMenu: View {
             if fileURL.lastPathComponent == "Trash" {
                 // 🗑 ゴミ箱フォルダ専用メニュー
                 Button(role: .destructive) {
-                    onEmptyTrash?()
+                    onEmptyTrashRequest?()
                 } label: {
                     Label("Empty Trash", systemImage: "trash.slash")
                 }
+
             } else {
                 // 🔹 通常ファイル・フォルダ用メニュー
                 Button {
@@ -718,7 +732,7 @@ private func ensureTrashFolderExists() {
     }
 }
 
-// MARK: - 削除 → ゴミ箱へ移動
+// M - 削除 → ゴミ箱へ移動
 private func moveToTrash(file: URL) {
     let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     let trashURL = documentsURL.appendingPathComponent(trashFolderName)
