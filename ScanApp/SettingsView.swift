@@ -8,8 +8,8 @@ import SwiftUI
 struct SettingsView: View {
     // Save the selected retention period in UserDefaults
     
-    @AppStorage("trashDeleteImmediately") private var deleteImmediately: Bool = false 
-    private var retentionDays: Int = 30
+    @AppStorage("trashRetentionDays") private var retentionDays: Int = 30
+    @AppStorage("trashDeleteImmediately") private var deleteImmediately: Bool = false  
     private let options: [Int] = [0, 10, 30, 60]
 
     var body: some View {
