@@ -12,6 +12,7 @@ struct ListFileView: View {
     var onShare: (URL) -> Void
     var onDelete: (URL) -> Void
     var onEmptyTrash: () -> Void
+    
 
     var body: some View {
         List {

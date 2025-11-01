@@ -244,7 +244,8 @@ struct FileListContentView: View {
                 selectedFiles = [file]
                 showMoveSheet = true
             },
-            onShare: shareFile
+            onShare: shareFile,
+            onEmptyTrash: emptyTrashFolder
         )
     }
     
@@ -277,7 +278,8 @@ struct FileListContentView: View {
             onDelete: { file in
                 moveToTrash(file: file)
                 asyncLoadFiles()
-            }
+            },
+            onEmptyTrash: emptyTrashFolder
 )
     }
     
@@ -479,6 +481,33 @@ private func deleteFiles(at offsets: IndexSet) {
     
         fileToRename = nil
     }
+    
+    private func emptyTrashFolder() {
+        // ドキュメントディレクトリ内の Trash フォルダパスを取得
+        let trashURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Trash")
+    
+        do {
+            let fileManager = FileManager.default
+    
+            // Trashフォルダが存在する場合のみ処理
+            if fileManager.fileExists(atPath: trashURL.path) {
+                let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
+    
+                // 中のファイルをすべて削除
+                for file in files {
+                    try fileManager.removeItem(at: file)
+                }
+            }
+    
+            // ファイルリスト再読み込みを通知
+            NotificationCenter.default.post(name: .reloadFileList, object: nil)
+            print("🗑 Trash emptied successfully.")
+    
+        } catch {
+            print("⚠️ Failed to empty trash: \(error.localizedDescription)")
+        }
+    }
 
     
 
@@ -536,7 +565,7 @@ struct FileContextMenu: View {
 
     var body: some View {
         Group {
-            if file.lastPathComponent == "Trash" {
+            if fileURL.lastPathComponent == "Trash" {
                 // 🗑 ゴミ箱フォルダ専用メニュー
                 Button(role: .destructive) {
                     onEmptyTrash?()
@@ -618,29 +647,3 @@ private func moveToTrash(file: URL) {
     }
 }
 
-private func emptyTrashFolder() {
-    // ドキュメントディレクトリ内の Trash フォルダパスを取得
-    let trashURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("Trash")
-
-    do {
-        let fileManager = FileManager.default
-
-        // Trashフォルダが存在する場合のみ処理
-        if fileManager.fileExists(atPath: trashURL.path) {
-            let files = try fileManager.contentsOfDirectory(at: trashURL, includingPropertiesForKeys: nil)
-
-            // 中のファイルをすべて削除
-            for file in files {
-                try fileManager.removeItem(at: file)
-            }
-        }
-
-        // ファイルリスト再読み込みを通知
-        NotificationCenter.default.post(name: .reloadFileList, object: nil)
-        print("🗑 Trash emptied successfully.")
-
-    } catch {
-        print("⚠️ Failed to empty trash: \(error.localizedDescription)")
-    }
-}
