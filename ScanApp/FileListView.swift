@@ -154,9 +154,6 @@ struct FileListContentView: View {
             }
         }
         .onAppear {
-            if UserDefaults.standard.object(forKey: "trashRetentionDays") == nil {
-                UserDefaults.standard.set(30, forKey: "trashRetentionDays")
-            }
             ensureTrashFolderExists()
             autoCleanTrash()
             asyncLoadFiles()
