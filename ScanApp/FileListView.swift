@@ -154,6 +154,9 @@ struct FileListContentView: View {
             }
         }
         .onAppear {
+            if UserDefaults.standard.object(forKey: "trashRetentionDays") == nil {
+                UserDefaults.standard.set(30, forKey: "trashRetentionDays")
+            }
             ensureTrashFolderExists()
             autoCleanTrash()
             asyncLoadFiles()
@@ -196,10 +199,10 @@ struct FileListContentView: View {
         } message: {
             Text("This will permanently delete all files in the Trash folder.")
         }
-        Text(debugMessage)
-            .font(.caption)
-            .foregroundColor(.gray)
-            .padding(4)
+//        Text(debugMessage)
+//            .font(.caption)
+//            .foregroundColor(.gray)
+//            .padding(4)
         .sheet(isPresented: $showMoveSheet) {
             NavigationStack {
                 FolderSelectionView(
