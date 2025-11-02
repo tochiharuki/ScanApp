@@ -530,8 +530,15 @@ struct FileListContentView: View {
     private func createFolder(named name: String) {
         guard !name.isEmpty else { return }
         let newFolderURL = currentURL.appendingPathComponent(name)
-        try? fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
-        asyncLoadFiles()
+        do {
+            try fileManager.createDirectory(at: newFolderURL, withIntermediateDirectories: false)
+            asyncLoadFiles()
+        } catch {
+            print("⚠️ Failed to create folder: \(error.localizedDescription)")
+        }
+
+        // ✅ 入力内容をリセット
+        newFolderName = ""
     }
 
     private func moveSelectedFiles(to destination: URL) {
