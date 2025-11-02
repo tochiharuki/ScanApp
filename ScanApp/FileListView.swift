@@ -259,7 +259,8 @@ struct FileListContentView: View {
             },
             onShare: shareFile,
             onEmptyTrashRequest: { showEmptyTrashAlert = true }, // ✅ ここを追加
-            onEmptyTrash: emptyTrashFolder
+            onEmptyTrash: emptyTrashFolder,
+            onConvertToPDF: convertFileToPDF 
         )
     }
     
@@ -294,7 +295,8 @@ struct FileListContentView: View {
             },
             onShare: shareFile,
             onEmptyTrashRequest: { showEmptyTrashAlert = true }, // ✅ ここを追加
-            onEmptyTrash: emptyTrashFolder
+            onEmptyTrash: emptyTrashFolder,
+            onConvertToPDF: convertFileToPDF 
         )
     }
     
@@ -681,21 +683,31 @@ struct FileContextMenu: View {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
                 
-                if fileURL.pathExtension.lowercased() == "pdf" {
-                    Button {
-                        onConvertToPDF?(fileURL)  // PDFもクロージャ経由で呼ぶ
-                    } label: {
-                        Label("Convert to PDF", systemImage: "doc.richtext")
-                    }
-                }
-
                 if ["jpg", "jpeg", "png"].contains(fileURL.pathExtension.lowercased()) {
                     Button {
-                        onConvertToPDF?(fileURL)  // 画像も同じクロージャ経由
+                        onConvertToPDF?(fileURL)
                     } label: {
                         Label("Convert to PDF", systemImage: "doc.richtext")
                     }
                 }
+                
+                if fileURL.pathExtension.lowercased() == "pdf" {
+                    Button {
+                        Task {
+                            do {
+                                let outputDir = fileURL.deletingLastPathComponent()
+                                let images = try FileConverter.convertPDFToImages(pdfURL: fileURL, outputBaseDir: outputDir)
+                                print("✅ Converted \(fileURL.lastPathComponent) → \(images.count) images")
+                                NotificationCenter.default.post(name: .reloadFileList, object: nil)
+                            } catch {
+                                print("❌ PDF→Image failed: \(error.localizedDescription)")
+                            }
+                        }
+                    } label: {
+                        Label("Convert to Images", systemImage: "photo.on.rectangle")
+                    }
+                }
+                
             }
         }
     }
