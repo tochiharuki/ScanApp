@@ -8,8 +8,9 @@ struct SettingsView: View {
     @State private var pendingRetentionDays: Int
     
     init() {
-        // AppStorage で保存されている値を初期値として使用
-        _pendingRetentionDays = State(initialValue: UserDefaults.standard.integer(forKey: "trashRetentionDays"))
+        // ✅ AppStorageから値を取得して同期
+        let saved = UserDefaults.standard.object(forKey: "trashRetentionDays") as? Int
+        _pendingRetentionDays = State(initialValue: saved ?? 30)
     }
     
     var body: some View {
